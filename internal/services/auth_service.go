@@ -5,10 +5,12 @@ import (
 	"git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend/internal/helpers"
 	"git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend/internal/models"
 	r "git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend/internal/repositories"
+	"gorm.io/gorm"
 )
 
 type AuthService interface {
-	Register(auth dtos.RegisterRequestDTO) (*models.User, *string, error)
+	Register(userData dtos.RegisterRequestDTO) (*models.User, *string, error)
+	Login(userData dtos.LoginRequestDTO) (*models.User, *string, error)
 }
 
 type authService struct {
@@ -28,24 +30,24 @@ func NewAuthService(c *ASConfig) AuthService {
 	}
 }
 
-func (s *authService) Register(auth dtos.RegisterRequestDTO) (*models.User, *string, error) {
-	city, err := s.cityRepository.GetCityIDByName(auth.City)
+func (s *authService) Register(userData dtos.RegisterRequestDTO) (*models.User, *string, error) {
+	city, err := s.cityRepository.GetCityIDByName(userData.City)
 
 	if err != nil {
 		return nil, nil, err
 	}
 
-	encryptedPassword, err := helpers.Encrypt(auth.Password)
+	encryptedPassword, err := helpers.Encrypt(userData.Password)
 
 	if err != nil {
 		return nil, nil, err
 	}
 
 	user := &models.User{
-		Name:     auth.Name,
-		Email:    auth.Email,
+		Name:     userData.Name,
+		Email:    userData.Email,
 		Password: encryptedPassword,
-		Address:  auth.Address,
+		Address:  userData.Address,
 		CityID:   city.ID,
 		Role:     "user",
 	}
@@ -68,4 +70,29 @@ func (s *authService) Register(auth dtos.RegisterRequestDTO) (*models.User, *str
 	}
 
 	return newUser, token, nil
+}
+
+func (s *authService) Login(userData dtos.LoginRequestDTO) (*models.User, *string, error) {
+	user, err := s.userRepository.GetUserByEmail(userData.Email)
+
+	if err != nil {
+		return nil, nil, err
+	}
+
+	if !helpers.CompareEncrypt(userData.Password, user.Password) {
+		return nil, nil, gorm.ErrRecordNotFound
+	}
+
+	dataToJwt := &dtos.JwtData{
+		ID:    user.ID,
+		Email: user.Email,
+	}
+
+	token, err := helpers.GenerateJwtToken(dataToJwt)
+
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return user, token, nil
 }

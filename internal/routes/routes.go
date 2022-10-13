@@ -8,4 +8,5 @@ import (
 func InitAllRoutes(r *gin.Engine, h *handlers.Handler) {
 	// Auth
 	r.POST("/register", h.RegisterHandler)
+	r.POST("/login", h.LoginHandler)
 }

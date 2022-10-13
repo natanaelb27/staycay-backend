@@ -14,6 +14,17 @@ type RegisterResponseDTO struct {
 	Token string `json:"token"`
 }
 
+type LoginRequestDTO struct {
+	Email    string `json:"email" binding:"required"`
+	Password string `json:"password" binding:"required"`
+}
+
+type LoginResponseDTO struct {
+	ID    int    `json:"id"`
+	Email string `json:"email"`
+	Token string `json:"token"`
+}
+
 type JwtData struct {
 	ID    int    `json:"id"`
 	Email string `json:"email"`
