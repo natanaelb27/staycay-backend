@@ -14,19 +14,22 @@ type AuthService interface {
 }
 
 type authService struct {
-	userRepository r.UserRepository
-	cityRepository r.CityRepository
+	userRepository   r.UserRepository
+	cityRepository   r.CityRepository
+	walletRepository r.WalletRepository
 }
 
 type ASConfig struct {
-	UserRepository r.UserRepository
-	CityRepository r.CityRepository
+	UserRepository   r.UserRepository
+	CityRepository   r.CityRepository
+	WalletRepository r.WalletRepository
 }
 
 func NewAuthService(c *ASConfig) AuthService {
 	return &authService{
-		userRepository: c.UserRepository,
-		cityRepository: c.CityRepository,
+		userRepository:   c.UserRepository,
+		cityRepository:   c.CityRepository,
+		walletRepository: c.WalletRepository,
 	}
 }
 
@@ -53,6 +56,17 @@ func (s *authService) Register(userData dtos.RegisterRequestDTO) (*models.User, 
 	}
 
 	newUser, err := s.userRepository.CreateNewUser(user)
+
+	if err != nil {
+		return nil, nil, err
+	}
+
+	wallet := &models.Wallet{
+		UserID:  newUser.ID,
+		Balance: 0,
+	}
+
+	err = s.walletRepository.CreateWallet(wallet)
 
 	if err != nil {
 		return nil, nil, err

@@ -1,6 +1,7 @@
 package repositories
 
 import (
+	e "git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend/internal/errors"
 	"git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend/internal/models"
 	"gorm.io/gorm"
 )
@@ -25,7 +26,12 @@ func NewUserRepository(c *URConfig) UserRepository {
 }
 
 func (r *userRepository) CreateNewUser(user *models.User) (*models.User, error) {
-	result := r.db.Create(&user)
+	result := r.db.Where("email = ?", user.Email).FirstOrCreate(&user)
+
+	if result.RowsAffected == 0 {
+		return nil, e.ErrDuplicateEmailError
+	}
+
 	if result.Error != nil {
 		return nil, result.Error
 	}

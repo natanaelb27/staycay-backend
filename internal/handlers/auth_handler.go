@@ -23,6 +23,11 @@ func (h *Handler) RegisterHandler(c *gin.Context) {
 
 	newUser, token, err := h.authService.Register(request)
 	if err != nil {
+		if errors.Is(err, e.ErrDuplicateEmailError) {
+			c.JSON(http.StatusConflict, helpers.BuildErrorResponse(http.StatusConflict, err.Error()))
+			return
+		}
+
 		c.JSON(http.StatusInternalServerError, helpers.BuildErrorResponse(http.StatusInternalServerError, err.Error()))
 		return
 	}

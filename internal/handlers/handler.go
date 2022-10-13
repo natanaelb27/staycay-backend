@@ -32,9 +32,14 @@ func InitAllHandlers() *Handler {
 		DB: db,
 	})
 
+	walletRepo := r.NewWalletRepository(&r.WRConfig{
+		DB: db,
+	})
+
 	authService := s.NewAuthService(&s.ASConfig{
-		UserRepository: userRepo,
-		CityRepository: cityRepo,
+		UserRepository:   userRepo,
+		CityRepository:   cityRepo,
+		WalletRepository: walletRepo,
 	})
 
 	h := New(&HandlerConfig{
