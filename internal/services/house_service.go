@@ -8,7 +8,7 @@ import (
 )
 
 type HouseService interface {
-	GetAllHouses() ([]*dtos.HouseDetailsDTO, error)
+	GetAllHouses(queryParams map[string]interface{}, querySearchCity []string) ([]*dtos.HouseDetailsDTO, error)
 	AddNewHouse(userID int, request *dtos.AddNewHouseRequestDTO) (*models.House, []string, error)
 }
 
@@ -32,8 +32,22 @@ func NewHouseService(c *HSConfig) HouseService {
 	}
 }
 
-func (s *houseService) GetAllHouses() ([]*dtos.HouseDetailsDTO, error) {
-	house, err := s.houseRepository.GetHouse()
+func (s *houseService) GetAllHouses(queryParams map[string]interface{}, querySearchCity []string) ([]*dtos.HouseDetailsDTO, error) {
+
+	// if rec, ok := query["searchCity"].(map[string]interface{}); ok {
+	// 	for key, val := range rec {
+	// 		print(key, val)
+	// 	}
+	// } else {
+	// 	print("HAHaH")
+	// }
+
+	// print("SORT: ", query["sort"])
+	// print(query["sortby"])
+	// print("SEARCH: ", query["searchName"])
+	// print(query["searchCity"])
+
+	house, err := s.houseRepository.GetHouse(queryParams, querySearchCity)
 
 	if err != nil {
 		return nil, err

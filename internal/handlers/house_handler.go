@@ -13,7 +13,17 @@ import (
 func (h *Handler) GetAllHousesHandler(c *gin.Context) {
 	var response *dtos.GetAllHousesResponseDTO
 
-	data, err := h.houseService.GetAllHouses()
+	queryParams := map[string]interface{}{}
+	for key, values := range c.Request.URL.Query() {
+		queryParams[key] = values[0]
+	}
+
+	querySearchCity := make([]string, 0)
+	for _, city := range c.Request.URL.Query()["searchCity"] {
+		querySearchCity = append(querySearchCity, city)
+	}
+
+	data, err := h.houseService.GetAllHouses(queryParams, querySearchCity)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, helpers.BuildErrorResponse(http.StatusInternalServerError, err.Error()))
 		return

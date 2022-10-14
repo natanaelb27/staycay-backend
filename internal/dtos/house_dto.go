@@ -3,7 +3,7 @@ package dtos
 type HouseDetailsDTO struct {
 	HouseID     int    `json:"house_id"`
 	HouseName   string `json:"house_name"`
-	Price       int    `json:"price"`
+	HousePrice  int    `json:"house_price"`
 	Description string `json:"description"`
 	CityName    string `json:"city_name"`
 	MaxGuest    int    `json:"max_guest"`
