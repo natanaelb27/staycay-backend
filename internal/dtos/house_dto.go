@@ -1,9 +1,18 @@
 package dtos
 
-import "git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend/internal/models"
+type HouseDetailsDTO struct {
+	HouseID     int    `json:"house_id"`
+	HouseName   string `json:"house_name"`
+	Price       int    `json:"price"`
+	Description string `json:"description"`
+	CityName    string `json:"city_name"`
+	MaxGuest    int    `json:"max_guest"`
+	HostName    string `json:"host_name"`
+	HostEmail   string `json:"host_email"`
+}
 
 type GetAllHousesResponseDTO struct {
-	House []*models.House `json:"house"`
+	House []*HouseDetailsDTO `json:"house"`
 }
 
 type AddNewHouseRequestDTO struct {

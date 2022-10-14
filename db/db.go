@@ -23,7 +23,6 @@ func Connect() (err error) {
 		os.Getenv("DB_NAME"))
 
 	db, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
-	// db.AutoMigrate(&models.City{}, &models.User{}, &models.House{}, &models.Wallet{}, &models.GameChance{}, &models.HousePhoto{}, &models.Reservation{}, &models.Transaction{}, &models.PickupStatus{}, &models.Pickup{})
 	db.AutoMigrate(&models.City{}, &models.User{}, &models.House{}, &models.Wallet{}, &models.GameChance{}, &models.HousePhoto{}, &models.Reservation{}, &models.PickupStatus{}, &models.Pickup{})
 
 	if err != nil {

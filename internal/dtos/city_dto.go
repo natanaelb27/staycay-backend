@@ -1,7 +1,10 @@
 package dtos
 
-import "git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend/internal/models"
+type CitiesDTO struct {
+	CityID   int    `json:"city_id"`
+	CityName string `json:"city_name"`
+}
 
 type GetAllCitiesResponseDTO struct {
-	City []*models.City `json:"city"`
+	City []*CitiesDTO `json:"city"`
 }

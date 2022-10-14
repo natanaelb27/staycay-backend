@@ -8,7 +8,7 @@ import (
 )
 
 type HouseService interface {
-	GetAllHouses() ([]*models.House, error)
+	GetAllHouses() ([]*dtos.HouseDetailsDTO, error)
 	AddNewHouse(userID int, request *dtos.AddNewHouseRequestDTO) (*models.House, []string, error)
 }
 
@@ -32,7 +32,7 @@ func NewHouseService(c *HSConfig) HouseService {
 	}
 }
 
-func (s *houseService) GetAllHouses() ([]*models.House, error) {
+func (s *houseService) GetAllHouses() ([]*dtos.HouseDetailsDTO, error) {
 	house, err := s.houseRepository.GetHouse()
 
 	if err != nil {

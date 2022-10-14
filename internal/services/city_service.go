@@ -1,12 +1,12 @@
 package services
 
 import (
-	"git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend/internal/models"
+	"git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend/internal/dtos"
 	r "git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend/internal/repositories"
 )
 
 type CityService interface {
-	GetAllCities() ([]*models.City, error)
+	GetAllCities() ([]*dtos.CitiesDTO, error)
 }
 
 type cityService struct {
@@ -23,12 +23,21 @@ func NewCityService(c *CSConfig) CityService {
 	}
 }
 
-func (s *cityService) GetAllCities() ([]*models.City, error) {
-	city, err := s.cityRepository.GetCity()
+func (s *cityService) GetAllCities() ([]*dtos.CitiesDTO, error) {
+	cities, err := s.cityRepository.GetCity()
 
 	if err != nil {
 		return nil, err
 	}
 
-	return city, nil
+	cityList := make([]*dtos.CitiesDTO, 0)
+
+	for _, city := range cities {
+		cityList = append(cityList, &dtos.CitiesDTO{
+			CityID:   city.ID,
+			CityName: city.Name,
+		})
+	}
+
+	return cityList, nil
 }
