@@ -17,12 +17,14 @@ type authService struct {
 	userRepository   r.UserRepository
 	cityRepository   r.CityRepository
 	walletRepository r.WalletRepository
+	gameRepository   r.GameRepository
 }
 
 type ASConfig struct {
 	UserRepository   r.UserRepository
 	CityRepository   r.CityRepository
 	WalletRepository r.WalletRepository
+	GameRepository   r.GameRepository
 }
 
 func NewAuthService(c *ASConfig) AuthService {
@@ -30,11 +32,12 @@ func NewAuthService(c *ASConfig) AuthService {
 		userRepository:   c.UserRepository,
 		cityRepository:   c.CityRepository,
 		walletRepository: c.WalletRepository,
+		gameRepository:   c.GameRepository,
 	}
 }
 
 func (s *authService) Register(userData dtos.RegisterRequestDTO) (*models.User, *string, error) {
-	city, err := s.cityRepository.GetCityIDByName(userData.City)
+	city, err := s.cityRepository.GetCityIDByName(userData.CityName)
 
 	if err != nil {
 		return nil, nil, err
@@ -67,6 +70,18 @@ func (s *authService) Register(userData dtos.RegisterRequestDTO) (*models.User, 
 	}
 
 	err = s.walletRepository.CreateWallet(wallet)
+
+	if err != nil {
+		return nil, nil, err
+	}
+
+	game := &models.GameChance{
+		UserID:  newUser.ID,
+		Chance:  0,
+		Counter: 0,
+	}
+
+	err = s.gameRepository.CreateGameUser(game)
 
 	if err != nil {
 		return nil, nil, err

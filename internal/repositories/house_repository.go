@@ -7,6 +7,8 @@ import (
 
 type HouseRepository interface {
 	GetHouse() ([]*models.House, error)
+	CreateNewHouse(newHouse *models.House) (*models.House, error)
+	AddHousePhoto(newHousePhoto *models.HousePhoto) (*models.HousePhoto, error)
 }
 
 type houseRepository struct {
@@ -33,4 +35,24 @@ func (r *houseRepository) GetHouse() ([]*models.House, error) {
 	}
 
 	return house, nil
+}
+
+func (r *houseRepository) CreateNewHouse(newHouse *models.House) (*models.House, error) {
+	result := r.db.Create(&newHouse)
+
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	return newHouse, nil
+}
+
+func (r *houseRepository) AddHousePhoto(newHousePhoto *models.HousePhoto) (*models.HousePhoto, error) {
+	result := r.db.Create(&newHousePhoto)
+
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	return newHousePhoto, nil
 }

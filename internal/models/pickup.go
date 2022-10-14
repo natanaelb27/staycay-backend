@@ -8,8 +8,6 @@ import (
 
 type Pickup struct {
 	ID             int            `json:"id" gorm:"primary_key"`
-	UserID         int            `json:"user_id"`
-	User           User           `json:"user" gorm:"foreignKey:UserID"`
 	ReservationID  int            `json:"reservation_id"`
 	Reservation    Reservation    `json:"reservation" gorm:"foreignKey:ReservationID"`
 	PickupStatusID int            `json:"pickup_status_id"`

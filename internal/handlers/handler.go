@@ -7,25 +7,28 @@ import (
 )
 
 type Handler struct {
-	authService  s.AuthService
-	cityService  s.CityService
-	userService  s.UserService
-	houseService s.HouseService
+	authService   s.AuthService
+	cityService   s.CityService
+	userService   s.UserService
+	houseService  s.HouseService
+	walletService s.WalletService
 }
 
 type HandlerConfig struct {
-	AuthService  s.AuthService
-	CityService  s.CityService
-	UserService  s.UserService
-	HouseService s.HouseService
+	AuthService   s.AuthService
+	CityService   s.CityService
+	UserService   s.UserService
+	HouseService  s.HouseService
+	WalletService s.WalletService
 }
 
 func New(c *HandlerConfig) *Handler {
 	return &Handler{
-		authService:  c.AuthService,
-		cityService:  c.CityService,
-		userService:  c.UserService,
-		houseService: c.HouseService,
+		authService:   c.AuthService,
+		cityService:   c.CityService,
+		userService:   c.UserService,
+		houseService:  c.HouseService,
+		walletService: c.WalletService,
 	}
 }
 
@@ -48,10 +51,15 @@ func InitAllHandlers() *Handler {
 		DB: db,
 	})
 
+	gameRepo := r.NewGameRepository(&r.GRConfig{
+		DB: db,
+	})
+
 	authService := s.NewAuthService(&s.ASConfig{
 		UserRepository:   userRepo,
 		CityRepository:   cityRepo,
 		WalletRepository: walletRepo,
+		GameRepository:   gameRepo,
 	})
 
 	cityService := s.NewCityService(&s.CSConfig{
@@ -65,13 +73,21 @@ func InitAllHandlers() *Handler {
 
 	houseService := s.NewHouseService(&s.HSConfig{
 		HouseRepository: houseRepo,
+		CityRepository:  cityRepo,
+		UserRepository:  userRepo,
+	})
+
+	walletService := s.NewWalletService(&s.WSConfig{
+		WalletRepository: walletRepo,
+		GameRepository:   gameRepo,
 	})
 
 	h := New(&HandlerConfig{
-		AuthService:  authService,
-		CityService:  cityService,
-		UserService:  userService,
-		HouseService: houseService,
+		AuthService:   authService,
+		CityService:   cityService,
+		UserService:   userService,
+		HouseService:  houseService,
+		WalletService: walletService,
 	})
 
 	return h
