@@ -9,9 +9,9 @@ type RegisterRequestDTO struct {
 }
 
 type RegisterResponseDTO struct {
-	ID    int    `json:"id"`
-	Email string `json:"email"`
-	Token string `json:"token"`
+	UserID int    `json:"user_id"`
+	Email  string `json:"email"`
+	Token  string `json:"token"`
 }
 
 type LoginRequestDTO struct {
@@ -20,12 +20,12 @@ type LoginRequestDTO struct {
 }
 
 type LoginResponseDTO struct {
-	ID    int    `json:"id"`
-	Email string `json:"email"`
-	Token string `json:"token"`
+	UserID int    `json:"user_id"`
+	Email  string `json:"email"`
+	Token  string `json:"token"`
 }
 
 type JwtData struct {
-	ID    int    `json:"id"`
-	Email string `json:"email"`
+	UserID int    `json:"user_id"`
+	Email  string `json:"email"`
 }

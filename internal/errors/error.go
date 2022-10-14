@@ -3,6 +3,7 @@ package errors
 import "errors"
 
 var (
-	ErrCredentialError     = errors.New("credential error")
-	ErrDuplicateEmailError = errors.New("this email address is already registered")
+	ErrCredentialError          = errors.New("credential error")
+	ErrDuplicateEmailError      = errors.New("this email address is already registered")
+	ErrOldPasswordNotMatchError = errors.New("old password does not match")
 )

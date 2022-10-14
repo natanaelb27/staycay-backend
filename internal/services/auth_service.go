@@ -73,8 +73,8 @@ func (s *authService) Register(userData dtos.RegisterRequestDTO) (*models.User, 
 	}
 
 	dataToJwt := &dtos.JwtData{
-		ID:    newUser.ID,
-		Email: newUser.Email,
+		UserID: newUser.ID,
+		Email:  newUser.Email,
 	}
 
 	token, err := helpers.GenerateJwtToken(dataToJwt)
@@ -98,8 +98,8 @@ func (s *authService) Login(userData dtos.LoginRequestDTO) (*models.User, *strin
 	}
 
 	dataToJwt := &dtos.JwtData{
-		ID:    user.ID,
-		Email: user.Email,
+		UserID: user.ID,
+		Email:  user.Email,
 	}
 
 	token, err := helpers.GenerateJwtToken(dataToJwt)
