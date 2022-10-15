@@ -118,7 +118,7 @@ func (r *userRepository) UpdateUser(userID int, userNewData *models.User) (*mode
 		Model(&user).
 		Clauses(clause.Returning{}).
 		Where("id = ?", userID).
-		Updates(userNewData)
+		Updates(&userNewData)
 
 	if result.Error != nil {
 		return nil, result.Error

@@ -143,11 +143,54 @@ func (h *Handler) UpdateHouseHandler(c *gin.Context) {
 
 }
 
+func (h *Handler) DeleteHouseHandler(c *gin.Context) {
+	var response *dtos.DeleteHouseResponseDTO
+
+	houseID, _ := strconv.Atoi(c.Param("houseId"))
+	userContext := c.MustGet("user").(dtos.JwtData)
+
+	data, err := h.houseService.DeleteHouse(houseID, userContext.UserID)
+
+	if err != nil {
+		if errors.Is(err, e.ErrIdNotFoundError) {
+			c.JSON(http.StatusBadRequest, helpers.BuildErrorResponse(http.StatusBadRequest, e.ErrIdNotFoundError.Error()))
+			return
+		}
+
+		if errors.Is(err, e.ErrInvalidHostError) {
+			c.JSON(http.StatusForbidden, helpers.BuildErrorResponse(http.StatusForbidden, e.ErrInvalidHostError.Error()))
+			return
+		}
+
+		if errors.Is(err, e.ErrDeleteUpcomingReservationError) {
+			c.JSON(http.StatusBadRequest, helpers.BuildErrorResponse(http.StatusBadRequest, e.ErrDeleteUpcomingReservationError.Error()))
+			return
+		}
+
+		c.JSON(http.StatusInternalServerError, helpers.BuildErrorResponse(http.StatusInternalServerError, err.Error()))
+		return
+	}
+
+	response = &dtos.DeleteHouseResponseDTO{
+		HouseID:     data.ID,
+		Price:       data.Price,
+		Description: data.Description,
+		CityID:      data.CityID,
+		MaxGuest:    data.MaxGuest,
+		Status:      data.Status,
+	}
+
+	c.JSON(http.StatusOK, helpers.BuildSuccessResponse(http.StatusOK, http.StatusText(http.StatusOK), response))
+
+}
+
 func (h *Handler) DeleteHousePhotoHandler(c *gin.Context) {
+	var response *dtos.DeleteHousePhotoResponseDTO
+
 	housePhotoID, _ := strconv.Atoi(c.Param("housePhotoId"))
 	userContext := c.MustGet("user").(dtos.JwtData)
 
-	response, err := h.houseService.DeleteHousePhoto(housePhotoID, userContext.UserID)
+	data, err := h.houseService.DeleteHousePhoto(housePhotoID, userContext.UserID)
 
 	if err != nil {
 		if errors.Is(err, e.ErrIdNotFoundError) {
@@ -162,6 +205,11 @@ func (h *Handler) DeleteHousePhotoHandler(c *gin.Context) {
 
 		c.JSON(http.StatusInternalServerError, helpers.BuildErrorResponse(http.StatusInternalServerError, err.Error()))
 		return
+	}
+
+	response = &dtos.DeleteHousePhotoResponseDTO{
+		HouseID: data.HouseID,
+		Photo:   data.Photo,
 	}
 
 	c.JSON(http.StatusOK, helpers.BuildSuccessResponse(http.StatusOK, http.StatusText(http.StatusOK), response))

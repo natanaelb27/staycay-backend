@@ -2,6 +2,7 @@ package repositories
 
 import (
 	"fmt"
+	"time"
 
 	"git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend/internal/dtos"
 	e "git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend/internal/errors"
@@ -19,7 +20,9 @@ type HouseRepository interface {
 	CreateNewHouse(newHouse *models.House) (*models.House, error)
 	AddHousePhoto(newHousePhoto *models.HousePhoto) (*models.HousePhoto, error)
 	UpdateHouseByHouseID(houseID int, houseNewData *models.House) (*models.House, error)
+	DeleteHouseByID(houseID int) (*models.House, error)
 	DeleteHousePhotoByID(housePhotoID int) (*models.HousePhoto, error)
+	GetUpcomingHouseReservationsByHouseID(houseID int) (*dtos.HouseReservationsDTO, error)
 }
 
 type houseRepository struct {
@@ -73,8 +76,8 @@ func (r *houseRepository) GetHouse(queryParams map[string]interface{}, querySear
 
 	result := r.db.Raw(query, r.db.Model(&models.House{}).
 		Select("houses.id AS house_id, houses.name AS house_name, houses.price AS house_price, houses.description AS house_description, cities.name AS house_city_name, houses.max_guest AS house_max_guest, houses.status AS house_status, users.id AS host_id, users.name AS host_name, users.email AS host_email").
-		Joins("LEFT JOIN cities ON houses.city_id = cities.id").
-		Joins("LEFT JOIN users ON houses.user_id = users.id").
+		Joins("JOIN cities ON houses.city_id = cities.id").
+		Joins("JOIN users ON houses.user_id = users.id").
 		Where("houses.status = ?", "active")).
 		Scan(&houseDetails)
 
@@ -96,8 +99,8 @@ func (r *houseRepository) GetHouseByHostID(hostID int) ([]*dtos.HouseDetailsDTO,
 
 	result := r.db.Model(&models.House{}).
 		Select("houses.id AS house_id, houses.name AS house_name, houses.price AS house_price, houses.description AS house_description, cities.name AS house_city_name, houses.max_guest AS house_max_guest, houses.status AS house_status, users.id AS host_id, users.name AS host_name, users.email AS host_email").
-		Joins("LEFT JOIN cities ON houses.city_id = cities.id").
-		Joins("LEFT JOIN users ON houses.user_id = users.id").
+		Joins("JOIN cities ON houses.city_id = cities.id").
+		Joins("JOIN users ON houses.user_id = users.id").
 		Where("houses.user_id = ?", hostID).
 		Find(&houseDetails)
 
@@ -120,6 +123,10 @@ func (r *houseRepository) GetHousePhotoByHouseID(houseID int) ([]*dtos.HousePhot
 		return nil, result.Error
 	}
 
+	if result.RowsAffected == 0 {
+		return nil, e.ErrIdNotFoundError
+	}
+
 	return housePhotos, nil
 }
 
@@ -128,13 +135,17 @@ func (r *houseRepository) GetHouseByHouseID(houseID int) (*dtos.HouseDetailsDTO,
 
 	result := r.db.Model(&models.House{}).
 		Select("houses.id AS house_id, houses.name AS house_name, houses.price AS house_price, houses.description AS house_description, cities.name AS house_city_name, houses.max_guest AS house_max_guest, houses.status AS house_status, users.id AS host_id, users.name AS host_name, users.email AS host_email").
-		Joins("LEFT JOIN cities ON houses.city_id = cities.id").
-		Joins("LEFT JOIN users ON houses.user_id = users.id").
+		Joins("JOIN cities ON houses.city_id = cities.id").
+		Joins("JOIN users ON houses.user_id = users.id").
 		Where("houses.id = ?", houseID).
 		Find(&houseDetails)
 
 	if result.Error != nil {
 		return nil, result.Error
+	}
+
+	if result.RowsAffected == 0 {
+		return nil, e.ErrIdNotFoundError
 	}
 
 	return houseDetails, nil
@@ -161,19 +172,19 @@ func (r *houseRepository) AddHousePhoto(newHousePhoto *models.HousePhoto) (*mode
 }
 
 func (r *houseRepository) UpdateHouseByHouseID(houseID int, houseNewData *models.House) (*models.House, error) {
-	var house *models.House
+	var house models.House
 
 	result := r.db.
 		Model(&house).
 		Clauses(clause.Returning{}).
 		Where("id = ?", houseID).
-		Updates(houseNewData)
+		Updates(&houseNewData)
 
 	if result.Error != nil {
 		return nil, result.Error
 	}
 
-	return house, nil
+	return &house, nil
 }
 
 func (r *houseRepository) GetHouseByHousePhotoID(housePhotoID int) (*dtos.HouseDetailsDTO, error) {
@@ -191,11 +202,22 @@ func (r *houseRepository) GetHouseByHousePhotoID(housePhotoID int) (*dtos.HouseD
 		return nil, result.Error
 	}
 
-	if result.RowsAffected == 0 {
-		return nil, e.ErrIdNotFoundError
+	return houseDetails, nil
+}
+
+func (r *houseRepository) DeleteHouseByID(houseID int) (*models.House, error) {
+	var house *models.House
+
+	result := r.db.
+		Clauses(clause.Returning{}).
+		Where("id = ?", houseID).
+		Delete(&house)
+
+	if result.Error != nil {
+		return nil, result.Error
 	}
 
-	return houseDetails, nil
+	return house, nil
 }
 
 func (r *houseRepository) DeleteHousePhotoByID(housePhotoID int) (*models.HousePhoto, error) {
@@ -211,4 +233,41 @@ func (r *houseRepository) DeleteHousePhotoByID(housePhotoID int) (*models.HouseP
 	}
 
 	return housePhoto, nil
+}
+
+// func (r *houseRepository) GetHouseReservationsByHouseID(houseID int) (*dtos.HouseReservationsDTO, error) {
+// 	var houseReservation *dtos.HouseReservationsDTO
+
+// 	result := r.db.Model(&models.House{}).
+// 		Select("houses.id AS house_id, reservations.id AS reservation_id, reservations.reservation_code AS reservation_code, reservations.check_in_date AS check_in_date, reservations.check_out_date AS check_out_date, reservations.total_price AS total_price").
+// 		Joins("JOIN reservations ON houses.id = reservations.house_id").
+// 		Where("house.id = ?", houseID).
+// 		Find(&houseReservation)
+
+// 	if result.Error != nil {
+// 		return nil, result.Error
+// 	}
+
+// 	return houseReservation, nil
+// }
+
+func (r *houseRepository) GetUpcomingHouseReservationsByHouseID(houseID int) (*dtos.HouseReservationsDTO, error) {
+	var houseReservation *dtos.HouseReservationsDTO
+
+	result := r.db.Model(&models.House{}).
+		Select("houses.id AS house_id, reservations.id AS reservation_id, reservations.reservation_code AS reservation_code, reservations.check_in_date AS check_in_date, reservations.check_out_date AS check_out_date, reservations.total_price AS total_price").
+		Joins("JOIN reservations ON houses.id = reservations.house_id").
+		Where("houses.id = ?", houseID).
+		Where("reservations.check_in_date > ?", time.Now()).
+		Find(&houseReservation)
+
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	if result.RowsAffected > 0 {
+		return nil, e.ErrDeleteUpcomingReservationError
+	}
+
+	return houseReservation, nil
 }

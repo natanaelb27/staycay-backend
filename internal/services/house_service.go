@@ -1,6 +1,8 @@
 package services
 
 import (
+	"errors"
+
 	"git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend/internal/dtos"
 	e "git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend/internal/errors"
 	"git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend/internal/models"
@@ -12,6 +14,7 @@ type HouseService interface {
 	GetHostHouses(hostID int) ([]*dtos.HouseDetailsWithPhotoDTO, error)
 	AddNewHouse(userID int, request *dtos.AddNewHouseRequestDTO) (*models.House, []string, error)
 	UpdateHouse(houseID int, userID int, request *dtos.UpdateHouseRequestDTO) (*models.House, []string, error)
+	DeleteHouse(houseID int, userID int) (*models.House, error)
 	DeleteHousePhoto(housePhotoID int, userID int) (*models.HousePhoto, error)
 }
 
@@ -226,8 +229,6 @@ func (s *houseService) UpdateHouse(houseID int, userID int, request *dtos.Update
 		Status:      request.Status,
 	}
 
-	print("newData: ", newData)
-
 	updatedHouse, err := s.houseRepository.UpdateHouseByHouseID(houseID, newData)
 
 	if err != nil {
@@ -254,6 +255,48 @@ func (s *houseService) UpdateHouse(houseID int, userID int, request *dtos.Update
 	}
 
 	return updatedHouse, photoList, nil
+}
+
+func (s *houseService) DeleteHouse(houseID int, userID int) (*models.House, error) {
+	houseDetails, err := s.houseRepository.GetHouseByHouseID(houseID)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if houseDetails.HostID != userID {
+		return nil, e.ErrInvalidHostError
+	}
+
+	_, err = s.houseRepository.GetUpcomingHouseReservationsByHouseID(houseID)
+
+	if err != nil {
+		if errors.Is(err, e.ErrDeleteUpcomingReservationError) {
+
+			newData := &models.House{
+				Status: "inactive",
+			}
+
+			house, err := s.houseRepository.UpdateHouseByHouseID(houseID, newData)
+
+			if err != nil {
+				return nil, err
+			}
+
+			return house, e.ErrDeleteUpcomingReservationError
+
+		} else {
+			return nil, err
+		}
+	}
+
+	deletedHouse, err := s.houseRepository.DeleteHouseByID(houseID)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return deletedHouse, nil
 }
 
 func (s *houseService) DeleteHousePhoto(housePhotoID int, userID int) (*models.HousePhoto, error) {

@@ -1,5 +1,7 @@
 package dtos
 
+import "time"
+
 // type HouseDetailsDTO struct {
 // 	HouseID          int            `json:"house_id"`
 // 	HouseName        string         `json:"house_name"`
@@ -100,4 +102,27 @@ type UpdateHouseResponseDTO struct {
 	MaxGuest    int      `json:"max_guest"`
 	Photo       []string `json:"photo"`
 	Status      string   `json:"status"`
+}
+
+type DeleteHouseResponseDTO struct {
+	HouseID     int    `json:"house_id"`
+	Price       int    `json:"price"`
+	Description string `json:"description"`
+	CityID      int    `json:"city_id"`
+	MaxGuest    int    `json:"max_guest"`
+	Status      string `json:"status"`
+}
+
+type DeleteHousePhotoResponseDTO struct {
+	HouseID int    `json:"house_id"`
+	Photo   string `json:"photo"`
+}
+
+type HouseReservationsDTO struct {
+	HouseID         int       `json:"house_id"`
+	ReservationID   int       `json:"reservation_id"`
+	ReservationCode string    `json:"reservation_code"`
+	CheckInDate     time.Time `json:"check_in_date"`
+	CheckOutDate    time.Time `json:"check_out_date"`
+	TotalPrice      int       `json:"total_price"`
 }
