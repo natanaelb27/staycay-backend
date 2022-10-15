@@ -68,7 +68,7 @@ func (r *houseRepository) GetHouse(queryParams map[string]interface{}, querySear
 	query := fmt.Sprintf("SELECT * FROM (?) t WHERE t.house_name ILIKE '%s' %s %s %s", fmt.Sprintf("%%%s%%", qFilterHouseName), qFilterCityName, qSortBy, qSort)
 
 	result := r.db.Raw(query, r.db.Model(&models.House{}).
-		Select("houses.id AS house_id, houses.name AS house_name, houses.price AS house_price, houses.description AS house_description, cities.name AS house_city_name, houses.max_guest AS house_max_guest, houses.status AS house_status, users.id AS host_id, users.name AS host_name, users.email AS host_email").
+		Select("houses.id AS house_id, houses.name AS house_name, houses.price AS house_price, houses.description AS house_description, cities.name AS house_city_name, houses.max_guest AS house_max_guest, houses.status AS house_status, ARRAY( SELECT photo FROM house_photos WHERE house_id = houses.id) AS house_photo, users.id AS host_id, users.name AS host_name, users.email AS host_email").
 		Joins("LEFT JOIN cities ON houses.city_id = cities.id").
 		Joins("LEFT JOIN users ON houses.user_id = users.id")).
 		Where("houses.status = ?", "active").
@@ -91,7 +91,7 @@ func (r *houseRepository) GetHouseByHostID(hostID int) ([]*dtos.HouseDetailsDTO,
 	var houseDetails []*dtos.HouseDetailsDTO
 
 	result := r.db.Model(&models.House{}).
-		Select("houses.id AS house_id, houses.name AS house_name, houses.price AS house_price, houses.description AS house_description, cities.name AS house_city_name, houses.max_guest AS house_max_guest, houses.status AS house_status, users.id AS host_id, users.name AS host_name, users.email AS host_email").
+		Select("houses.id AS house_id, houses.name AS house_name, houses.price AS house_price, houses.description AS house_description, cities.name AS house_city_name, houses.max_guest AS house_max_guest, houses.status AS house_status, ARRAY( SELECT photo FROM house_photos WHERE house_id = houses.id) AS house_photo, users.id AS host_id, users.name AS host_name, users.email AS host_email").
 		Joins("LEFT JOIN cities ON houses.city_id = cities.id").
 		Joins("LEFT JOIN users ON houses.user_id = users.id").
 		Where("houses.user_id = ?", hostID).
