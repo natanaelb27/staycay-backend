@@ -58,20 +58,25 @@ func (s *userService) UpdateUserProfile(userID int, request dtos.UpdateUserProfi
 		return nil, err
 	}
 
-	if !helpers.CompareEncrypt(request.OldPassword, user.Password) {
-		return nil, e.ErrOldPasswordNotMatchError
+	encryptedPassword := ""
+	if request.Password != "" {
+		if !helpers.CompareEncrypt(request.OldPassword, user.Password) {
+			return nil, e.ErrOldPasswordNotMatchError
+		}
+
+		encryptedPassword, err = helpers.Encrypt(request.Password)
+		if err != nil {
+			return nil, err
+		}
 	}
 
-	city, err := s.cityRepository.GetCityIDByName(request.CityName)
+	city := &models.City{}
+	if request.CityName != "" {
+		city, err = s.cityRepository.GetCityIDByName(request.CityName)
 
-	if err != nil {
-		return nil, err
-	}
-
-	encryptedPassword, err := helpers.Encrypt(request.Password)
-
-	if err != nil {
-		return nil, err
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	newData := &models.User{

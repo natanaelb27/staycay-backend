@@ -3,6 +3,7 @@ package handlers
 import (
 	"errors"
 	"net/http"
+	"strconv"
 
 	"git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend/internal/dtos"
 	e "git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend/internal/errors"
@@ -19,17 +20,42 @@ func (h *Handler) GetAllHousesHandler(c *gin.Context) {
 	}
 
 	querySearchCity := make([]string, 0)
-	for _, city := range c.Request.URL.Query()["searchCity"] {
-		querySearchCity = append(querySearchCity, city)
-	}
+	querySearchCity = append(querySearchCity, c.Request.URL.Query()["searchCity"]...)
+	// for _, city := range c.Request.URL.Query()["searchCity"] {
+	// 	querySearchCity = append(querySearchCity, city)
+	// }
 
 	data, err := h.houseService.GetAllHouses(queryParams, querySearchCity)
+
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, helpers.BuildErrorResponse(http.StatusInternalServerError, err.Error()))
 		return
 	}
 
 	response = &dtos.GetAllHousesResponseDTO{
+		House: data,
+	}
+
+	c.JSON(http.StatusOK, helpers.BuildSuccessResponse(http.StatusOK, http.StatusText(http.StatusOK), response))
+}
+
+func (h *Handler) GetHostHousesHandler(c *gin.Context) {
+	var response *dtos.GetHostHousesResponseDTO
+
+	userContext := c.MustGet("user").(dtos.JwtData)
+
+	data, err := h.houseService.GetHostHouses(userContext.UserID)
+	if err != nil {
+		if errors.Is(err, e.ErrInvalidRoleNotHostError) {
+			c.JSON(http.StatusForbidden, helpers.BuildErrorResponse(http.StatusForbidden, e.ErrInvalidRoleNotHostError.Error()))
+			return
+		}
+
+		c.JSON(http.StatusInternalServerError, helpers.BuildErrorResponse(http.StatusInternalServerError, err.Error()))
+		return
+	}
+
+	response = &dtos.GetHostHousesResponseDTO{
 		House: data,
 	}
 
@@ -50,8 +76,8 @@ func (h *Handler) AddNewHouseHandler(c *gin.Context) {
 
 	newHouse, photo, err := h.houseService.AddNewHouse(userContext.UserID, request)
 	if err != nil {
-		if errors.Is(err, e.ErrInvalidRoleAddHouseError) {
-			c.JSON(http.StatusBadRequest, helpers.BuildErrorResponse(http.StatusBadRequest, e.ErrInvalidRoleAddHouseError.Error()))
+		if errors.Is(err, e.ErrInvalidRoleNotHostError) {
+			c.JSON(http.StatusForbidden, helpers.BuildErrorResponse(http.StatusForbidden, e.ErrInvalidRoleNotHostError.Error()))
 			return
 		}
 
@@ -66,6 +92,51 @@ func (h *Handler) AddNewHouseHandler(c *gin.Context) {
 		CityID:      newHouse.CityID,
 		MaxGuest:    newHouse.MaxGuest,
 		Photo:       photo,
+	}
+
+	c.JSON(http.StatusOK, helpers.BuildSuccessResponse(http.StatusOK, http.StatusText(http.StatusOK), response))
+
+}
+
+func (h *Handler) UpdateHouseHandler(c *gin.Context) {
+	var request *dtos.UpdateHouseRequestDTO
+	var response *dtos.UpdateHouseResponseDTO
+
+	houseID, _ := strconv.Atoi(c.Param("houseId"))
+
+	userContext := c.MustGet("user").(dtos.JwtData)
+
+	err := c.ShouldBindJSON(&request)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, helpers.BuildErrorResponse(http.StatusBadRequest, err.Error()))
+		return
+	}
+
+	newHouse, photo, err := h.houseService.UpdateHouse(houseID, userContext.UserID, request)
+
+	if err != nil {
+		if errors.Is(err, e.ErrInvalidRoleNotHostError) {
+			c.JSON(http.StatusForbidden, helpers.BuildErrorResponse(http.StatusForbidden, e.ErrInvalidRoleNotHostError.Error()))
+			return
+		}
+
+		if errors.Is(err, e.ErrInvalidHostError) {
+			c.JSON(http.StatusForbidden, helpers.BuildErrorResponse(http.StatusForbidden, e.ErrInvalidHostError.Error()))
+			return
+		}
+
+		c.JSON(http.StatusInternalServerError, helpers.BuildErrorResponse(http.StatusInternalServerError, err.Error()))
+		return
+	}
+
+	response = &dtos.UpdateHouseResponseDTO{
+		Name:        newHouse.Name,
+		Price:       newHouse.Price,
+		Description: newHouse.Description,
+		CityID:      newHouse.CityID,
+		MaxGuest:    newHouse.MaxGuest,
+		Photo:       photo,
+		Status:      newHouse.Status,
 	}
 
 	c.JSON(http.StatusOK, helpers.BuildSuccessResponse(http.StatusOK, http.StatusText(http.StatusOK), response))

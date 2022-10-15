@@ -28,5 +28,7 @@ func InitAllRoutes(r *gin.Engine, h *handlers.Handler) {
 	r.POST("/topup", h.TopUpWalletHandler)
 
 	// Host
-	r.POST("/house", h.AddNewHouseHandler)
+	r.GET("/host/house", h.GetHostHousesHandler)
+	r.POST("/host/house", h.AddNewHouseHandler)
+	r.PATCH("/host/house/:houseId", h.UpdateHouseHandler)
 }

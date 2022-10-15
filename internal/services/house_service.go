@@ -9,7 +9,9 @@ import (
 
 type HouseService interface {
 	GetAllHouses(queryParams map[string]interface{}, querySearchCity []string) ([]*dtos.HouseDetailsDTO, error)
+	GetHostHouses(hostID int) ([]*dtos.HouseDetailsDTO, error)
 	AddNewHouse(userID int, request *dtos.AddNewHouseRequestDTO) (*models.House, []string, error)
+	UpdateHouse(houseID int, userID int, request *dtos.UpdateHouseRequestDTO) (*models.House, []string, error)
 }
 
 type houseService struct {
@@ -56,6 +58,26 @@ func (s *houseService) GetAllHouses(queryParams map[string]interface{}, querySea
 	return house, nil
 }
 
+func (s *houseService) GetHostHouses(userID int) ([]*dtos.HouseDetailsDTO, error) {
+	userDetails, err := s.userRepository.GetUserDetails(userID)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if userDetails.Role != "host" {
+		return nil, e.ErrInvalidRoleNotHostError
+	}
+
+	house, err := s.houseRepository.GetHouseByHostID(userID)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return house, nil
+}
+
 func (s *houseService) AddNewHouse(userID int, request *dtos.AddNewHouseRequestDTO) (*models.House, []string, error) {
 	userDetails, err := s.userRepository.GetUserDetails(userID)
 
@@ -64,7 +86,7 @@ func (s *houseService) AddNewHouse(userID int, request *dtos.AddNewHouseRequestD
 	}
 
 	if userDetails.Role != "host" {
-		return nil, nil, e.ErrInvalidRoleAddHouseError
+		return nil, nil, e.ErrInvalidRoleNotHostError
 	}
 
 	city, err := s.cityRepository.GetCityIDByName(request.CityName)
@@ -109,4 +131,74 @@ func (s *houseService) AddNewHouse(userID int, request *dtos.AddNewHouseRequestD
 	}
 
 	return house, photoList, nil
+}
+
+func (s *houseService) UpdateHouse(houseID int, userID int, request *dtos.UpdateHouseRequestDTO) (*models.House, []string, error) {
+	userDetails, err := s.userRepository.GetUserDetails(userID)
+
+	if err != nil {
+		return nil, nil, err
+	}
+
+	if userDetails.Role != "host" {
+		return nil, nil, e.ErrInvalidRoleNotHostError
+	}
+
+	house, err := s.houseRepository.GetHouseByHouseID(houseID)
+
+	if err != nil {
+		return nil, nil, err
+	}
+
+	if house.HostID != userID {
+		return nil, nil, e.ErrInvalidHostError
+	}
+
+	city := &models.City{}
+
+	if request.CityName != "" {
+		city, err = s.cityRepository.GetCityIDByName(request.CityName)
+
+		if err != nil {
+			return nil, nil, err
+		}
+	}
+
+	newData := &models.House{
+		Name:        request.Name,
+		Price:       request.Price,
+		Description: request.Description,
+		CityID:      city.ID,
+		MaxGuest:    request.MaxGuest,
+		Status:      request.Status,
+	}
+
+	print("newData: ", newData)
+
+	updatedHouse, err := s.houseRepository.UpdateHouseByHouseID(houseID, newData)
+
+	if err != nil {
+		return nil, nil, err
+	}
+
+	photoList := make([]string, 0)
+
+	if len(request.Photo) > 0 {
+		for _, photo := range request.Photo {
+			newHousePhoto := &models.HousePhoto{
+				HouseID: updatedHouse.ID,
+				Photo:   photo,
+			}
+
+			housePhoto, err := s.houseRepository.AddHousePhoto(newHousePhoto)
+
+			if err != nil {
+				return nil, nil, err
+			}
+
+			photoList = append(photoList, housePhoto.Photo)
+		}
+	}
+
+	return updatedHouse, photoList, nil
 }
