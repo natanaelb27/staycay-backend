@@ -2,7 +2,6 @@ package repositories
 
 import (
 	"fmt"
-	"time"
 
 	"git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend/internal/dtos"
 	e "git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend/internal/errors"
@@ -22,7 +21,6 @@ type HouseRepository interface {
 	UpdateHouseByHouseID(houseID int, houseNewData *models.House) (*models.House, error)
 	DeleteHouseByID(houseID int) (*models.House, error)
 	DeleteHousePhotoByID(housePhotoID int) (*models.HousePhoto, error)
-	GetUpcomingHouseReservationsByHouseID(houseID int) (*dtos.HouseReservationsDTO, error)
 }
 
 type houseRepository struct {
@@ -251,23 +249,23 @@ func (r *houseRepository) DeleteHousePhotoByID(housePhotoID int) (*models.HouseP
 // 	return houseReservation, nil
 // }
 
-func (r *houseRepository) GetUpcomingHouseReservationsByHouseID(houseID int) (*dtos.HouseReservationsDTO, error) {
-	var houseReservation *dtos.HouseReservationsDTO
+// func (r *houseRepository) GetUpcomingHouseReservationsByHouseID(houseID int) (*dtos.HouseReservationsDTO, error) {
+// 	var houseReservation *dtos.HouseReservationsDTO
 
-	result := r.db.Model(&models.House{}).
-		Select("houses.id AS house_id, reservations.id AS reservation_id, reservations.reservation_code AS reservation_code, reservations.check_in_date AS check_in_date, reservations.check_out_date AS check_out_date, reservations.total_price AS total_price").
-		Joins("JOIN reservations ON houses.id = reservations.house_id").
-		Where("houses.id = ?", houseID).
-		Where("reservations.check_in_date > ?", time.Now()).
-		Find(&houseReservation)
+// 	result := r.db.Model(&models.House{}).
+// 		Select("houses.id AS house_id, reservations.id AS reservation_id, reservations.reservation_code AS reservation_code, reservations.check_in_date AS check_in_date, reservations.check_out_date AS check_out_date, reservations.total_price AS total_price").
+// 		Joins("JOIN reservations ON houses.id = reservations.house_id").
+// 		Where("houses.id = ?", houseID).
+// 		Where("reservations.check_in_date > ?", time.Now()).
+// 		Find(&houseReservation)
 
-	if result.Error != nil {
-		return nil, result.Error
-	}
+// 	if result.Error != nil {
+// 		return nil, result.Error
+// 	}
 
-	if result.RowsAffected > 0 {
-		return nil, e.ErrDeleteUpcomingReservationError
-	}
+// 	if result.RowsAffected > 0 {
+// 		return nil, e.ErrDeleteUpcomingReservationError
+// 	}
 
-	return houseReservation, nil
-}
+// 	return houseReservation, nil
+// }

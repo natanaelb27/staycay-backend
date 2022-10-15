@@ -7,28 +7,31 @@ import (
 )
 
 type Handler struct {
-	authService   s.AuthService
-	cityService   s.CityService
-	userService   s.UserService
-	houseService  s.HouseService
-	walletService s.WalletService
+	authService        s.AuthService
+	cityService        s.CityService
+	userService        s.UserService
+	houseService       s.HouseService
+	walletService      s.WalletService
+	reservationService s.ReservationService
 }
 
 type HandlerConfig struct {
-	AuthService   s.AuthService
-	CityService   s.CityService
-	UserService   s.UserService
-	HouseService  s.HouseService
-	WalletService s.WalletService
+	AuthService        s.AuthService
+	CityService        s.CityService
+	UserService        s.UserService
+	HouseService       s.HouseService
+	WalletService      s.WalletService
+	ReservationService s.ReservationService
 }
 
 func New(c *HandlerConfig) *Handler {
 	return &Handler{
-		authService:   c.AuthService,
-		cityService:   c.CityService,
-		userService:   c.UserService,
-		houseService:  c.HouseService,
-		walletService: c.WalletService,
+		authService:        c.AuthService,
+		cityService:        c.CityService,
+		userService:        c.UserService,
+		houseService:       c.HouseService,
+		walletService:      c.WalletService,
+		reservationService: c.ReservationService,
 	}
 }
 
@@ -48,6 +51,10 @@ func InitAllHandlers() *Handler {
 	})
 
 	houseRepo := r.NewHouseRepository(&r.HRConfig{
+		DB: db,
+	})
+
+	reservationRepo := r.NewReservationRepository(&r.RRConfig{
 		DB: db,
 	})
 
@@ -72,9 +79,10 @@ func InitAllHandlers() *Handler {
 	})
 
 	houseService := s.NewHouseService(&s.HSConfig{
-		HouseRepository: houseRepo,
-		CityRepository:  cityRepo,
-		UserRepository:  userRepo,
+		HouseRepository:       houseRepo,
+		CityRepository:        cityRepo,
+		UserRepository:        userRepo,
+		ReservationRepository: reservationRepo,
 	})
 
 	walletService := s.NewWalletService(&s.WSConfig{
@@ -82,12 +90,18 @@ func InitAllHandlers() *Handler {
 		GameRepository:   gameRepo,
 	})
 
+	reservationService := s.NewReservationService(&s.RSConfig{
+		ReservationRepository: reservationRepo,
+		HouseRepository:       houseRepo,
+	})
+
 	h := New(&HandlerConfig{
-		AuthService:   authService,
-		CityService:   cityService,
-		UserService:   userService,
-		HouseService:  houseService,
-		WalletService: walletService,
+		AuthService:        authService,
+		CityService:        cityService,
+		UserService:        userService,
+		HouseService:       houseService,
+		WalletService:      walletService,
+		ReservationService: reservationService,
 	})
 
 	return h

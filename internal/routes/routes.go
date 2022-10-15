@@ -33,4 +33,6 @@ func InitAllRoutes(r *gin.Engine, h *handlers.Handler) {
 	r.PATCH("/host/house/:houseId", h.UpdateHouseHandler)
 	r.DELETE("/host/house/:houseId", h.DeleteHouseHandler)
 	r.DELETE("/host/house/photo/:housePhotoId", h.DeleteHousePhotoHandler)
+
+	r.POST("/reservation", h.AddReservationHandler)
 }

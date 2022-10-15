@@ -19,22 +19,25 @@ type HouseService interface {
 }
 
 type houseService struct {
-	houseRepository r.HouseRepository
-	cityRepository  r.CityRepository
-	userRepository  r.UserRepository
+	houseRepository       r.HouseRepository
+	cityRepository        r.CityRepository
+	userRepository        r.UserRepository
+	reservationRepository r.ReservationRepository
 }
 
 type HSConfig struct {
-	HouseRepository r.HouseRepository
-	CityRepository  r.CityRepository
-	UserRepository  r.UserRepository
+	HouseRepository       r.HouseRepository
+	CityRepository        r.CityRepository
+	UserRepository        r.UserRepository
+	ReservationRepository r.ReservationRepository
 }
 
 func NewHouseService(c *HSConfig) HouseService {
 	return &houseService{
-		houseRepository: c.HouseRepository,
-		cityRepository:  c.CityRepository,
-		userRepository:  c.UserRepository,
+		houseRepository:       c.HouseRepository,
+		cityRepository:        c.CityRepository,
+		userRepository:        c.UserRepository,
+		reservationRepository: c.ReservationRepository,
 	}
 }
 
@@ -268,7 +271,7 @@ func (s *houseService) DeleteHouse(houseID int, userID int) (*models.House, erro
 		return nil, e.ErrInvalidHostError
 	}
 
-	_, err = s.houseRepository.GetUpcomingHouseReservationsByHouseID(houseID)
+	_, err = s.reservationRepository.GetUpcomingHouseReservationsByHouseID(houseID)
 
 	if err != nil {
 		if errors.Is(err, e.ErrDeleteUpcomingReservationError) {
