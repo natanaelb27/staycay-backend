@@ -142,3 +142,28 @@ func (h *Handler) UpdateHouseHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, helpers.BuildSuccessResponse(http.StatusOK, http.StatusText(http.StatusOK), response))
 
 }
+
+func (h *Handler) DeleteHousePhotoHandler(c *gin.Context) {
+	housePhotoID, _ := strconv.Atoi(c.Param("housePhotoId"))
+	userContext := c.MustGet("user").(dtos.JwtData)
+
+	response, err := h.houseService.DeleteHousePhoto(housePhotoID, userContext.UserID)
+
+	if err != nil {
+		if errors.Is(err, e.ErrIdNotFoundError) {
+			c.JSON(http.StatusBadRequest, helpers.BuildErrorResponse(http.StatusBadRequest, e.ErrIdNotFoundError.Error()))
+			return
+		}
+
+		if errors.Is(err, e.ErrInvalidHostError) {
+			c.JSON(http.StatusForbidden, helpers.BuildErrorResponse(http.StatusForbidden, e.ErrInvalidHostError.Error()))
+			return
+		}
+
+		c.JSON(http.StatusInternalServerError, helpers.BuildErrorResponse(http.StatusInternalServerError, err.Error()))
+		return
+	}
+
+	c.JSON(http.StatusOK, helpers.BuildSuccessResponse(http.StatusOK, http.StatusText(http.StatusOK), response))
+
+}

@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend/internal/dtos"
+	e "git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend/internal/errors"
 	"git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend/internal/models"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -14,9 +15,11 @@ type HouseRepository interface {
 	GetHouseByHostID(hostID int) ([]*dtos.HouseDetailsDTO, error)
 	GetHousePhotoByHouseID(houseID int) ([]*dtos.HousePhotosDTO, error)
 	GetHouseByHouseID(houseID int) (*dtos.HouseDetailsDTO, error)
+	GetHouseByHousePhotoID(housePhotoID int) (*dtos.HouseDetailsDTO, error)
 	CreateNewHouse(newHouse *models.House) (*models.House, error)
 	AddHousePhoto(newHousePhoto *models.HousePhoto) (*models.HousePhoto, error)
 	UpdateHouseByHouseID(houseID int, houseNewData *models.House) (*models.House, error)
+	DeleteHousePhotoByID(housePhotoID int) (*models.HousePhoto, error)
 }
 
 type houseRepository struct {
@@ -158,7 +161,7 @@ func (r *houseRepository) AddHousePhoto(newHousePhoto *models.HousePhoto) (*mode
 }
 
 func (r *houseRepository) UpdateHouseByHouseID(houseID int, houseNewData *models.House) (*models.House, error) {
-	var house models.House
+	var house *models.House
 
 	result := r.db.
 		Model(&house).
@@ -170,5 +173,42 @@ func (r *houseRepository) UpdateHouseByHouseID(houseID int, houseNewData *models
 		return nil, result.Error
 	}
 
-	return &house, nil
+	return house, nil
+}
+
+func (r *houseRepository) GetHouseByHousePhotoID(housePhotoID int) (*dtos.HouseDetailsDTO, error) {
+	var houseDetails *dtos.HouseDetailsDTO
+
+	result := r.db.Model(&models.HousePhoto{}).
+		Select("houses.id AS house_id, houses.name AS house_name, houses.price AS house_price, houses.description AS house_description, cities.name AS house_city_name, houses.max_guest AS house_max_guest, houses.status AS house_status, users.id AS host_id, users.name AS host_name, users.email AS host_email").
+		Joins("JOIN houses ON house_photos.house_id = houses.id").
+		Joins("JOIN cities ON houses.city_id = cities.id").
+		Joins("JOIN users ON houses.user_id = users.id").
+		Where("house_photos.id = ?", housePhotoID).
+		Find(&houseDetails)
+
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	if result.RowsAffected == 0 {
+		return nil, e.ErrIdNotFoundError
+	}
+
+	return houseDetails, nil
+}
+
+func (r *houseRepository) DeleteHousePhotoByID(housePhotoID int) (*models.HousePhoto, error) {
+	var housePhoto *models.HousePhoto
+
+	result := r.db.
+		Clauses(clause.Returning{}).
+		Where("id = ?", housePhotoID).
+		Delete(&housePhoto)
+
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	return housePhoto, nil
 }

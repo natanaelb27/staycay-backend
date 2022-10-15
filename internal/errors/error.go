@@ -9,5 +9,6 @@ var (
 	ErrTopUpTooSmallError       = errors.New("top up amount is too small (minimum Rp. 10,000)")
 	ErrInvalidRoleNotHostError  = errors.New("user is not a host")
 	ErrInvalidHostError         = errors.New("user is not the host")
+	ErrIdNotFoundError          = errors.New("this id is not found")
 	// ErrInvalidRoleAddHouseError = errors.New("only host can add a new house")
 )

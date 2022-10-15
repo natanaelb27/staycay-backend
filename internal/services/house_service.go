@@ -12,6 +12,7 @@ type HouseService interface {
 	GetHostHouses(hostID int) ([]*dtos.HouseDetailsWithPhotoDTO, error)
 	AddNewHouse(userID int, request *dtos.AddNewHouseRequestDTO) (*models.House, []string, error)
 	UpdateHouse(houseID int, userID int, request *dtos.UpdateHouseRequestDTO) (*models.House, []string, error)
+	DeleteHousePhoto(housePhotoID int, userID int) (*models.HousePhoto, error)
 }
 
 type houseService struct {
@@ -253,4 +254,23 @@ func (s *houseService) UpdateHouse(houseID int, userID int, request *dtos.Update
 	}
 
 	return updatedHouse, photoList, nil
+}
+
+func (s *houseService) DeleteHousePhoto(housePhotoID int, userID int) (*models.HousePhoto, error) {
+	houseDetails, err := s.houseRepository.GetHouseByHousePhotoID(housePhotoID)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if houseDetails.HostID != userID {
+		return nil, e.ErrInvalidHostError
+	}
+
+	housePhoto, err := s.houseRepository.DeleteHousePhotoByID(housePhotoID)
+	if err != nil {
+		return nil, err
+	}
+
+	return housePhoto, nil
 }
