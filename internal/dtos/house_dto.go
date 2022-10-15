@@ -1,27 +1,57 @@
 package dtos
 
-import "github.com/lib/pq"
+// type HouseDetailsDTO struct {
+// 	HouseID          int            `json:"house_id"`
+// 	HouseName        string         `json:"house_name"`
+// 	HousePrice       int            `json:"house_price"`
+// 	HouseDescription string         `json:"description"`
+// 	HouseCityName    string         `json:"house_city_name"`
+// 	HouseMaxGuest    int            `json:"house_max_guest"`
+// 	HouseStatus      string         `json:"house_status"`
+// 	HousePhoto       pq.StringArray `json:"house_photo" gorm:"type:text[]"`
+// 	HostID           int            `json:"host_id"`
+// 	HostName         string         `json:"host_name"`
+// 	HostEmail        string         `json:"host_email"`
+// }
+
+type HousePhotosDTO struct {
+	PhotoID int    `json:"photo_id"`
+	Photo   string `json:"photo"`
+}
 
 type HouseDetailsDTO struct {
-	HouseID          int            `json:"house_id"`
-	HouseName        string         `json:"house_name"`
-	HousePrice       int            `json:"house_price"`
-	HouseDescription string         `json:"description"`
-	HouseCityName    string         `json:"house_city_name"`
-	HouseMaxGuest    int            `json:"house_max_guest"`
-	HouseStatus      string         `json:"house_status"`
-	HousePhoto       pq.StringArray `json:"house_photo" gorm:"type:text[]"`
-	HostID           int            `json:"host_id"`
-	HostName         string         `json:"host_name"`
-	HostEmail        string         `json:"host_email"`
+	HouseID          int    `json:"house_id"`
+	HouseName        string `json:"house_name"`
+	HousePrice       int    `json:"house_price"`
+	HouseDescription string `json:"description"`
+	HouseCityName    string `json:"house_city_name"`
+	HouseMaxGuest    int    `json:"house_max_guest"`
+	HouseStatus      string `json:"house_status"`
+	HostID           int    `json:"host_id"`
+	HostName         string `json:"host_name"`
+	HostEmail        string `json:"host_email"`
+}
+
+type HouseDetailsWithPhotoDTO struct {
+	HouseID          int               `json:"house_id"`
+	HouseName        string            `json:"house_name"`
+	HousePrice       int               `json:"house_price"`
+	HouseDescription string            `json:"description"`
+	HouseCityName    string            `json:"house_city_name"`
+	HouseMaxGuest    int               `json:"house_max_guest"`
+	HouseStatus      string            `json:"house_status"`
+	HousePhoto       []*HousePhotosDTO `json:"house_photo"`
+	HostID           int               `json:"host_id"`
+	HostName         string            `json:"host_name"`
+	HostEmail        string            `json:"host_email"`
 }
 
 type GetAllHousesResponseDTO struct {
-	House []*HouseDetailsDTO `json:"house"`
+	House []*HouseDetailsWithPhotoDTO `json:"house"`
 }
 
 type GetHostHousesResponseDTO struct {
-	House []*HouseDetailsDTO `json:"house"`
+	House []*HouseDetailsWithPhotoDTO `json:"house"`
 }
 
 type AddNewHouseRequestDTO struct {

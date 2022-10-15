@@ -8,8 +8,8 @@ import (
 )
 
 type HouseService interface {
-	GetAllHouses(queryParams map[string]interface{}, querySearchCity []string) ([]*dtos.HouseDetailsDTO, error)
-	GetHostHouses(hostID int) ([]*dtos.HouseDetailsDTO, error)
+	GetAllHouses(queryParams map[string]interface{}, querySearchCity []string) ([]*dtos.HouseDetailsWithPhotoDTO, error)
+	GetHostHouses(hostID int) ([]*dtos.HouseDetailsWithPhotoDTO, error)
 	AddNewHouse(userID int, request *dtos.AddNewHouseRequestDTO) (*models.House, []string, error)
 	UpdateHouse(houseID int, userID int, request *dtos.UpdateHouseRequestDTO) (*models.House, []string, error)
 }
@@ -34,7 +34,7 @@ func NewHouseService(c *HSConfig) HouseService {
 	}
 }
 
-func (s *houseService) GetAllHouses(queryParams map[string]interface{}, querySearchCity []string) ([]*dtos.HouseDetailsDTO, error) {
+func (s *houseService) GetAllHouses(queryParams map[string]interface{}, querySearchCity []string) ([]*dtos.HouseDetailsWithPhotoDTO, error) {
 
 	// if rec, ok := query["searchCity"].(map[string]interface{}); ok {
 	// 	for key, val := range rec {
@@ -49,16 +49,45 @@ func (s *houseService) GetAllHouses(queryParams map[string]interface{}, querySea
 	// print("SEARCH: ", query["searchName"])
 	// print(query["searchCity"])
 
-	house, err := s.houseRepository.GetHouse(queryParams, querySearchCity)
+	// house, err := s.houseRepository.GetHouse(queryParams, querySearchCity)
+
+	// if err != nil {
+	// 	return nil, err
+	// }
+
+	houseDetails, err := s.houseRepository.GetHouse(queryParams, querySearchCity)
 
 	if err != nil {
 		return nil, err
 	}
 
-	return house, nil
+	houseData := []*dtos.HouseDetailsWithPhotoDTO{}
+	for _, house := range houseDetails {
+		housePhoto, err := s.houseRepository.GetHousePhotoByHouseID(house.HouseID)
+
+		if err != nil {
+			return nil, err
+		}
+
+		houseData = append(houseData, &dtos.HouseDetailsWithPhotoDTO{
+			HouseID:          house.HouseID,
+			HouseName:        house.HouseName,
+			HousePrice:       house.HousePrice,
+			HouseDescription: house.HouseDescription,
+			HouseCityName:    house.HouseCityName,
+			HouseMaxGuest:    house.HouseMaxGuest,
+			HouseStatus:      house.HouseStatus,
+			HousePhoto:       housePhoto,
+			HostID:           house.HostID,
+			HostName:         house.HostName,
+			HostEmail:        house.HostEmail,
+		})
+	}
+
+	return houseData, nil
 }
 
-func (s *houseService) GetHostHouses(userID int) ([]*dtos.HouseDetailsDTO, error) {
+func (s *houseService) GetHostHouses(userID int) ([]*dtos.HouseDetailsWithPhotoDTO, error) {
 	userDetails, err := s.userRepository.GetUserDetails(userID)
 
 	if err != nil {
@@ -69,13 +98,36 @@ func (s *houseService) GetHostHouses(userID int) ([]*dtos.HouseDetailsDTO, error
 		return nil, e.ErrInvalidRoleNotHostError
 	}
 
-	house, err := s.houseRepository.GetHouseByHostID(userID)
+	houseDetails, err := s.houseRepository.GetHouseByHostID(userID)
 
 	if err != nil {
 		return nil, err
 	}
 
-	return house, nil
+	houseData := []*dtos.HouseDetailsWithPhotoDTO{}
+	for _, house := range houseDetails {
+		housePhoto, err := s.houseRepository.GetHousePhotoByHouseID(house.HouseID)
+
+		if err != nil {
+			return nil, err
+		}
+
+		houseData = append(houseData, &dtos.HouseDetailsWithPhotoDTO{
+			HouseID:          house.HouseID,
+			HouseName:        house.HouseName,
+			HousePrice:       house.HousePrice,
+			HouseDescription: house.HouseDescription,
+			HouseCityName:    house.HouseCityName,
+			HouseMaxGuest:    house.HouseMaxGuest,
+			HouseStatus:      house.HouseStatus,
+			HousePhoto:       housePhoto,
+			HostID:           house.HostID,
+			HostName:         house.HostName,
+			HostEmail:        house.HostEmail,
+		})
+	}
+
+	return houseData, nil
 }
 
 func (s *houseService) AddNewHouse(userID int, request *dtos.AddNewHouseRequestDTO) (*models.House, []string, error) {
