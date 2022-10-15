@@ -93,6 +93,8 @@ func InitAllHandlers() *Handler {
 	reservationService := s.NewReservationService(&s.RSConfig{
 		ReservationRepository: reservationRepo,
 		HouseRepository:       houseRepo,
+		UserRepository:        userRepo,
+		WalletRepository:      walletRepo,
 	})
 
 	h := New(&HandlerConfig{

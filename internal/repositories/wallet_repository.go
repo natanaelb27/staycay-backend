@@ -9,6 +9,7 @@ import (
 type WalletRepository interface {
 	CreateWallet(wallet *models.Wallet) error
 	AddWalletBalance(userID int, amount int) (*models.Wallet, error)
+	SubtractWalletBalance(userID int, amount int) (*models.Wallet, error)
 }
 
 type walletRepository struct {
@@ -44,6 +45,23 @@ func (r *walletRepository) AddWalletBalance(userID int, amount int) (*models.Wal
 		Clauses(clause.Returning{}).
 		Where("user_id = ?", userID).
 		Update("balance", gorm.Expr("balance + ?", amount))
+
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	return &wallet, nil
+
+}
+
+func (r *walletRepository) SubtractWalletBalance(userID int, amount int) (*models.Wallet, error) {
+	var wallet models.Wallet
+
+	result := r.db.
+		Model(&wallet).
+		Clauses(clause.Returning{}).
+		Where("user_id = ?", userID).
+		Update("balance", gorm.Expr("balance - ?", amount))
 
 	if result.Error != nil {
 		return nil, result.Error
