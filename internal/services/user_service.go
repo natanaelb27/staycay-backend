@@ -12,7 +12,7 @@ type UserService interface {
 	GetUserProfile(userID int) (*dtos.UserDetailsDTO, error)
 	GetUserProfileByUserID(userID int) (*dtos.UserDetailsDTO, error)
 	UpdateUserRoleToHost(userID int) (*models.User, error)
-	UpdateUserProfile(userID int, request dtos.UpdateUserProfileRequestDTO) (*models.User, error)
+	UpdateUserProfile(userID int, request *dtos.UpdateUserProfileRequestDTO) (*models.User, error)
 }
 
 type userService struct {
@@ -62,7 +62,7 @@ func (s *userService) UpdateUserRoleToHost(userID int) (*models.User, error) {
 	return userDetails, nil
 }
 
-func (s *userService) UpdateUserProfile(userID int, request dtos.UpdateUserProfileRequestDTO) (*models.User, error) {
+func (s *userService) UpdateUserProfile(userID int, request *dtos.UpdateUserProfileRequestDTO) (*models.User, error) {
 	user, err := s.userRepository.GetUserByID(userID)
 
 	if err != nil {

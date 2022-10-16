@@ -13,6 +13,7 @@ type Handler struct {
 	houseService       s.HouseService
 	walletService      s.WalletService
 	reservationService s.ReservationService
+	pickupService      s.PickupService
 }
 
 type HandlerConfig struct {
@@ -22,6 +23,7 @@ type HandlerConfig struct {
 	HouseService       s.HouseService
 	WalletService      s.WalletService
 	ReservationService s.ReservationService
+	PickupService      s.PickupService
 }
 
 func New(c *HandlerConfig) *Handler {
@@ -32,6 +34,7 @@ func New(c *HandlerConfig) *Handler {
 		houseService:       c.HouseService,
 		walletService:      c.WalletService,
 		reservationService: c.ReservationService,
+		pickupService:      c.PickupService,
 	}
 }
 
@@ -55,6 +58,10 @@ func InitAllHandlers() *Handler {
 	})
 
 	reservationRepo := r.NewReservationRepository(&r.RRConfig{
+		DB: db,
+	})
+
+	pickupRepo := r.NewPickupRepository(&r.PRConfig{
 		DB: db,
 	})
 
@@ -97,6 +104,12 @@ func InitAllHandlers() *Handler {
 		WalletRepository:      walletRepo,
 	})
 
+	pickupService := s.NewPickupService(&s.PSConfig{
+		PickupRepository:      pickupRepo,
+		ReservationRepository: reservationRepo,
+		UserRepository:        userRepo,
+	})
+
 	h := New(&HandlerConfig{
 		AuthService:        authService,
 		CityService:        cityService,
@@ -104,6 +117,7 @@ func InitAllHandlers() *Handler {
 		HouseService:       houseService,
 		WalletService:      walletService,
 		ReservationService: reservationService,
+		PickupService:      pickupService,
 	})
 
 	return h

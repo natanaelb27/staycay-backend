@@ -21,6 +21,7 @@ func InitAllRoutes(r *gin.Engine, h *handlers.Handler) {
 	// User
 	r.GET("/user/:userId", h.GetUserProfileByUserIDHandler)
 
+	// Need Authorizations
 	r.Use(middlewares.AuthorizeJWT)
 
 	// User
@@ -40,6 +41,11 @@ func InitAllRoutes(r *gin.Engine, h *handlers.Handler) {
 	r.POST("/host/house/photo/:houseId", h.AddHousePhotoHandler)
 	r.DELETE("/host/house/photo/:housePhotoId", h.DeleteHousePhotoHandler)
 
-	r.POST("/reservation", h.AddReservationHandler)
+	// Reservation
 	r.GET("/reservation", h.GetHouseReservationsByUserHandler)
+	r.POST("/reservation", h.AddReservationHandler)
+
+	// Pickup
+	// r.GET("/pickup/:reservationId", h.GetReservationStatusByReservationIDHandler)
+	r.POST("/pickup/:reservationId", h.RequestPickupHandler)
 }

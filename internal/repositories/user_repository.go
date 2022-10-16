@@ -34,12 +34,12 @@ func NewUserRepository(c *URConfig) UserRepository {
 func (r *userRepository) CreateNewUser(user *models.User) (*models.User, error) {
 	result := r.db.Where("email = ?", user.Email).FirstOrCreate(&user)
 
-	if result.RowsAffected == 0 {
-		return nil, e.ErrDuplicateEmailError
-	}
-
 	if result.Error != nil {
 		return nil, result.Error
+	}
+
+	if result.RowsAffected == 0 {
+		return nil, e.ErrDuplicateEmailError
 	}
 
 	return user, nil

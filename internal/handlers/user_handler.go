@@ -80,7 +80,7 @@ func (h *Handler) UpdateUserRoleHandler(c *gin.Context) {
 }
 
 func (h *Handler) UpdateUserProfileHandler(c *gin.Context) {
-	var request dtos.UpdateUserProfileRequestDTO
+	var request *dtos.UpdateUserProfileRequestDTO
 	var response *dtos.UpdateUserProfileResponseDTO
 	userContext := c.MustGet("user").(dtos.JwtData)
 

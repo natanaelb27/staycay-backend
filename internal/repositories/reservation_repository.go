@@ -10,6 +10,7 @@ import (
 type ReservationRepository interface {
 	GetHouseReservationsByUserID(userID int, filterBy string) ([]*dtos.HouseReservationsDTO, error)
 	GetHouseReservationsByHouseID(houseID int, filterBy string) ([]*dtos.HouseReservationsDTO, error)
+	GetHouseReservationsByID(reservationID int) (*dtos.HouseReservationsDTO, error)
 	ValidateReservation(request *dtos.AddReservationRequestDTO) error
 	GetLastReservationID() (int, error)
 	CreateReservation(userID int, request *models.Reservation) (*models.Reservation, error)
@@ -32,13 +33,13 @@ func NewReservationRepository(c *RRConfig) ReservationRepository {
 func (r *reservationRepository) GetHouseReservationsByUserID(userID int, filterBy string) ([]*dtos.HouseReservationsDTO, error) {
 	var houseReservation []*dtos.HouseReservationsDTO
 
-	result := r.db.Model(&models.House{}).
-		Select(`houses.id AS house_id, reservations.user_id AS user_id, reservations.id AS reservation_id, reservations.reservation_code AS reservation_code, reservations.check_in_date AS check_in_date, reservations.check_out_date AS check_out_date, reservations.total_price AS total_price,
+	result := r.db.Model(&models.Reservation{}).
+		Select(`houses.id AS house_id, houses.city_id AS house_city_id, reservations.user_id AS user_id, reservations.id AS reservation_id, reservations.reservation_code AS reservation_code, reservations.check_in_date AS check_in_date, reservations.check_out_date AS check_out_date, reservations.total_price AS total_price,
 		(CASE WHEN NOW()::timestamp::date = reservations.check_in_date::timestamp::date THEN 'today'
 		WHEN NOW()::timestamp::date BETWEEN reservations.check_in_date::timestamp::date AND reservations.check_out_date::timestamp::date THEN 'ongoing'
 		WHEN reservations.check_in_date::timestamp::date > NOW() THEN 'upcoming'
 		WHEN reservations.check_out_date::timestamp::date < NOW() THEN 'past' END) AS reservation_status`).
-		Joins("JOIN reservations ON houses.id = reservations.house_id").
+		Joins("JOIN houses ON reservations.house_id = houses.id").
 		Where("reservations.user_id = ?", userID)
 
 	// result := r.db.Model(&models.House{}).
@@ -74,13 +75,13 @@ func (r *reservationRepository) GetHouseReservationsByUserID(userID int, filterB
 func (r *reservationRepository) GetHouseReservationsByHouseID(houseID int, filterBy string) ([]*dtos.HouseReservationsDTO, error) {
 	var houseReservation []*dtos.HouseReservationsDTO
 
-	result := r.db.Model(&models.House{}).
-		Select(`houses.id AS house_id, reservations.user_id AS user_id, reservations.id AS reservation_id, reservations.reservation_code AS reservation_code, reservations.check_in_date AS check_in_date, reservations.check_out_date AS check_out_date, reservations.total_price AS total_price,
+	result := r.db.Model(&models.Reservation{}).
+		Select(`houses.id AS house_id, houses.city_id AS house_city_id, reservations.user_id AS user_id, reservations.id AS reservation_id, reservations.reservation_code AS reservation_code, reservations.check_in_date AS check_in_date, reservations.check_out_date AS check_out_date, reservations.total_price AS total_price,
 		(CASE WHEN NOW()::timestamp::date = reservations.check_in_date::timestamp::date THEN 'today'
 		WHEN NOW()::timestamp::date BETWEEN reservations.check_in_date::timestamp::date AND reservations.check_out_date::timestamp::date THEN 'ongoing'
 		WHEN reservations.check_in_date::timestamp::date > NOW() THEN 'upcoming'
 		WHEN reservations.check_out_date::timestamp::date < NOW() THEN 'past' END) AS reservation_status`).
-		Joins("JOIN reservations ON houses.id = reservations.house_id").
+		Joins("JOIN houses ON reservations.house_id = houses.id").
 		Where("reservations.house_id = ?", houseID)
 
 	if filterBy == "today" {
@@ -100,6 +101,26 @@ func (r *reservationRepository) GetHouseReservationsByHouseID(houseID int, filte
 	}
 
 	result.Find(&houseReservation)
+
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	return houseReservation, nil
+}
+
+func (r *reservationRepository) GetHouseReservationsByID(reservationID int) (*dtos.HouseReservationsDTO, error) {
+	var houseReservation *dtos.HouseReservationsDTO
+
+	result := r.db.Model(&models.Reservation{}).
+		Select(`houses.id AS house_id, houses.city_id AS house_city_id, reservations.user_id AS user_id, reservations.id AS reservation_id, reservations.reservation_code AS reservation_code, reservations.check_in_date AS check_in_date, reservations.check_out_date AS check_out_date, reservations.total_price AS total_price,
+		(CASE WHEN NOW()::timestamp::date = reservations.check_in_date::timestamp::date THEN 'today'
+		WHEN NOW()::timestamp::date BETWEEN reservations.check_in_date::timestamp::date AND reservations.check_out_date::timestamp::date THEN 'ongoing'
+		WHEN reservations.check_in_date::timestamp::date > NOW() THEN 'upcoming'
+		WHEN reservations.check_out_date::timestamp::date < NOW() THEN 'past' END) AS reservation_status`).
+		Joins("JOIN houses ON reservations.house_id = houses.id").
+		Where("reservations.id = ?", reservationID).
+		Find(&houseReservation)
 
 	if result.Error != nil {
 		return nil, result.Error

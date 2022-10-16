@@ -4,6 +4,7 @@ import "time"
 
 type HouseReservationsDTO struct {
 	HouseID           int       `json:"house_id"`
+	HouseCityID       int       `json:"house_city_id"`
 	UserID            int       `json:"user_id"`
 	ReservationID     int       `json:"reservation_id"`
 	ReservationCode   string    `json:"reservation_code"`

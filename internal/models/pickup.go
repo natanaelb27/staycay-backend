@@ -15,6 +15,7 @@ type Pickup struct {
 	PickupAddress  string         `json:"pickup_address"`
 	CityID         int            `json:"city_id"`
 	City           City           `json:"city" gorm:"foreignKey:CityID"`
+	PickupPrice    int            `json:"pickup_price"`
 	CreatedAt      time.Time      `json:"created_at"`
 	UpdatedAt      time.Time      `json:"updated_at"`
 	DeletedAt      gorm.DeletedAt `json:"deleted_at" gorm:"index"`
