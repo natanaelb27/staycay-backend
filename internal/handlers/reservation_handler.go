@@ -36,6 +36,11 @@ func (h *Handler) AddReservationHandler(c *gin.Context) {
 			return
 		}
 
+		if errors.Is(err, e.ErrInvalidReservationBeforeNowError) {
+			c.JSON(http.StatusBadRequest, helpers.BuildErrorResponse(http.StatusBadRequest, e.ErrInvalidReservationBeforeNowError.Error()))
+			return
+		}
+
 		if errors.Is(err, e.ErrNotValidReservationDateConflict) {
 			c.JSON(http.StatusBadRequest, helpers.BuildErrorResponse(http.StatusBadRequest, e.ErrNotValidReservationDateConflict.Error()))
 			return

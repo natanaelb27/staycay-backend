@@ -54,6 +54,12 @@ func (s *reservationService) AddReservation(userID int, request *dtos.AddReserva
 		return nil, e.ErrInvalidReservationDateLaterError
 	}
 
+	now, _ := time.Parse(format, time.Now().Format(format))
+
+	if now.After(checkInDate) {
+		return nil, e.ErrInvalidReservationBeforeNowError
+	}
+
 	err := s.reservationRepository.ValidateReservation(request)
 
 	if err != nil {
