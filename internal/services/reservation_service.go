@@ -13,6 +13,8 @@ import (
 
 type ReservationService interface {
 	AddReservation(userID int, request *dtos.AddReservationRequestDTO) (*models.Reservation, error)
+	GetHouseReservationsByUser(userID int, queryParams map[string]interface{}) ([]*dtos.HouseReservationsDTO, error)
+	GetHouseReservationsByHouse(houseID int, userID int, queryParams map[string]interface{}) ([]*dtos.HouseReservationsDTO, error)
 }
 
 type reservationService struct {
@@ -68,19 +70,16 @@ func (s *reservationService) AddReservation(userID int, request *dtos.AddReserva
 		return nil, e.ErrBalanceNotEnoughError
 	}
 
-	_, err = s.walletRepository.SubtractWalletBalance(userID, totalPrice)
-
-	if err != nil {
-		return nil, err
-	}
-
 	lastReservationID, err := s.reservationRepository.GetLastReservationID()
 
 	if err != nil {
 		return nil, err
 	}
 
-	reservationCode := fmt.Sprintf("RC%s%d%s", strings.ReplaceAll(request.CheckInDate, "-", ""), lastReservationID+1, strings.ReplaceAll(request.CheckOutDate, "-", ""))
+	reservationCode := fmt.Sprintf("RC%s%d%s",
+		strings.ReplaceAll(request.CheckInDate, "-", ""),
+		lastReservationID+1,
+		strings.ReplaceAll(request.CheckOutDate, "-", ""))
 
 	newReservation := &models.Reservation{
 		HouseID:         request.HouseID,
@@ -97,5 +96,43 @@ func (s *reservationService) AddReservation(userID int, request *dtos.AddReserva
 		return nil, err
 	}
 
+	_, err = s.walletRepository.SubtractWalletBalance(userID, totalPrice)
+
+	if err != nil {
+		return nil, err
+	}
+
 	return reservation, nil
+}
+
+func (s *reservationService) GetHouseReservationsByUser(userID int, queryParams map[string]interface{}) ([]*dtos.HouseReservationsDTO, error) {
+	filterBy := fmt.Sprintf("%v", queryParams["filterBy"])
+	houseReservations, err := s.reservationRepository.GetHouseReservationsByUserID(userID, filterBy)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return houseReservations, nil
+}
+
+func (s *reservationService) GetHouseReservationsByHouse(houseID int, userID int, queryParams map[string]interface{}) ([]*dtos.HouseReservationsDTO, error) {
+	houseDetails, err := s.houseRepository.GetHouseByHouseID(houseID)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if houseDetails.HostID != userID {
+		return nil, e.ErrInvalidHostError
+	}
+
+	filterBy := fmt.Sprintf("%v", queryParams["filterBy"])
+	houseReservations, err := s.reservationRepository.GetHouseReservationsByHouseID(houseID, filterBy)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return houseReservations, nil
 }

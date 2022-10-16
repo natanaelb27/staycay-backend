@@ -39,6 +39,40 @@ func (h *Handler) GetAllHousesHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, helpers.BuildSuccessResponse(http.StatusOK, http.StatusText(http.StatusOK), response))
 }
 
+func (h *Handler) GetHouseByIDHandler(c *gin.Context) {
+	var response *dtos.GetHouseByIDResponseDTO
+
+	houseID, _ := strconv.Atoi(c.Param("houseId"))
+
+	data, err := h.houseService.GetHouseByID(houseID)
+
+	if err != nil {
+		if errors.Is(err, e.ErrIdNotFoundError) {
+			c.JSON(http.StatusBadRequest, helpers.BuildErrorResponse(http.StatusBadRequest, e.ErrIdNotFoundError.Error()))
+			return
+		}
+
+		c.JSON(http.StatusInternalServerError, helpers.BuildErrorResponse(http.StatusInternalServerError, err.Error()))
+		return
+	}
+
+	response = &dtos.GetHouseByIDResponseDTO{
+		HouseID:          data.HouseID,
+		HouseName:        data.HouseName,
+		HousePrice:       data.HousePrice,
+		HouseDescription: data.HouseDescription,
+		HouseCityName:    data.HouseCityName,
+		HouseMaxGuest:    data.HouseMaxGuest,
+		HouseStatus:      data.HouseStatus,
+		HousePhoto:       data.HousePhoto,
+		HostID:           data.HostID,
+		HostName:         data.HostName,
+		HostEmail:        data.HostEmail,
+	}
+
+	c.JSON(http.StatusOK, helpers.BuildSuccessResponse(http.StatusOK, http.StatusText(http.StatusOK), response))
+}
+
 func (h *Handler) GetHostHousesHandler(c *gin.Context) {
 	var response *dtos.GetHostHousesResponseDTO
 
@@ -112,7 +146,7 @@ func (h *Handler) UpdateHouseHandler(c *gin.Context) {
 		return
 	}
 
-	newHouse, photo, err := h.houseService.UpdateHouse(houseID, userContext.UserID, request)
+	newHouse, err := h.houseService.UpdateHouse(houseID, userContext.UserID, request)
 
 	if err != nil {
 		if errors.Is(err, e.ErrInvalidRoleNotHostError) {
@@ -135,7 +169,6 @@ func (h *Handler) UpdateHouseHandler(c *gin.Context) {
 		Description: newHouse.Description,
 		CityID:      newHouse.CityID,
 		MaxGuest:    newHouse.MaxGuest,
-		Photo:       photo,
 		Status:      newHouse.Status,
 	}
 
@@ -178,6 +211,45 @@ func (h *Handler) DeleteHouseHandler(c *gin.Context) {
 		CityID:      data.CityID,
 		MaxGuest:    data.MaxGuest,
 		Status:      data.Status,
+	}
+
+	c.JSON(http.StatusOK, helpers.BuildSuccessResponse(http.StatusOK, http.StatusText(http.StatusOK), response))
+
+}
+
+func (h *Handler) AddHousePhotoHandler(c *gin.Context) {
+	var request *dtos.AddHousePhotoRequestDTO
+	var response *dtos.AddHousePhotoResponseDTO
+
+	houseID, _ := strconv.Atoi(c.Param("houseId"))
+
+	userContext := c.MustGet("user").(dtos.JwtData)
+
+	err := c.ShouldBindJSON(&request)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, helpers.BuildErrorResponse(http.StatusBadRequest, err.Error()))
+		return
+	}
+
+	photoList, err := h.houseService.AddHousePhoto(houseID, userContext.UserID, request)
+
+	if err != nil {
+		if errors.Is(err, e.ErrInvalidRoleNotHostError) {
+			c.JSON(http.StatusForbidden, helpers.BuildErrorResponse(http.StatusForbidden, e.ErrInvalidRoleNotHostError.Error()))
+			return
+		}
+
+		if errors.Is(err, e.ErrInvalidHostError) {
+			c.JSON(http.StatusForbidden, helpers.BuildErrorResponse(http.StatusForbidden, e.ErrInvalidHostError.Error()))
+			return
+		}
+
+		c.JSON(http.StatusInternalServerError, helpers.BuildErrorResponse(http.StatusInternalServerError, err.Error()))
+		return
+	}
+
+	response = &dtos.AddHousePhotoResponseDTO{
+		Photo: photoList,
 	}
 
 	c.JSON(http.StatusOK, helpers.BuildSuccessResponse(http.StatusOK, http.StatusText(http.StatusOK), response))

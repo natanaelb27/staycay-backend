@@ -3,6 +3,7 @@ package handlers
 import (
 	"errors"
 	"net/http"
+	"strconv"
 
 	"git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend/internal/dtos"
 	e "git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend/internal/errors"
@@ -45,4 +46,60 @@ func (h *Handler) AddReservationHandler(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, helpers.BuildSuccessResponse(http.StatusOK, http.StatusText(http.StatusOK), response))
+}
+
+func (h *Handler) GetHouseReservationsByUserHandler(c *gin.Context) {
+	var response *dtos.GetHouseReservationsByUserResponseDTO
+
+	userContext := c.MustGet("user").(dtos.JwtData)
+
+	queryParams := map[string]interface{}{}
+	for key, values := range c.Request.URL.Query() {
+		queryParams[key] = values[0]
+	}
+
+	data, err := h.reservationService.GetHouseReservationsByUser(userContext.UserID, queryParams)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, helpers.BuildErrorResponse(http.StatusInternalServerError, err.Error()))
+		return
+	}
+
+	response = &dtos.GetHouseReservationsByUserResponseDTO{
+		Reservation: data,
+	}
+
+	c.JSON(http.StatusOK, helpers.BuildSuccessResponse(http.StatusOK, http.StatusText(http.StatusOK), response))
+}
+
+func (h *Handler) GetHouseReservationsByHouseHandler(c *gin.Context) {
+	var response *dtos.GetHouseReservationsByHouseResponseDTO
+
+	houseID, _ := strconv.Atoi(c.Param("houseId"))
+
+	userContext := c.MustGet("user").(dtos.JwtData)
+
+	queryParams := map[string]interface{}{}
+	for key, values := range c.Request.URL.Query() {
+		queryParams[key] = values[0]
+	}
+
+	data, err := h.reservationService.GetHouseReservationsByHouse(houseID, userContext.UserID, queryParams)
+
+	if err != nil {
+		if errors.Is(err, e.ErrInvalidHostError) {
+			c.JSON(http.StatusForbidden, helpers.BuildErrorResponse(http.StatusForbidden, e.ErrInvalidHostError.Error()))
+			return
+		}
+
+		c.JSON(http.StatusInternalServerError, helpers.BuildErrorResponse(http.StatusInternalServerError, err.Error()))
+		return
+	}
+
+	response = &dtos.GetHouseReservationsByHouseResponseDTO{
+		Reservation: data,
+	}
+
+	c.JSON(http.StatusOK, helpers.BuildSuccessResponse(http.StatusOK, http.StatusText(http.StatusOK), response))
+
 }

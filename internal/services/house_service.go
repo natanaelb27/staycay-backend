@@ -1,8 +1,6 @@
 package services
 
 import (
-	"errors"
-
 	"git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend/internal/dtos"
 	e "git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend/internal/errors"
 	"git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend/internal/models"
@@ -11,10 +9,12 @@ import (
 
 type HouseService interface {
 	GetAllHouses(queryParams map[string]interface{}, querySearchCity []string) ([]*dtos.HouseDetailsWithPhotoDTO, error)
+	GetHouseByID(houseID int) (*dtos.HouseDetailsWithPhotoDTO, error)
 	GetHostHouses(hostID int) ([]*dtos.HouseDetailsWithPhotoDTO, error)
 	AddNewHouse(userID int, request *dtos.AddNewHouseRequestDTO) (*models.House, []string, error)
-	UpdateHouse(houseID int, userID int, request *dtos.UpdateHouseRequestDTO) (*models.House, []string, error)
+	UpdateHouse(houseID int, userID int, request *dtos.UpdateHouseRequestDTO) (*models.House, error)
 	DeleteHouse(houseID int, userID int) (*models.House, error)
+	AddHousePhoto(houseID int, userID int, request *dtos.AddHousePhotoRequestDTO) ([]string, error)
 	DeleteHousePhoto(housePhotoID int, userID int) (*models.HousePhoto, error)
 }
 
@@ -89,6 +89,36 @@ func (s *houseService) GetAllHouses(queryParams map[string]interface{}, querySea
 			HostName:         house.HostName,
 			HostEmail:        house.HostEmail,
 		})
+	}
+
+	return houseData, nil
+}
+
+func (s *houseService) GetHouseByID(houseID int) (*dtos.HouseDetailsWithPhotoDTO, error) {
+	houseDetails, err := s.houseRepository.GetHouseByHouseID(houseID)
+
+	if err != nil {
+		return nil, err
+	}
+
+	housePhoto, err := s.houseRepository.GetHousePhotoByHouseID(houseID)
+
+	if err != nil {
+		return nil, err
+	}
+
+	houseData := &dtos.HouseDetailsWithPhotoDTO{
+		HouseID:          houseDetails.HouseID,
+		HouseName:        houseDetails.HouseName,
+		HousePrice:       houseDetails.HousePrice,
+		HouseDescription: houseDetails.HouseDescription,
+		HouseCityName:    houseDetails.HouseCityName,
+		HouseMaxGuest:    houseDetails.HouseMaxGuest,
+		HouseStatus:      houseDetails.HouseStatus,
+		HousePhoto:       housePhoto,
+		HostID:           houseDetails.HostID,
+		HostName:         houseDetails.HostName,
+		HostEmail:        houseDetails.HostEmail,
 	}
 
 	return houseData, nil
@@ -192,25 +222,25 @@ func (s *houseService) AddNewHouse(userID int, request *dtos.AddNewHouseRequestD
 	return house, photoList, nil
 }
 
-func (s *houseService) UpdateHouse(houseID int, userID int, request *dtos.UpdateHouseRequestDTO) (*models.House, []string, error) {
+func (s *houseService) UpdateHouse(houseID int, userID int, request *dtos.UpdateHouseRequestDTO) (*models.House, error) {
 	userDetails, err := s.userRepository.GetUserDetails(userID)
 
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
 	if userDetails.Role != "host" {
-		return nil, nil, e.ErrInvalidRoleNotHostError
+		return nil, e.ErrInvalidRoleNotHostError
 	}
 
 	house, err := s.houseRepository.GetHouseByHouseID(houseID)
 
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
 	if house.HostID != userID {
-		return nil, nil, e.ErrInvalidHostError
+		return nil, e.ErrInvalidHostError
 	}
 
 	city := &models.City{}
@@ -219,7 +249,7 @@ func (s *houseService) UpdateHouse(houseID int, userID int, request *dtos.Update
 		city, err = s.cityRepository.GetCityIDByName(request.CityName)
 
 		if err != nil {
-			return nil, nil, err
+			return nil, err
 		}
 	}
 
@@ -235,29 +265,10 @@ func (s *houseService) UpdateHouse(houseID int, userID int, request *dtos.Update
 	updatedHouse, err := s.houseRepository.UpdateHouseByHouseID(houseID, newData)
 
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
-	photoList := make([]string, 0)
-
-	if len(request.Photo) > 0 {
-		for _, photo := range request.Photo {
-			newHousePhoto := &models.HousePhoto{
-				HouseID: updatedHouse.ID,
-				Photo:   photo,
-			}
-
-			housePhoto, err := s.houseRepository.AddHousePhoto(newHousePhoto)
-
-			if err != nil {
-				return nil, nil, err
-			}
-
-			photoList = append(photoList, housePhoto.Photo)
-		}
-	}
-
-	return updatedHouse, photoList, nil
+	return updatedHouse, nil
 }
 
 func (s *houseService) DeleteHouse(houseID int, userID int) (*models.House, error) {
@@ -271,26 +282,25 @@ func (s *houseService) DeleteHouse(houseID int, userID int) (*models.House, erro
 		return nil, e.ErrInvalidHostError
 	}
 
-	_, err = s.reservationRepository.GetUpcomingHouseReservationsByHouseID(houseID)
+	upcomingHouseReservation, err := s.reservationRepository.GetHouseReservationsByHouseID(houseID, "upcoming")
 
-	if err != nil {
-		if errors.Is(err, e.ErrDeleteUpcomingReservationError) {
+	if len(upcomingHouseReservation) > 0 {
+		newData := &models.House{
+			Status: "inactive",
+		}
 
-			newData := &models.House{
-				Status: "inactive",
-			}
+		house, err := s.houseRepository.UpdateHouseByHouseID(houseID, newData)
 
-			house, err := s.houseRepository.UpdateHouseByHouseID(houseID, newData)
-
-			if err != nil {
-				return nil, err
-			}
-
-			return house, e.ErrDeleteUpcomingReservationError
-
-		} else {
+		if err != nil {
 			return nil, err
 		}
+
+		return house, e.ErrDeleteUpcomingReservationError
+	}
+
+	if err != nil {
+		return nil, err
+
 	}
 
 	deletedHouse, err := s.houseRepository.DeleteHouseByID(houseID)
@@ -300,6 +310,39 @@ func (s *houseService) DeleteHouse(houseID int, userID int) (*models.House, erro
 	}
 
 	return deletedHouse, nil
+}
+
+func (s *houseService) AddHousePhoto(houseID int, userID int, request *dtos.AddHousePhotoRequestDTO) ([]string, error) {
+	userDetails, err := s.userRepository.GetUserDetails(userID)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if userDetails.Role != "host" {
+		return nil, e.ErrInvalidRoleNotHostError
+	}
+
+	photoList := make([]string, 0)
+
+	if len(request.Photo) > 0 {
+		for _, photo := range request.Photo {
+			newHousePhoto := &models.HousePhoto{
+				HouseID: houseID,
+				Photo:   photo,
+			}
+
+			housePhoto, err := s.houseRepository.AddHousePhoto(newHousePhoto)
+
+			if err != nil {
+				return nil, err
+			}
+
+			photoList = append(photoList, housePhoto.Photo)
+		}
+	}
+
+	return photoList, nil
 }
 
 func (s *houseService) DeleteHousePhoto(housePhotoID int, userID int) (*models.HousePhoto, error) {

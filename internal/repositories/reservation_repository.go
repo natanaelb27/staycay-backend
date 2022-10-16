@@ -1,8 +1,6 @@
 package repositories
 
 import (
-	"time"
-
 	"git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend/internal/dtos"
 	e "git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend/internal/errors"
 	"git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend/internal/models"
@@ -10,7 +8,8 @@ import (
 )
 
 type ReservationRepository interface {
-	GetUpcomingHouseReservationsByHouseID(houseID int) (*dtos.HouseReservationsDTO, error)
+	GetHouseReservationsByUserID(userID int, filterBy string) ([]*dtos.HouseReservationsDTO, error)
+	GetHouseReservationsByHouseID(houseID int, filterBy string) ([]*dtos.HouseReservationsDTO, error)
 	ValidateReservation(request *dtos.AddReservationRequestDTO) error
 	GetLastReservationID() (int, error)
 	CreateReservation(userID int, request *models.Reservation) (*models.Reservation, error)
@@ -30,22 +29,80 @@ func NewReservationRepository(c *RRConfig) ReservationRepository {
 	}
 }
 
-func (r *reservationRepository) GetUpcomingHouseReservationsByHouseID(houseID int) (*dtos.HouseReservationsDTO, error) {
-	var houseReservation *dtos.HouseReservationsDTO
+func (r *reservationRepository) GetHouseReservationsByUserID(userID int, filterBy string) ([]*dtos.HouseReservationsDTO, error) {
+	var houseReservation []*dtos.HouseReservationsDTO
 
 	result := r.db.Model(&models.House{}).
-		Select("houses.id AS house_id, reservations.id AS reservation_id, reservations.reservation_code AS reservation_code, reservations.check_in_date AS check_in_date, reservations.check_out_date AS check_out_date, reservations.total_price AS total_price").
+		Select(`houses.id AS house_id, reservations.user_id AS user_id, reservations.id AS reservation_id, reservations.reservation_code AS reservation_code, reservations.check_in_date AS check_in_date, reservations.check_out_date AS check_out_date, reservations.total_price AS total_price,
+		(CASE WHEN NOW()::timestamp::date = reservations.check_in_date::timestamp::date THEN 'today'
+		WHEN NOW()::timestamp::date BETWEEN reservations.check_in_date::timestamp::date AND reservations.check_out_date::timestamp::date THEN 'ongoing'
+		WHEN reservations.check_in_date::timestamp::date > NOW() THEN 'upcoming'
+		WHEN reservations.check_out_date::timestamp::date < NOW() THEN 'past' END) AS reservation_status`).
 		Joins("JOIN reservations ON houses.id = reservations.house_id").
-		Where("houses.id = ?", houseID).
-		Where("reservations.check_in_date > ?", time.Now()).
-		Find(&houseReservation)
+		Where("reservations.user_id = ?", userID)
+
+	// result := r.db.Model(&models.House{}).
+	// 	Select("houses.id AS house_id, reservations.user_id AS user_id, reservations.id AS reservation_id, reservations.reservation_code AS reservation_code, reservations.check_in_date AS check_in_date, reservations.check_out_date AS check_out_date, reservations.total_price AS total_price").
+	// 	Joins("JOIN reservations ON houses.id = reservations.house_id").
+	// 	Where("reservations.user_id = ?", userID)
+
+	if filterBy == "today" {
+		result = result.Where("NOW()::timestamp::date = reservations.check_in_date::timestamp::date")
+	}
+
+	if filterBy == "ongoing" {
+		result = result.Where("NOW()::timestamp::date BETWEEN reservations.check_in_date::timestamp::date AND reservations.check_out_date::timestamp::date")
+	}
+
+	if filterBy == "upcoming" {
+		result = result.Where("reservations.check_in_date::timestamp::date > NOW()")
+	}
+
+	if filterBy == "past" {
+		result = result.Where("reservations.check_out_date::timestamp::date < NOW()")
+	}
+
+	result.Find(&houseReservation)
 
 	if result.Error != nil {
 		return nil, result.Error
 	}
 
-	if result.RowsAffected > 0 {
-		return nil, e.ErrDeleteUpcomingReservationError
+	return houseReservation, nil
+}
+
+func (r *reservationRepository) GetHouseReservationsByHouseID(houseID int, filterBy string) ([]*dtos.HouseReservationsDTO, error) {
+	var houseReservation []*dtos.HouseReservationsDTO
+
+	result := r.db.Model(&models.House{}).
+		Select(`houses.id AS house_id, reservations.user_id AS user_id, reservations.id AS reservation_id, reservations.reservation_code AS reservation_code, reservations.check_in_date AS check_in_date, reservations.check_out_date AS check_out_date, reservations.total_price AS total_price,
+		(CASE WHEN NOW()::timestamp::date = reservations.check_in_date::timestamp::date THEN 'today'
+		WHEN NOW()::timestamp::date BETWEEN reservations.check_in_date::timestamp::date AND reservations.check_out_date::timestamp::date THEN 'ongoing'
+		WHEN reservations.check_in_date::timestamp::date > NOW() THEN 'upcoming'
+		WHEN reservations.check_out_date::timestamp::date < NOW() THEN 'past' END) AS reservation_status`).
+		Joins("JOIN reservations ON houses.id = reservations.house_id").
+		Where("reservations.house_id = ?", houseID)
+
+	if filterBy == "today" {
+		result = result.Where("NOW()::timestamp::date = reservations.check_in_date::timestamp::date")
+	}
+
+	if filterBy == "ongoing" {
+		result = result.Where("NOW()::timestamp::date BETWEEN reservations.check_in_date::timestamp::date AND reservations.check_out_date::timestamp::date")
+	}
+
+	if filterBy == "upcoming" {
+		result = result.Where("reservations.check_in_date::timestamp::date > NOW()")
+	}
+
+	if filterBy == "past" {
+		result = result.Where("reservations.check_out_date::timestamp::date < NOW()")
+	}
+
+	result.Find(&houseReservation)
+
+	if result.Error != nil {
+		return nil, result.Error
 	}
 
 	return houseReservation, nil

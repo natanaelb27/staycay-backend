@@ -16,6 +16,7 @@ func InitAllRoutes(r *gin.Engine, h *handlers.Handler) {
 
 	// House
 	r.GET("/house", h.GetAllHousesHandler)
+	r.GET("/house/:houseId", h.GetHouseByIDHandler)
 
 	r.Use(middlewares.AuthorizeJWT)
 
@@ -29,10 +30,13 @@ func InitAllRoutes(r *gin.Engine, h *handlers.Handler) {
 
 	// Host
 	r.GET("/host/house", h.GetHostHousesHandler)
+	r.GET("/host/reservation/:houseId", h.GetHouseReservationsByHouseHandler)
 	r.POST("/host/house", h.AddNewHouseHandler)
 	r.PATCH("/host/house/:houseId", h.UpdateHouseHandler)
 	r.DELETE("/host/house/:houseId", h.DeleteHouseHandler)
+	r.POST("/host/house/photo/:houseId", h.AddHousePhotoHandler)
 	r.DELETE("/host/house/photo/:housePhotoId", h.DeleteHousePhotoHandler)
 
 	r.POST("/reservation", h.AddReservationHandler)
+	r.GET("/reservation", h.GetHouseReservationsByUserHandler)
 }
