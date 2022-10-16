@@ -14,6 +14,7 @@ type Handler struct {
 	walletService      s.WalletService
 	reservationService s.ReservationService
 	pickupService      s.PickupService
+	gameService        s.GameService
 }
 
 type HandlerConfig struct {
@@ -24,6 +25,7 @@ type HandlerConfig struct {
 	WalletService      s.WalletService
 	ReservationService s.ReservationService
 	PickupService      s.PickupService
+	GameService        s.GameService
 }
 
 func New(c *HandlerConfig) *Handler {
@@ -35,6 +37,7 @@ func New(c *HandlerConfig) *Handler {
 		walletService:      c.WalletService,
 		reservationService: c.ReservationService,
 		pickupService:      c.PickupService,
+		gameService:        c.GameService,
 	}
 }
 
@@ -110,6 +113,11 @@ func InitAllHandlers() *Handler {
 		UserRepository:        userRepo,
 	})
 
+	gameService := s.NewGameService(&s.GSConfig{
+		GameRepository:   gameRepo,
+		WalletRepository: walletRepo,
+	})
+
 	h := New(&HandlerConfig{
 		AuthService:        authService,
 		CityService:        cityService,
@@ -118,6 +126,7 @@ func InitAllHandlers() *Handler {
 		WalletService:      walletService,
 		ReservationService: reservationService,
 		PickupService:      pickupService,
+		GameService:        gameService,
 	})
 
 	return h

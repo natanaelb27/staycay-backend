@@ -46,8 +46,8 @@ func (h *Handler) AddReservationHandler(c *gin.Context) {
 			return
 		}
 
-		if errors.Is(err, e.ErrBalanceNotEnoughError) {
-			c.JSON(http.StatusBadRequest, helpers.BuildErrorResponse(http.StatusBadRequest, e.ErrBalanceNotEnoughError.Error()))
+		if errors.Is(err, e.ErrInsufficientBalanceError) {
+			c.JSON(http.StatusBadRequest, helpers.BuildErrorResponse(http.StatusBadRequest, e.ErrInsufficientBalanceError.Error()))
 			return
 		}
 

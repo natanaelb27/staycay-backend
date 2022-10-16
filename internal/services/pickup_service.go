@@ -64,7 +64,7 @@ func (s *pickupService) RequestPickup(reservationID int, userID int, request *dt
 	}
 
 	if user.Balance < pickUpPrice {
-		return nil, e.ErrBalanceNotEnoughError
+		return nil, e.ErrInsufficientBalanceError
 	}
 
 	pickupStatus, err := s.pickupRepository.GetPickupStatusByName("pending admin")

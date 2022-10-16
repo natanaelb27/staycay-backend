@@ -48,4 +48,8 @@ func InitAllRoutes(r *gin.Engine, h *handlers.Handler) {
 	// Pickup
 	// r.GET("/pickup/:reservationId", h.GetReservationStatusByReservationIDHandler)
 	r.POST("/pickup/:reservationId", h.RequestPickupHandler)
+
+	// Game
+	r.GET("/game", h.GetGameHandler)
+	r.POST("/game", h.PlayGameHandler)
 }

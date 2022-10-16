@@ -81,7 +81,7 @@ func (s *reservationService) AddReservation(userID int, request *dtos.AddReserva
 	}
 
 	if user.Balance < totalPrice {
-		return nil, e.ErrBalanceNotEnoughError
+		return nil, e.ErrInsufficientBalanceError
 	}
 
 	lastReservationID, err := s.reservationRepository.GetLastReservationID()
