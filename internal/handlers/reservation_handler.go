@@ -26,6 +26,16 @@ func (h *Handler) AddReservationHandler(c *gin.Context) {
 	data, err := h.reservationService.AddReservation(userContext.UserID, request)
 
 	if err != nil {
+		if errors.Is(err, e.ErrInvalidReservationDateLaterError) {
+			c.JSON(http.StatusBadRequest, helpers.BuildErrorResponse(http.StatusBadRequest, e.ErrInvalidReservationDateLaterError.Error()))
+			return
+		}
+
+		if errors.Is(err, e.ErrInvalidReservationDateSameError) {
+			c.JSON(http.StatusBadRequest, helpers.BuildErrorResponse(http.StatusBadRequest, e.ErrInvalidReservationDateSameError.Error()))
+			return
+		}
+
 		if errors.Is(err, e.ErrNotValidReservationDateConflict) {
 			c.JSON(http.StatusBadRequest, helpers.BuildErrorResponse(http.StatusBadRequest, e.ErrNotValidReservationDateConflict.Error()))
 			return

@@ -3,6 +3,7 @@ package handlers
 import (
 	"errors"
 	"net/http"
+	"strconv"
 
 	"git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend/internal/dtos"
 	e "git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend/internal/errors"
@@ -22,6 +23,31 @@ func (h *Handler) GetUserProfileHandler(c *gin.Context) {
 	}
 
 	response = &dtos.GetUserProfileResponseDTO{
+		UserID:   userDetails.UserID,
+		Name:     userDetails.Name,
+		Email:    userDetails.Email,
+		Address:  userDetails.Address,
+		CityName: userDetails.CityName,
+		Role:     userDetails.Role,
+		WalletID: userDetails.WalletID,
+		Balance:  userDetails.Balance,
+	}
+
+	c.JSON(http.StatusOK, helpers.BuildSuccessResponse(http.StatusOK, http.StatusText(http.StatusOK), response))
+}
+
+func (h *Handler) GetUserProfileByUserIDHandler(c *gin.Context) {
+	var response *dtos.GetUserProfileByUserIDResponseDTO
+	userID, _ := strconv.Atoi(c.Param("userId"))
+
+	userDetails, err := h.userService.GetUserProfileByUserID(userID)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, helpers.BuildErrorResponse(http.StatusInternalServerError, err.Error()))
+		return
+	}
+
+	response = &dtos.GetUserProfileByUserIDResponseDTO{
 		UserID:   userDetails.UserID,
 		Name:     userDetails.Name,
 		Email:    userDetails.Email,

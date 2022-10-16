@@ -10,6 +10,7 @@ import (
 
 type UserService interface {
 	GetUserProfile(userID int) (*dtos.UserDetailsDTO, error)
+	GetUserProfileByUserID(userID int) (*dtos.UserDetailsDTO, error)
 	UpdateUserRoleToHost(userID int) (*models.User, error)
 	UpdateUserProfile(userID int, request dtos.UpdateUserProfileRequestDTO) (*models.User, error)
 }
@@ -32,6 +33,16 @@ func NewUserService(c *USConfig) UserService {
 }
 
 func (s *userService) GetUserProfile(userID int) (*dtos.UserDetailsDTO, error) {
+	userDetails, err := s.userRepository.GetUserDetails(userID)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return userDetails, nil
+}
+
+func (s *userService) GetUserProfileByUserID(userID int) (*dtos.UserDetailsDTO, error) {
 	userDetails, err := s.userRepository.GetUserDetails(userID)
 
 	if err != nil {

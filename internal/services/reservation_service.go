@@ -41,6 +41,19 @@ func NewReservationService(c *RSConfig) ReservationService {
 }
 
 func (s *reservationService) AddReservation(userID int, request *dtos.AddReservationRequestDTO) (*models.Reservation, error) {
+	format := "2006-01-02"
+	checkInDate, _ := time.Parse(format, request.CheckInDate)
+	checkOutDate, _ := time.Parse(format, request.CheckOutDate)
+	diffDay := int(checkOutDate.Sub(checkInDate).Hours() / 24)
+
+	if diffDay == 0 {
+		return nil, e.ErrInvalidReservationDateSameError
+	}
+
+	if diffDay < 0 {
+		return nil, e.ErrInvalidReservationDateLaterError
+	}
+
 	err := s.reservationRepository.ValidateReservation(request)
 
 	if err != nil {
@@ -52,11 +65,6 @@ func (s *reservationService) AddReservation(userID int, request *dtos.AddReserva
 	if err != nil {
 		return nil, err
 	}
-
-	format := "2006-01-02"
-	checkInDate, _ := time.Parse(format, request.CheckInDate)
-	checkOutDate, _ := time.Parse(format, request.CheckOutDate)
-	diffDay := int(checkOutDate.Sub(checkInDate).Hours() / 24)
 
 	totalPrice := diffDay * house.HousePrice
 

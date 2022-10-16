@@ -22,6 +22,17 @@ type GetUserProfileResponseDTO struct {
 	Balance  int    `json:"balance"`
 }
 
+type GetUserProfileByUserIDResponseDTO struct {
+	UserID   int    `json:"user_id"`
+	Name     string `json:"name"`
+	Email    string `json:"email"`
+	Address  string `json:"address"`
+	CityName string `json:"city_name"`
+	Role     string `json:"role"`
+	WalletID int    `json:"wallet_id"`
+	Balance  int    `json:"balance"`
+}
+
 type UpdateUserProfileRequestDTO struct {
 	Name        string `json:"name"`
 	OldPassword string `json:"old_password"`

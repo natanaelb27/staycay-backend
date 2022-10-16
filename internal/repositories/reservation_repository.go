@@ -111,8 +111,8 @@ func (r *reservationRepository) GetHouseReservationsByHouseID(houseID int, filte
 func (r *reservationRepository) ValidateReservation(request *dtos.AddReservationRequestDTO) error {
 	result := r.db.Model(&models.Reservation{}).
 		Where("house_id = ?", request.HouseID).
-		Where("check_in_date BETWEEN ? AND ?", request.CheckInDate, request.CheckOutDate).
-		Or("check_out_date BETWEEN ? AND ?", request.CheckInDate, request.CheckOutDate).
+		Where("? BETWEEN check_in_date::timestamp::date AND check_out_date::timestamp::date", request.CheckInDate).
+		Or("? BETWEEN check_in_date::timestamp::date AND check_out_date::timestamp::date", request.CheckOutDate).
 		Find(&models.Reservation{})
 
 	if result.Error != nil {
@@ -147,4 +147,21 @@ func (r *reservationRepository) CreateReservation(userID int, newReservation *mo
 	}
 
 	return newReservation, nil
+}
+
+func (r *reservationRepository) ValidateTodaysReservation(reservationID int) error {
+	result := r.db.Model(&models.Reservation{}).
+		Where("id = ?", reservationID).
+		Where("check_in_date::timestamp::date = NOW()::timestamp::date").
+		Find(&models.Reservation{})
+
+	if result.Error != nil {
+		return result.Error
+	}
+
+	if result.RowsAffected > 0 {
+		return e.ErrNotTodaysReservationError
+	}
+
+	return nil
 }

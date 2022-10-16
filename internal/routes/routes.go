@@ -18,6 +18,9 @@ func InitAllRoutes(r *gin.Engine, h *handlers.Handler) {
 	r.GET("/house", h.GetAllHousesHandler)
 	r.GET("/house/:houseId", h.GetHouseByIDHandler)
 
+	// User
+	r.GET("/user/:userId", h.GetUserProfileByUserIDHandler)
+
 	r.Use(middlewares.AuthorizeJWT)
 
 	// User
