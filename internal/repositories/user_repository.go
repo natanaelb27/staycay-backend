@@ -49,7 +49,7 @@ func (r *userRepository) GetUserDetails(userID int) (*dtos.UserDetailsDTO, error
 	var userDetails *dtos.UserDetailsDTO
 
 	result := r.db.Model(&models.User{}).
-		Select("users.id AS user_id, users.name, users.email, users.address, cities.name AS city_name, users.role, wallets.id AS wallet_id, wallets.balance").
+		Select("users.id AS user_id, users.name, users.email, users.address, cities.id AS city_id, cities.name AS city_name, users.role, wallets.id AS wallet_id, wallets.balance").
 		Joins("LEFT JOIN cities ON users.city_id = cities.id").
 		Joins("LEFT JOIN wallets ON users.id = wallets.user_id").
 		Where("users.id = ?", userID).

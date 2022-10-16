@@ -81,20 +81,20 @@ func (s *userService) UpdateUserProfile(userID int, request *dtos.UpdateUserProf
 		}
 	}
 
-	city := &models.City{}
-	if request.CityName != "" {
-		city, err = s.cityRepository.GetCityIDByName(request.CityName)
+	// city := &models.City{}
+	// if request.CityName != "" {
+	// 	city, err = s.cityRepository.GetCityIDByName(request.CityName)
 
-		if err != nil {
-			return nil, err
-		}
-	}
+	// 	if err != nil {
+	// 		return nil, err
+	// 	}
+	// }
 
 	newData := &models.User{
 		Name:     request.Name,
 		Password: encryptedPassword,
 		Address:  request.Address,
-		CityID:   city.ID,
+		CityID:   request.CityID,
 	}
 
 	userDetails, err := s.userRepository.UpdateUser(userID, newData)

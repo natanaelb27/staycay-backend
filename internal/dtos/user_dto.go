@@ -5,6 +5,7 @@ type UserDetailsDTO struct {
 	Name     string `json:"name"`
 	Email    string `json:"email"`
 	Address  string `json:"address"`
+	CityID   int    `json:"city_id"`
 	CityName string `json:"city_name"`
 	Role     string `json:"role"`
 	WalletID int    `json:"wallet_id"`
@@ -16,6 +17,7 @@ type GetUserProfileResponseDTO struct {
 	Name     string `json:"name"`
 	Email    string `json:"email"`
 	Address  string `json:"address"`
+	CityID   int    `json:"city_id"`
 	CityName string `json:"city_name"`
 	Role     string `json:"role"`
 	WalletID int    `json:"wallet_id"`
@@ -27,6 +29,7 @@ type GetUserProfileByUserIDResponseDTO struct {
 	Name     string `json:"name"`
 	Email    string `json:"email"`
 	Address  string `json:"address"`
+	CityID   int    `json:"city_id"`
 	CityName string `json:"city_name"`
 	Role     string `json:"role"`
 	WalletID int    `json:"wallet_id"`
@@ -38,7 +41,8 @@ type UpdateUserProfileRequestDTO struct {
 	OldPassword string `json:"old_password"`
 	Password    string `json:"password"`
 	Address     string `json:"address"`
-	CityName    string `json:"city_name"`
+	CityID      int    `json:"city_id"`
+	// CityName    string `json:"city_name"`
 }
 
 type UpdateUserProfileResponseDTO struct {

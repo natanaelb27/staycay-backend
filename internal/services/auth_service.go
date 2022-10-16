@@ -37,11 +37,11 @@ func NewAuthService(c *ASConfig) AuthService {
 }
 
 func (s *authService) Register(userData dtos.RegisterRequestDTO) (*models.User, *string, error) {
-	city, err := s.cityRepository.GetCityIDByName(userData.CityName)
+	// city, err := s.cityRepository.GetCityIDByName(userData.CityName)
 
-	if err != nil {
-		return nil, nil, err
-	}
+	// if err != nil {
+	// 	return nil, nil, err
+	// }
 
 	encryptedPassword, err := helpers.Encrypt(userData.Password)
 
@@ -54,7 +54,7 @@ func (s *authService) Register(userData dtos.RegisterRequestDTO) (*models.User, 
 		Email:    userData.Email,
 		Password: encryptedPassword,
 		Address:  userData.Address,
-		CityID:   city.ID,
+		CityID:   userData.CityID,
 		Role:     "user",
 	}
 

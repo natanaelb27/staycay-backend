@@ -5,7 +5,8 @@ type RegisterRequestDTO struct {
 	Email    string `json:"email" binding:"required"`
 	Password string `json:"password" binding:"required"`
 	Address  string `json:"address" binding:"required"`
-	CityName string `json:"city_name" binding:"required"`
+	CityID   int    `json:"city_id" binding:"required"`
+	// CityName string `json:"city_name" binding:"required"`
 }
 
 type RegisterResponseDTO struct {

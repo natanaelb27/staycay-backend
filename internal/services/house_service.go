@@ -178,18 +178,18 @@ func (s *houseService) AddNewHouse(userID int, request *dtos.AddNewHouseRequestD
 		return nil, nil, e.ErrInvalidRoleNotHostError
 	}
 
-	city, err := s.cityRepository.GetCityIDByName(request.CityName)
+	// city, err := s.cityRepository.GetCityIDByName(request.CityName)
 
-	if err != nil {
-		return nil, nil, err
-	}
+	// if err != nil {
+	// 	return nil, nil, err
+	// }
 
 	newHouse := &models.House{
 		Name:        request.Name,
 		UserID:      userID,
 		Price:       request.Price,
 		Description: request.Description,
-		CityID:      city.ID,
+		CityID:      request.CityID,
 		MaxGuest:    request.MaxGuest,
 		Status:      "active",
 	}
@@ -243,21 +243,21 @@ func (s *houseService) UpdateHouse(houseID int, userID int, request *dtos.Update
 		return nil, e.ErrInvalidHostError
 	}
 
-	city := &models.City{}
+	// city := &models.City{}
 
-	if request.CityName != "" {
-		city, err = s.cityRepository.GetCityIDByName(request.CityName)
+	// if request.CityName != "" {
+	// 	city, err = s.cityRepository.GetCityIDByName(request.CityName)
 
-		if err != nil {
-			return nil, err
-		}
-	}
+	// 	if err != nil {
+	// 		return nil, err
+	// 	}
+	// }
 
 	newData := &models.House{
 		Name:        request.Name,
 		Price:       request.Price,
 		Description: request.Description,
-		CityID:      city.ID,
+		CityID:      request.CityID,
 		MaxGuest:    request.MaxGuest,
 		Status:      request.Status,
 	}
