@@ -9,6 +9,7 @@ import (
 
 type PickupService interface {
 	RequestPickup(reservationID int, userID int, request *dtos.RequestPickupRequestDTO) (*models.Pickup, error)
+	GetPickupStatusByReservation(reservationID int, userID int) (*dtos.GetPickupStatusByReservationResponseDTO, error)
 }
 
 type pickupService struct {
@@ -50,6 +51,12 @@ func (s *pickupService) RequestPickup(reservationID int, userID int, request *dt
 		return nil, e.ErrPickupOngoingReservation
 	}
 
+	err = s.pickupRepository.ValidateOnlyOnePickupReservation(reservationID)
+
+	if err != nil {
+		return nil, err
+	}
+
 	pickUpPrice := 0
 	if houseReservation.HouseCityID != request.CityID {
 		pickUpPrice = 300000
@@ -87,4 +94,25 @@ func (s *pickupService) RequestPickup(reservationID int, userID int, request *dt
 	}
 
 	return pickupData, nil
+}
+
+func (s *pickupService) GetPickupStatusByReservation(reservationID int, userID int) (*dtos.GetPickupStatusByReservationResponseDTO, error) {
+
+	houseReservation, err := s.reservationRepository.GetHouseReservationsByID(reservationID)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if houseReservation.UserID != userID {
+		return nil, e.ErrInvalidUserReservationError
+	}
+
+	reservationPickup, err := s.pickupRepository.GetReservationPickupStatus(reservationID)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return reservationPickup, nil
 }

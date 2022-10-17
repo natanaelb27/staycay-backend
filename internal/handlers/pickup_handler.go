@@ -26,7 +26,13 @@ func (h *Handler) RequestPickupHandler(c *gin.Context) {
 	}
 
 	data, err := h.pickupService.RequestPickup(reservationID, userContext.UserID, request)
+
 	if err != nil {
+		if errors.Is(err, e.ErrDuplicatePickupReservationError) {
+			c.JSON(http.StatusBadRequest, helpers.BuildErrorResponse(http.StatusBadRequest, e.ErrDuplicatePickupReservationError.Error()))
+			return
+		}
+
 		if errors.Is(err, e.ErrInvalidUserReservationError) {
 			c.JSON(http.StatusForbidden, helpers.BuildErrorResponse(http.StatusForbidden, e.ErrInvalidUserReservationError.Error()))
 			return
@@ -58,6 +64,28 @@ func (h *Handler) RequestPickupHandler(c *gin.Context) {
 		PickupAddress:  data.PickupAddress,
 		CityID:         data.CityID,
 		PickupPrice:    data.PickupPrice,
+	}
+
+	c.JSON(http.StatusOK, helpers.BuildSuccessResponse(http.StatusOK, http.StatusText(http.StatusOK), response))
+}
+
+func (h *Handler) GetPickupStatusByReservationHandler(c *gin.Context) {
+	var response *dtos.GetPickupStatusByReservationResponseDTO
+
+	userContext := c.MustGet("user").(dtos.JwtData)
+
+	reservationID, _ := strconv.Atoi(c.Param("reservationId"))
+
+	data, err := h.pickupService.GetPickupStatusByReservation(reservationID, userContext.UserID)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, helpers.BuildErrorResponse(http.StatusInternalServerError, err.Error()))
+		return
+	}
+
+	response = &dtos.GetPickupStatusByReservationResponseDTO{
+		ReservationID:    data.ReservationID,
+		PickupStatusName: data.PickupStatusName,
 	}
 
 	c.JSON(http.StatusOK, helpers.BuildSuccessResponse(http.StatusOK, http.StatusText(http.StatusOK), response))
