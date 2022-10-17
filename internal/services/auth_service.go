@@ -2,6 +2,7 @@ package services
 
 import (
 	"git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend/internal/dtos"
+	e "git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend/internal/errors"
 	"git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend/internal/helpers"
 	"git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend/internal/models"
 	r "git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend/internal/repositories"
@@ -37,6 +38,14 @@ func NewAuthService(c *ASConfig) AuthService {
 }
 
 func (s *authService) Register(userData dtos.RegisterRequestDTO) (*models.User, *string, error) {
+	if !helpers.VerifyEMailAddress(userData.Email) {
+		return nil, nil, e.ErrInvalidEmailInputError
+	}
+
+	if !helpers.VerifyPassword(userData.Password) {
+		return nil, nil, e.ErrInvalidPasswordInputError
+	}
+
 	// city, err := s.cityRepository.GetCityIDByName(userData.CityName)
 
 	// if err != nil {

@@ -39,6 +39,10 @@ func (s *pickupService) RequestPickup(reservationID int, userID int, request *dt
 		return nil, err
 	}
 
+	if houseReservation.UserID == 0 {
+		return nil, e.ErrIdNotFoundError
+	}
+
 	if houseReservation.UserID != userID {
 		return nil, e.ErrInvalidUserReservationError
 	}
@@ -97,6 +101,11 @@ func (s *pickupService) RequestPickup(reservationID int, userID int, request *dt
 }
 
 func (s *pickupService) GetPickupStatusByReservation(reservationID int, userID int) (*dtos.GetPickupStatusByReservationResponseDTO, error) {
+	err := s.pickupRepository.ValidatePickupReservationExists(reservationID)
+
+	if err != nil {
+		return nil, err
+	}
 
 	houseReservation, err := s.reservationRepository.GetHouseReservationsByID(reservationID)
 

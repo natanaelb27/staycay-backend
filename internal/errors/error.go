@@ -4,6 +4,8 @@ import "errors"
 
 var (
 	ErrCredentialError                  = errors.New("credential error")
+	ErrInvalidEmailInputError           = errors.New("email is not valid")
+	ErrInvalidPasswordInputError        = errors.New("password does not meet the requirements")
 	ErrDuplicateEmailError              = errors.New("this email address is already registered")
 	ErrOldPasswordNotMatchError         = errors.New("old password does not match")
 	ErrTopUpTooSmallError               = errors.New("top up amount is too small (minimum Rp. 10,000)")

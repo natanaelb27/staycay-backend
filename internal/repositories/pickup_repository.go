@@ -9,6 +9,7 @@ import (
 
 type PickupRepository interface {
 	ValidateOnlyOnePickupReservation(reservationID int) error
+	ValidatePickupReservationExists(reservationID int) error
 	CreatePickup(pickup *models.Pickup) (*models.Pickup, error)
 	GetPickupStatusByName(status string) (*models.PickupStatus, error)
 	GetReservationPickupStatus(reservationID int) (*dtos.GetPickupStatusByReservationResponseDTO, error)
@@ -39,6 +40,22 @@ func (r *pickupRepository) ValidateOnlyOnePickupReservation(reservationID int) e
 
 	if result.RowsAffected > 0 {
 		return e.ErrDuplicatePickupReservationError
+	}
+
+	return nil
+}
+
+func (r *pickupRepository) ValidatePickupReservationExists(reservationID int) error {
+	result := r.db.Model(&models.Pickup{}).
+		Where("reservation_id = ?", reservationID).
+		Find(&models.Pickup{})
+
+	if result.Error != nil {
+		return result.Error
+	}
+
+	if result.RowsAffected == 0 {
+		return e.ErrIdNotFoundError
 	}
 
 	return nil

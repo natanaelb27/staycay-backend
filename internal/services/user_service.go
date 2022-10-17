@@ -71,6 +71,10 @@ func (s *userService) UpdateUserProfile(userID int, request *dtos.UpdateUserProf
 
 	encryptedPassword := ""
 	if request.Password != "" {
+		if !helpers.VerifyPassword(request.Password) {
+			return nil, e.ErrInvalidPasswordInputError
+		}
+
 		if !helpers.CompareEncrypt(request.OldPassword, user.Password) {
 			return nil, e.ErrOldPasswordNotMatchError
 		}

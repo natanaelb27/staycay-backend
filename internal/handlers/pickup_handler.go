@@ -28,6 +28,11 @@ func (h *Handler) RequestPickupHandler(c *gin.Context) {
 	data, err := h.pickupService.RequestPickup(reservationID, userContext.UserID, request)
 
 	if err != nil {
+		if errors.Is(err, e.ErrIdNotFoundError) {
+			c.JSON(http.StatusBadRequest, helpers.BuildErrorResponse(http.StatusBadRequest, e.ErrIdNotFoundError.Error()))
+			return
+		}
+
 		if errors.Is(err, e.ErrDuplicatePickupReservationError) {
 			c.JSON(http.StatusBadRequest, helpers.BuildErrorResponse(http.StatusBadRequest, e.ErrDuplicatePickupReservationError.Error()))
 			return
@@ -79,6 +84,11 @@ func (h *Handler) GetPickupStatusByReservationHandler(c *gin.Context) {
 	data, err := h.pickupService.GetPickupStatusByReservation(reservationID, userContext.UserID)
 
 	if err != nil {
+		if errors.Is(err, e.ErrIdNotFoundError) {
+			c.JSON(http.StatusBadRequest, helpers.BuildErrorResponse(http.StatusBadRequest, e.ErrIdNotFoundError.Error()))
+			return
+		}
+
 		c.JSON(http.StatusInternalServerError, helpers.BuildErrorResponse(http.StatusInternalServerError, err.Error()))
 		return
 	}
