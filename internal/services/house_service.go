@@ -184,14 +184,20 @@ func (s *houseService) AddNewHouse(userID int, request *dtos.AddNewHouseRequestD
 	// 	return nil, nil, err
 	// }
 
+	houseStatus, err := s.houseRepository.GetHouseStatusByName("Active")
+
+	if err != nil {
+		return nil, nil, err
+	}
+
 	newHouse := &models.House{
-		Name:        request.Name,
-		UserID:      userID,
-		Price:       request.Price,
-		Description: request.Description,
-		CityID:      request.CityID,
-		MaxGuest:    request.MaxGuest,
-		Status:      "active",
+		Name:          request.Name,
+		UserID:        userID,
+		Price:         request.Price,
+		Description:   request.Description,
+		CityID:        request.CityID,
+		MaxGuest:      request.MaxGuest,
+		HouseStatusID: houseStatus.ID,
 	}
 
 	house, err := s.houseRepository.CreateNewHouse(newHouse)
@@ -239,6 +245,10 @@ func (s *houseService) UpdateHouse(houseID int, userID int, request *dtos.Update
 		return nil, err
 	}
 
+	if house.HouseStatus == "Deactivated by Admin" {
+		request.HouseStatusID = 0
+	}
+
 	if house.HostID != userID {
 		return nil, e.ErrInvalidHostError
 	}
@@ -254,12 +264,12 @@ func (s *houseService) UpdateHouse(houseID int, userID int, request *dtos.Update
 	// }
 
 	newData := &models.House{
-		Name:        request.Name,
-		Price:       request.Price,
-		Description: request.Description,
-		CityID:      request.CityID,
-		MaxGuest:    request.MaxGuest,
-		Status:      request.Status,
+		Name:          request.Name,
+		Price:         request.Price,
+		Description:   request.Description,
+		CityID:        request.CityID,
+		MaxGuest:      request.MaxGuest,
+		HouseStatusID: request.HouseStatusID,
 	}
 
 	updatedHouse, err := s.houseRepository.UpdateHouseByHouseID(houseID, newData)
@@ -282,11 +292,17 @@ func (s *houseService) DeleteHouse(houseID int, userID int) (*models.House, erro
 		return nil, e.ErrInvalidHostError
 	}
 
+	houseStatus, err := s.houseRepository.GetHouseStatusByName("Inactive")
+
+	if err != nil {
+		return nil, err
+	}
+
 	upcomingHouseReservation, err := s.reservationRepository.GetHouseReservationsByHouseID(houseID, "upcoming")
 
 	if len(upcomingHouseReservation) > 0 {
 		newData := &models.House{
-			Status: "inactive",
+			HouseStatusID: houseStatus.ID,
 		}
 
 		house, err := s.houseRepository.UpdateHouseByHouseID(houseID, newData)

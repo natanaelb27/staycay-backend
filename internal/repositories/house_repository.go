@@ -16,6 +16,7 @@ type HouseRepository interface {
 	GetHousePhotoByHouseID(houseID int) ([]*dtos.HousePhotosDTO, error)
 	GetHouseByHouseID(houseID int) (*dtos.HouseDetailsDTO, error)
 	GetHouseByHousePhotoID(housePhotoID int) (*dtos.HouseDetailsDTO, error)
+	GetHouseStatusByName(status string) (*models.HouseStatus, error)
 	CreateNewHouse(newHouse *models.House) (*models.House, error)
 	AddHousePhoto(newHousePhoto *models.HousePhoto) (*models.HousePhoto, error)
 	UpdateHouseByHouseID(houseID int, houseNewData *models.House) (*models.House, error)
@@ -73,10 +74,11 @@ func (r *houseRepository) GetHouse(queryParams map[string]interface{}, querySear
 	query := fmt.Sprintf("SELECT * FROM (?) t WHERE t.house_name ILIKE '%s' %s %s %s", fmt.Sprintf("%%%s%%", qFilterHouseName), qFilterCityName, qSortBy, qSort)
 
 	result := r.db.Raw(query, r.db.Model(&models.House{}).
-		Select("houses.id AS house_id, houses.name AS house_name, houses.price AS house_price, houses.description AS house_description, cities.name AS house_city_name, houses.max_guest AS house_max_guest, houses.status AS house_status, users.id AS host_id, users.name AS host_name, users.email AS host_email").
+		Select("houses.id AS house_id, houses.name AS house_name, houses.price AS house_price, houses.description AS house_description, cities.name AS house_city_name, houses.max_guest AS house_max_guest, house_statuses.status AS house_status, users.id AS host_id, users.name AS host_name, users.email AS host_email").
 		Joins("JOIN cities ON houses.city_id = cities.id").
 		Joins("JOIN users ON houses.user_id = users.id").
-		Where("houses.status = ?", "active")).
+		Joins("JOIN house_statuses ON houses.house_status_id = house_statuses.id").
+		Where("house_statuses.status ILIKE ?", "active")).
 		Scan(&houseDetails)
 
 	// result := r.db.Model(&models.House{}).
@@ -96,9 +98,10 @@ func (r *houseRepository) GetHouseByHostID(hostID int) ([]*dtos.HouseDetailsDTO,
 	var houseDetails []*dtos.HouseDetailsDTO
 
 	result := r.db.Model(&models.House{}).
-		Select("houses.id AS house_id, houses.name AS house_name, houses.price AS house_price, houses.description AS house_description, cities.name AS house_city_name, houses.max_guest AS house_max_guest, houses.status AS house_status, users.id AS host_id, users.name AS host_name, users.email AS host_email").
+		Select("houses.id AS house_id, houses.name AS house_name, houses.price AS house_price, houses.description AS house_description, cities.name AS house_city_name, houses.max_guest AS house_max_guest, house_statuses.status AS house_status, users.id AS host_id, users.name AS host_name, users.email AS host_email").
 		Joins("JOIN cities ON houses.city_id = cities.id").
 		Joins("JOIN users ON houses.user_id = users.id").
+		Joins("JOIN house_statuses ON houses.house_status_id = house_statuses.id").
 		Where("houses.user_id = ?", hostID).
 		Find(&houseDetails)
 
@@ -132,9 +135,10 @@ func (r *houseRepository) GetHouseByHouseID(houseID int) (*dtos.HouseDetailsDTO,
 	var houseDetails *dtos.HouseDetailsDTO
 
 	result := r.db.Model(&models.House{}).
-		Select("houses.id AS house_id, houses.name AS house_name, houses.price AS house_price, houses.description AS house_description, cities.name AS house_city_name, houses.max_guest AS house_max_guest, houses.status AS house_status, users.id AS host_id, users.name AS host_name, users.email AS host_email").
+		Select("houses.id AS house_id, houses.name AS house_name, houses.price AS house_price, houses.description AS house_description, cities.name AS house_city_name, houses.max_guest AS house_max_guest, house_statuses.status AS house_status, users.id AS host_id, users.name AS host_name, users.email AS host_email").
 		Joins("JOIN cities ON houses.city_id = cities.id").
 		Joins("JOIN users ON houses.user_id = users.id").
+		Joins("JOIN house_statuses ON houses.house_status_id = house_statuses.id").
 		Where("houses.id = ?", houseID).
 		Find(&houseDetails)
 
@@ -147,6 +151,20 @@ func (r *houseRepository) GetHouseByHouseID(houseID int) (*dtos.HouseDetailsDTO,
 	}
 
 	return houseDetails, nil
+}
+
+func (r *houseRepository) GetHouseStatusByName(status string) (*models.HouseStatus, error) {
+	var houseStatus *models.HouseStatus
+
+	result := r.db.Model(&models.HouseStatus{}).
+		Where("status ILIKE ?", status).
+		First(&houseStatus)
+
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	return houseStatus, nil
 }
 
 func (r *houseRepository) CreateNewHouse(newHouse *models.House) (*models.House, error) {
@@ -189,10 +207,11 @@ func (r *houseRepository) GetHouseByHousePhotoID(housePhotoID int) (*dtos.HouseD
 	var houseDetails *dtos.HouseDetailsDTO
 
 	result := r.db.Model(&models.HousePhoto{}).
-		Select("houses.id AS house_id, houses.name AS house_name, houses.price AS house_price, houses.description AS house_description, cities.name AS house_city_name, houses.max_guest AS house_max_guest, houses.status AS house_status, users.id AS host_id, users.name AS host_name, users.email AS host_email").
+		Select("houses.id AS house_id, houses.name AS house_name, houses.price AS house_price, houses.description AS house_description, cities.name AS house_city_name, houses.max_guest AS house_max_guest, house_statuses.status AS house_status, users.id AS host_id, users.name AS host_name, users.email AS host_email").
 		Joins("JOIN houses ON house_photos.house_id = houses.id").
 		Joins("JOIN cities ON houses.city_id = cities.id").
 		Joins("JOIN users ON houses.user_id = users.id").
+		Joins("JOIN house_statuses ON houses.house_status_id = house_statuses.id").
 		Where("house_photos.id = ?", housePhotoID).
 		Find(&houseDetails)
 

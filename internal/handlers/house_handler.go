@@ -164,12 +164,12 @@ func (h *Handler) UpdateHouseHandler(c *gin.Context) {
 	}
 
 	response = &dtos.UpdateHouseResponseDTO{
-		Name:        newHouse.Name,
-		Price:       newHouse.Price,
-		Description: newHouse.Description,
-		CityID:      newHouse.CityID,
-		MaxGuest:    newHouse.MaxGuest,
-		Status:      newHouse.Status,
+		Name:          newHouse.Name,
+		Price:         newHouse.Price,
+		Description:   newHouse.Description,
+		CityID:        newHouse.CityID,
+		MaxGuest:      newHouse.MaxGuest,
+		HouseStatusID: newHouse.HouseStatusID,
 	}
 
 	c.JSON(http.StatusOK, helpers.BuildSuccessResponse(http.StatusOK, http.StatusText(http.StatusOK), response))
@@ -205,12 +205,12 @@ func (h *Handler) DeleteHouseHandler(c *gin.Context) {
 	}
 
 	response = &dtos.DeleteHouseResponseDTO{
-		HouseID:     data.ID,
-		Price:       data.Price,
-		Description: data.Description,
-		CityID:      data.CityID,
-		MaxGuest:    data.MaxGuest,
-		Status:      data.Status,
+		HouseID:       data.ID,
+		Price:         data.Price,
+		Description:   data.Description,
+		CityID:        data.CityID,
+		MaxGuest:      data.MaxGuest,
+		HouseStatusID: data.HouseStatusID,
 	}
 
 	c.JSON(http.StatusOK, helpers.BuildSuccessResponse(http.StatusOK, http.StatusText(http.StatusOK), response))

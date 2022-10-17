@@ -11,6 +11,10 @@ func InitAllRoutes(r *gin.Engine, h *handlers.Handler) {
 	r.POST("/register", h.RegisterHandler)
 	r.POST("/login", h.LoginHandler)
 
+	// Auth for Admin
+	r.POST("admin/register")
+	r.POST("admin/login")
+
 	// City
 	r.GET("/city", h.GetAllCitiesHandler)
 
@@ -52,4 +56,10 @@ func InitAllRoutes(r *gin.Engine, h *handlers.Handler) {
 	// Game
 	r.GET("/game", h.GetGameHandler)
 	r.POST("/game", h.PlayGameHandler)
+
+	// Admin
+	r.PATCH("admin/pickup/:reservationId")
+	r.PATCH("/admin/house/:houseId")
+	r.DELETE("admin/house/:houseId")
+
 }

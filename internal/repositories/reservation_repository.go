@@ -132,8 +132,7 @@ func (r *reservationRepository) GetHouseReservationsByID(reservationID int) (*dt
 func (r *reservationRepository) ValidateReservation(request *dtos.AddReservationRequestDTO) error {
 	result := r.db.Model(&models.Reservation{}).
 		Where("house_id = ?", request.HouseID).
-		Where("? BETWEEN check_in_date::timestamp::date AND check_out_date::timestamp::date", request.CheckInDate).
-		Or("? BETWEEN check_in_date::timestamp::date AND check_out_date::timestamp::date", request.CheckOutDate).
+		Where("? BETWEEN check_in_date::timestamp::date AND check_out_date::timestamp::date OR ? BETWEEN check_in_date::timestamp::date AND check_out_date::timestamp::date", request.CheckInDate, request.CheckOutDate).
 		Find(&models.Reservation{})
 
 	if result.Error != nil {

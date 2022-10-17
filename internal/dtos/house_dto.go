@@ -103,17 +103,19 @@ type UpdateHouseRequestDTO struct {
 	Description string `json:"description"`
 	CityID      int    `json:"city_id"`
 	// CityName    string `json:"city_name"`
-	MaxGuest int    `json:"max_guest"`
-	Status   string `json:"status"`
+	MaxGuest      int `json:"max_guest"`
+	HouseStatusID int `json:"house_status_id"`
+	// Status   string `json:"status"`
 }
 
 type UpdateHouseResponseDTO struct {
-	Name        string `json:"name"`
-	Price       int    `json:"price"`
-	Description string `json:"description"`
-	CityID      int    `json:"city_id"`
-	MaxGuest    int    `json:"max_guest"`
-	Status      string `json:"status"`
+	Name          string `json:"name"`
+	Price         int    `json:"price"`
+	Description   string `json:"description"`
+	CityID        int    `json:"city_id"`
+	MaxGuest      int    `json:"max_guest"`
+	HouseStatusID int    `json:"house_status_id"`
+	// Status      string `json:"status"`
 }
 
 type AddHousePhotoRequestDTO struct {
@@ -125,12 +127,13 @@ type AddHousePhotoResponseDTO struct {
 }
 
 type DeleteHouseResponseDTO struct {
-	HouseID     int    `json:"house_id"`
-	Price       int    `json:"price"`
-	Description string `json:"description"`
-	CityID      int    `json:"city_id"`
-	MaxGuest    int    `json:"max_guest"`
-	Status      string `json:"status"`
+	HouseID       int    `json:"house_id"`
+	Price         int    `json:"price"`
+	Description   string `json:"description"`
+	CityID        int    `json:"city_id"`
+	MaxGuest      int    `json:"max_guest"`
+	HouseStatusID int    `json:"house_status_id"`
+	// Status      string `json:"status"`
 }
 
 type DeleteHousePhotoResponseDTO struct {
