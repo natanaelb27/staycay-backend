@@ -58,13 +58,22 @@ func (s *authService) Register(userData dtos.RegisterRequestDTO) (*models.User, 
 		return nil, nil, err
 	}
 
+	print(userData.IsAdmin)
+
+	role := ""
+	if userData.IsAdmin {
+		role = "admin"
+	} else {
+		role = "user"
+	}
+
 	user := &models.User{
 		Name:     userData.Name,
 		Email:    userData.Email,
 		Password: encryptedPassword,
 		Address:  userData.Address,
 		CityID:   userData.CityID,
-		Role:     "user",
+		Role:     role,
 	}
 
 	newUser, err := s.userRepository.CreateNewUser(user)

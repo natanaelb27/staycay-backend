@@ -1,6 +1,8 @@
 package services
 
 import (
+	"strings"
+
 	"git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend/internal/dtos"
 	e "git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend/internal/errors"
 	"git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend/internal/models"
@@ -246,33 +248,23 @@ func (s *houseService) UpdateHouse(houseID int, userID int, request *dtos.Update
 		return nil, err
 	}
 
-	if userDetails.Role != "host" {
-		return nil, e.ErrInvalidRoleNotHostError
-	}
-
-	house, err := s.houseRepository.GetHouseByHouseID(houseID)
+	houseDetails, err := s.houseRepository.GetHouseByHouseID(houseID)
 
 	if err != nil {
 		return nil, err
 	}
 
-	if house.HouseStatus == "Deactivated by Admin" {
-		request.HouseStatusID = 0
+	if strings.ToLower(userDetails.Role) != "host" && strings.ToLower(userDetails.Role) != "admin" {
+		return nil, e.ErrInvalidRoleNotHostError
 	}
 
-	if house.HostID != userID {
+	if houseDetails.HostID != userID && strings.ToLower(userDetails.Role) != "admin" {
 		return nil, e.ErrInvalidHostError
 	}
 
-	// city := &models.City{}
-
-	// if request.CityName != "" {
-	// 	city, err = s.cityRepository.GetCityIDByName(request.CityName)
-
-	// 	if err != nil {
-	// 		return nil, err
-	// 	}
-	// }
+	if strings.ToLower(houseDetails.HouseStatus) == "deactivated by admin" && userDetails.Role != "admin" {
+		request.HouseStatusID = 0
+	}
 
 	newData := &models.House{
 		Name:          request.Name,
@@ -299,11 +291,28 @@ func (s *houseService) DeleteHouse(houseID int, userID int) (*models.House, erro
 		return nil, err
 	}
 
-	if houseDetails.HostID != userID {
+	user, err := s.userRepository.GetUserByID(userID)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if strings.ToLower(user.Role) != "host" && strings.ToLower(user.Role) != "admin" {
+		return nil, e.ErrInvalidRoleNotHostError
+	}
+
+	if houseDetails.HostID != userID || strings.ToLower(user.Role) == "admin" {
 		return nil, e.ErrInvalidHostError
 	}
 
-	houseStatus, err := s.houseRepository.GetHouseStatusByName("Inactive")
+	houseStatusName := ""
+	if strings.ToLower(user.Role) == "admin" {
+		houseStatusName = "deactivated by admin"
+	} else {
+		houseStatusName = "inactive"
+	}
+
+	houseStatus, err := s.houseRepository.GetHouseStatusByName(houseStatusName)
 
 	if err != nil {
 		return nil, err

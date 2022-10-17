@@ -11,10 +11,6 @@ func InitAllRoutes(r *gin.Engine, h *handlers.Handler) {
 	r.POST("/register", h.RegisterHandler)
 	r.POST("/login", h.LoginHandler)
 
-	// Auth for Admin
-	r.POST("admin/register")
-	r.POST("admin/login")
-
 	// City
 	r.GET("/city", h.GetAllCitiesHandler)
 
@@ -51,7 +47,7 @@ func InitAllRoutes(r *gin.Engine, h *handlers.Handler) {
 	r.POST("/reservation", h.AddReservationHandler)
 
 	// Pickup
-	r.GET("/pickup/:reservationId", h.GetPickupStatusByReservationHandler)
+	r.GET("/pickup/:reservationId", h.GetPickupDetailsByReservationHandler)
 	r.POST("/pickup/:reservationId", h.RequestPickupHandler)
 
 	// Game
@@ -59,8 +55,6 @@ func InitAllRoutes(r *gin.Engine, h *handlers.Handler) {
 	r.POST("/game", h.PlayGameHandler)
 
 	// Admin
-	r.PATCH("admin/pickup/:reservationId")
-	r.PATCH("/admin/house/:houseId")
-	r.DELETE("admin/house/:houseId")
+	r.PATCH("admin/pickup/:reservationId", h.AdminUpdatePickupStatusHandler)
 
 }

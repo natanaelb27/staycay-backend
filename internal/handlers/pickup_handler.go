@@ -74,14 +74,14 @@ func (h *Handler) RequestPickupHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, helpers.BuildSuccessResponse(http.StatusOK, http.StatusText(http.StatusOK), response))
 }
 
-func (h *Handler) GetPickupStatusByReservationHandler(c *gin.Context) {
-	var response *dtos.GetPickupStatusByReservationResponseDTO
+func (h *Handler) GetPickupDetailsByReservationHandler(c *gin.Context) {
+	var response *dtos.GetPickupDetailsByReservationResponseDTO
 
 	userContext := c.MustGet("user").(dtos.JwtData)
 
 	reservationID, _ := strconv.Atoi(c.Param("reservationId"))
 
-	data, err := h.pickupService.GetPickupStatusByReservation(reservationID, userContext.UserID)
+	response, err := h.pickupService.GetPickupDetailsByReservation(reservationID, userContext.UserID)
 
 	if err != nil {
 		if errors.Is(err, e.ErrIdNotFoundError) {
@@ -93,9 +93,43 @@ func (h *Handler) GetPickupStatusByReservationHandler(c *gin.Context) {
 		return
 	}
 
-	response = &dtos.GetPickupStatusByReservationResponseDTO{
-		ReservationID:    data.ReservationID,
-		PickupStatusName: data.PickupStatusName,
+	c.JSON(http.StatusOK, helpers.BuildSuccessResponse(http.StatusOK, http.StatusText(http.StatusOK), response))
+}
+
+func (h *Handler) AdminUpdatePickupStatusHandler(c *gin.Context) {
+	var request *dtos.AdminUpdatePickupStatusRequestDTO
+	var response *dtos.AdminUpdatePickupStatusResponseDTO
+
+	userContext := c.MustGet("user").(dtos.JwtData)
+
+	reservationID, _ := strconv.Atoi(c.Param("reservationId"))
+
+	err := c.ShouldBindJSON(&request)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, helpers.BuildErrorResponse(http.StatusBadRequest, err.Error()))
+		return
+	}
+
+	pickup, err := h.pickupService.AdminUpdatePickupStatus(request.PickupStatusID, reservationID, userContext.UserID)
+
+	if err != nil {
+		if errors.Is(err, e.ErrInvalidRoleNotAdminError) {
+			c.JSON(http.StatusForbidden, helpers.BuildErrorResponse(http.StatusForbidden, e.ErrInvalidRoleNotAdminError.Error()))
+			return
+		}
+
+		if errors.Is(err, e.ErrIdNotFoundError) {
+			c.JSON(http.StatusBadRequest, helpers.BuildErrorResponse(http.StatusBadRequest, e.ErrIdNotFoundError.Error()))
+			return
+		}
+
+		c.JSON(http.StatusInternalServerError, helpers.BuildErrorResponse(http.StatusInternalServerError, err.Error()))
+		return
+	}
+
+	response = &dtos.AdminUpdatePickupStatusResponseDTO{
+		ReservationID:  pickup.ReservationID,
+		PickupStatusID: pickup.PickupStatusID,
 	}
 
 	c.JSON(http.StatusOK, helpers.BuildSuccessResponse(http.StatusOK, http.StatusText(http.StatusOK), response))

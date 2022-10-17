@@ -5,14 +5,17 @@ import (
 	e "git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend/internal/errors"
 	"git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend/internal/models"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type PickupRepository interface {
 	ValidateOnlyOnePickupReservation(reservationID int) error
 	ValidatePickupReservationExists(reservationID int) error
 	CreatePickup(pickup *models.Pickup) (*models.Pickup, error)
+	GetPickupStatusByID(pickupStatusID int) (*models.PickupStatus, error)
 	GetPickupStatusByName(status string) (*models.PickupStatus, error)
-	GetReservationPickupStatus(reservationID int) (*dtos.GetPickupStatusByReservationResponseDTO, error)
+	GetPickupDetailsByReservationID(reservationID int) (*dtos.GetPickupDetailsByReservationResponseDTO, error)
+	UpdatePickupStatusByReservation(pickupStatusID int, reservationID int) (*models.Pickup, error)
 }
 
 type pickupRepository struct {
@@ -77,6 +80,18 @@ func (r *pickupRepository) CreatePickup(pickup *models.Pickup) (*models.Pickup, 
 	return pickup, nil
 }
 
+func (r *pickupRepository) GetPickupStatusByID(pickupStatusID int) (*models.PickupStatus, error) {
+	var pickupStatus *models.PickupStatus
+
+	result := r.db.Where("id = ?", pickupStatusID).First(&pickupStatus)
+
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	return pickupStatus, nil
+}
+
 func (r *pickupRepository) GetPickupStatusByName(status string) (*models.PickupStatus, error) {
 	var pickupStatus *models.PickupStatus
 
@@ -89,18 +104,35 @@ func (r *pickupRepository) GetPickupStatusByName(status string) (*models.PickupS
 	return pickupStatus, nil
 }
 
-func (r *pickupRepository) GetReservationPickupStatus(reservationID int) (*dtos.GetPickupStatusByReservationResponseDTO, error) {
-	var houseReservationStatus *dtos.GetPickupStatusByReservationResponseDTO
+func (r *pickupRepository) GetPickupDetailsByReservationID(reservationID int) (*dtos.GetPickupDetailsByReservationResponseDTO, error) {
+	var houseReservation *dtos.GetPickupDetailsByReservationResponseDTO
 
 	result := r.db.Model(&models.Pickup{}).
-		Select("pickups.reservation_id AS reservation_id, pickup_statuses.status AS pickup_status_name").
+		Select("pickups.id AS pickup_id, pickups.reservation_id AS reservation_id, reservations.house_id AS house_id, pickup_statuses.status AS pickup_status_name, pickups.pickup_address AS pickup_address, pickups.city_id AS pickup_city_id, cities.name AS pickup_city_name, pickups.pickup_price AS pickup_price").
 		Joins("JOIN pickup_statuses ON pickups.pickup_status_id = pickup_statuses.id").
+		Joins("JOIN reservations ON pickups.reservation_id = reservations.id").
+		Joins("JOIN cities ON pickups.city_id = cities.id").
 		Where("reservation_id = ?", reservationID).
-		First(&houseReservationStatus)
+		First(&houseReservation)
 
 	if result.Error != nil {
 		return nil, result.Error
 	}
 
-	return houseReservationStatus, nil
+	return houseReservation, nil
+}
+
+func (r *pickupRepository) UpdatePickupStatusByReservation(pickupStatusID int, reservationID int) (*models.Pickup, error) {
+	var pickup models.Pickup
+
+	result := r.db.Model(&pickup).
+		Clauses(clause.Returning{}).
+		Where("reservation_id = ?", reservationID).
+		Update("pickup_status_id", pickupStatusID)
+
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	return &pickup, nil
 }

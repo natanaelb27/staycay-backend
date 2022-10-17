@@ -1,6 +1,9 @@
 package services
 
 import (
+	"strings"
+	"time"
+
 	"git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend/internal/dtos"
 	e "git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend/internal/errors"
 	"git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend/internal/models"
@@ -9,7 +12,8 @@ import (
 
 type PickupService interface {
 	RequestPickup(reservationID int, userID int, request *dtos.RequestPickupRequestDTO) (*models.Pickup, error)
-	GetPickupStatusByReservation(reservationID int, userID int) (*dtos.GetPickupStatusByReservationResponseDTO, error)
+	GetPickupDetailsByReservation(reservationID int, userID int) (*dtos.GetPickupDetailsByReservationResponseDTO, error)
+	AdminUpdatePickupStatus(pickupStatusID int, reservationID int, userID int) (*models.Pickup, error)
 }
 
 type pickupService struct {
@@ -78,7 +82,7 @@ func (s *pickupService) RequestPickup(reservationID int, userID int, request *dt
 		return nil, e.ErrInsufficientBalanceError
 	}
 
-	pickupStatus, err := s.pickupRepository.GetPickupStatusByName("pending admin")
+	pickupStatus, err := s.pickupRepository.GetPickupStatusByName("Pending Admin")
 
 	if err != nil {
 		return nil, err
@@ -100,7 +104,7 @@ func (s *pickupService) RequestPickup(reservationID int, userID int, request *dt
 	return pickupData, nil
 }
 
-func (s *pickupService) GetPickupStatusByReservation(reservationID int, userID int) (*dtos.GetPickupStatusByReservationResponseDTO, error) {
+func (s *pickupService) GetPickupDetailsByReservation(reservationID int, userID int) (*dtos.GetPickupDetailsByReservationResponseDTO, error) {
 	err := s.pickupRepository.ValidatePickupReservationExists(reservationID)
 
 	if err != nil {
@@ -117,11 +121,59 @@ func (s *pickupService) GetPickupStatusByReservation(reservationID int, userID i
 		return nil, e.ErrInvalidUserReservationError
 	}
 
-	reservationPickup, err := s.pickupRepository.GetReservationPickupStatus(reservationID)
+	reservationPickup, err := s.pickupRepository.GetPickupDetailsByReservationID(reservationID)
 
 	if err != nil {
 		return nil, err
 	}
 
 	return reservationPickup, nil
+}
+
+func (s *pickupService) AdminUpdatePickupStatus(pickupStatusID int, reservationID int, userID int) (*models.Pickup, error) {
+	user, err := s.userRepository.GetUserDetails(userID)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if user.Role != "admin" {
+		return nil, e.ErrInvalidRoleNotAdminError
+	}
+
+	err = s.pickupRepository.ValidatePickupReservationExists(reservationID)
+
+	if err != nil {
+		return nil, err
+	}
+
+	pickupStatus, err := s.pickupRepository.GetPickupStatusByID(pickupStatusID)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if strings.ToLower(pickupStatus.Status) == "on the way to pickup" {
+		houseReservation, err := s.reservationRepository.GetHouseReservationsByID(reservationID)
+
+		if err != nil {
+			return nil, err
+		}
+
+		format := "2006-01-02"
+		now, _ := time.Parse(format, time.Now().Format(format))
+		checkInDate, _ := time.Parse(format, houseReservation.CheckInDate.Format(format))
+
+		if !checkInDate.Equal(now) {
+			return nil, e.ErrInvalidCheckInDateUpdatePickupStatusError
+		}
+	}
+
+	updatedPickup, err := s.pickupRepository.UpdatePickupStatusByReservation(pickupStatusID, reservationID)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return updatedPickup, nil
 }

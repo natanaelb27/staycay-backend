@@ -207,6 +207,11 @@ func (h *Handler) DeleteHouseHandler(c *gin.Context) {
 			return
 		}
 
+		if errors.Is(err, e.ErrInvalidRoleNotHostError) {
+			c.JSON(http.StatusForbidden, helpers.BuildErrorResponse(http.StatusForbidden, e.ErrInvalidRoleNotHostError.Error()))
+			return
+		}
+
 		if errors.Is(err, e.ErrInvalidHostError) {
 			c.JSON(http.StatusForbidden, helpers.BuildErrorResponse(http.StatusForbidden, e.ErrInvalidHostError.Error()))
 			return

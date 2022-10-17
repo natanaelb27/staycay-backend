@@ -1,11 +1,21 @@
 package dtos
 
+// type RegisterRequestDTO struct {
+// 	Name     string `json:"name" binding:"required"`
+// 	Email    string `json:"email" binding:"required"`
+// 	Password string `json:"password" binding:"required"`
+// 	Address  string `json:"address" binding:"required"`
+// 	CityID   int    `json:"city_id" binding:"required"`
+// 	// CityName string `json:"city_name" binding:"required"`
+// }
+
 type RegisterRequestDTO struct {
 	Name     string `json:"name" binding:"required"`
 	Email    string `json:"email" binding:"required"`
 	Password string `json:"password" binding:"required"`
 	Address  string `json:"address" binding:"required"`
 	CityID   int    `json:"city_id" binding:"required"`
+	IsAdmin  bool   `json:"is_admin"`
 	// CityName string `json:"city_name" binding:"required"`
 }
 
