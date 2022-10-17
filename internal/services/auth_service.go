@@ -58,8 +58,6 @@ func (s *authService) Register(userData dtos.RegisterRequestDTO) (*models.User, 
 		return nil, nil, err
 	}
 
-	print(userData.IsAdmin)
-
 	role := ""
 	if userData.IsAdmin {
 		role = "admin"

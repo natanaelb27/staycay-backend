@@ -49,7 +49,6 @@ func (r *houseRepository) GetHouse(queryParams map[string]interface{}, querySear
 	}
 
 	qFilterCityName := ""
-	print(len(querySearchCity))
 	if len(querySearchCity) > 0 {
 		qFilterCityName += "AND t.house_city_name IN ("
 		for i, city := range querySearchCity {

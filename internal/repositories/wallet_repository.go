@@ -30,7 +30,6 @@ func (r *walletRepository) CreateWallet(wallet *models.Wallet) error {
 	result := r.db.Create(&wallet)
 
 	if result.Error != nil {
-		print(result.Error)
 		return result.Error
 	}
 

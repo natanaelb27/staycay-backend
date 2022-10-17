@@ -32,7 +32,6 @@ func (r *gameRepository) CreateGameUser(game *models.GameChance) error {
 	result := r.db.Create(&game)
 
 	if result.Error != nil {
-		print(result.Error)
 		return result.Error
 	}
 
