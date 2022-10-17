@@ -68,6 +68,15 @@ type GetHostHousesResponseDTO struct {
 	House []*HouseDetailsWithPhotoDTO `json:"house"`
 }
 
+type HouseStatusDTO struct {
+	HouseStatusID   int    `json:"house_status_id"`
+	HouseStatusName string `json:"house_status_name"`
+}
+
+type GetAllHouseStatusesResponseDTO struct {
+	HouseStatus []*HouseStatusDTO `json:"house_status"`
+}
+
 type AddNewHouseRequestDTO struct {
 	Name        string `json:"name" binding:"required"`
 	Price       int    `json:"price" binding:"required"`

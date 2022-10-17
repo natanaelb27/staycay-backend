@@ -96,6 +96,23 @@ func (h *Handler) GetHostHousesHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, helpers.BuildSuccessResponse(http.StatusOK, http.StatusText(http.StatusOK), response))
 }
 
+func (h *Handler) GetAllHouseStatusesHandler(c *gin.Context) {
+	var response *dtos.GetAllHouseStatusesResponseDTO
+
+	data, err := h.houseService.GetAllHouseStatuses()
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, helpers.BuildErrorResponse(http.StatusInternalServerError, err.Error()))
+		return
+	}
+
+	response = &dtos.GetAllHouseStatusesResponseDTO{
+		HouseStatus: data,
+	}
+
+	c.JSON(http.StatusOK, helpers.BuildSuccessResponse(http.StatusOK, http.StatusText(http.StatusOK), response))
+}
+
 func (h *Handler) AddNewHouseHandler(c *gin.Context) {
 	var request *dtos.AddNewHouseRequestDTO
 	var response *dtos.AddNewHouseResponseDTO

@@ -11,6 +11,7 @@ type HouseService interface {
 	GetAllHouses(queryParams map[string]interface{}, querySearchCity []string) ([]*dtos.HouseDetailsWithPhotoDTO, error)
 	GetHouseByID(houseID int) (*dtos.HouseDetailsWithPhotoDTO, error)
 	GetHostHouses(hostID int) ([]*dtos.HouseDetailsWithPhotoDTO, error)
+	GetAllHouseStatuses() ([]*dtos.HouseStatusDTO, error)
 	AddNewHouse(userID int, request *dtos.AddNewHouseRequestDTO) (*models.House, []string, error)
 	UpdateHouse(houseID int, userID int, request *dtos.UpdateHouseRequestDTO) (*models.House, error)
 	DeleteHouse(houseID int, userID int) (*models.House, error)
@@ -165,6 +166,16 @@ func (s *houseService) GetHostHouses(userID int) ([]*dtos.HouseDetailsWithPhotoD
 	}
 
 	return houseData, nil
+}
+
+func (s *houseService) GetAllHouseStatuses() ([]*dtos.HouseStatusDTO, error) {
+	houseStatus, err := s.houseRepository.GetHouseStatus()
+
+	if err != nil {
+		return nil, err
+	}
+
+	return houseStatus, nil
 }
 
 func (s *houseService) AddNewHouse(userID int, request *dtos.AddNewHouseRequestDTO) (*models.House, []string, error) {

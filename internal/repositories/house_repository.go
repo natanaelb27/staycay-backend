@@ -17,6 +17,7 @@ type HouseRepository interface {
 	GetHouseByHouseID(houseID int) (*dtos.HouseDetailsDTO, error)
 	GetHouseByHousePhotoID(housePhotoID int) (*dtos.HouseDetailsDTO, error)
 	GetHouseStatusByName(status string) (*models.HouseStatus, error)
+	GetHouseStatus() ([]*dtos.HouseStatusDTO, error)
 	CreateNewHouse(newHouse *models.House) (*models.House, error)
 	AddHousePhoto(newHousePhoto *models.HousePhoto) (*models.HousePhoto, error)
 	UpdateHouseByHouseID(houseID int, houseNewData *models.House) (*models.House, error)
@@ -151,6 +152,21 @@ func (r *houseRepository) GetHouseByHouseID(houseID int) (*dtos.HouseDetailsDTO,
 	}
 
 	return houseDetails, nil
+}
+
+func (r *houseRepository) GetHouseStatus() ([]*dtos.HouseStatusDTO, error) {
+	var houseStatus []*dtos.HouseStatusDTO
+
+	result := r.db.
+		Model(&models.HouseStatus{}).
+		Select("id AS house_status_id, status AS house_status_name").
+		Find(&houseStatus)
+
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	return houseStatus, nil
 }
 
 func (r *houseRepository) GetHouseStatusByName(status string) (*models.HouseStatus, error) {
