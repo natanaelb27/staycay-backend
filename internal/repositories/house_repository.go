@@ -2,6 +2,7 @@ package repositories
 
 import (
 	"fmt"
+	"time"
 
 	"git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend/internal/dtos"
 	e "git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend/internal/errors"
@@ -11,7 +12,7 @@ import (
 )
 
 type HouseRepository interface {
-	GetHouse(queryParams map[string]interface{}, querySearchCity []string) ([]*dtos.HouseDetailsDTO, error)
+	GetHouse(queryParams map[string]interface{}) ([]*dtos.HouseDetailsDTO, error)
 	GetHouseByHostID(hostID int) ([]*dtos.HouseDetailsDTO, error)
 	GetHousePhotoByHouseID(houseID int) ([]*dtos.HousePhotosDTO, error)
 	GetHouseByHouseID(houseID int) (*dtos.HouseDetailsDTO, error)
@@ -40,7 +41,7 @@ func NewHouseRepository(c *HRConfig) HouseRepository {
 	}
 }
 
-func (r *houseRepository) GetHouse(queryParams map[string]interface{}, querySearchCity []string) ([]*dtos.HouseDetailsDTO, error) {
+func (r *houseRepository) GetHouse(queryParams map[string]interface{}) ([]*dtos.HouseDetailsDTO, error) {
 	var houseDetails []*dtos.HouseDetailsDTO
 	if queryParams["sortBy"] == "" || queryParams["sortBy"] == nil {
 		queryParams["sortBy"] = "t.house_name"
@@ -48,21 +49,57 @@ func (r *houseRepository) GetHouse(queryParams map[string]interface{}, querySear
 		queryParams["sortBy"] = fmt.Sprintf("t.house_%s", queryParams["sortBy"])
 	}
 
-	qFilterCityName := ""
-	if len(querySearchCity) > 0 {
-		qFilterCityName += "AND t.house_city_name IN ("
-		for i, city := range querySearchCity {
-			if i == len(querySearchCity)-1 {
-				qFilterCityName += "'" + city + "')"
-				break
-			}
-			qFilterCityName += "'" + city + "', "
-		}
-	}
+	// if len(querySearchCity) > 0 {
+	// 	qFilterCityName += "AND t.house_city_name IN ("
+	// 	for i, city := range querySearchCity {
+	// 		if i == len(querySearchCity)-1 {
+	// 			qFilterCityName += "'" + city + "')"
+	// 			break
+	// 		}
+	// 		qFilterCityName += "'" + city + "', "
+	// 	}
+	// }
 
 	qFilterHouseName := ""
 	if queryParams["searchName"] != nil {
 		qFilterHouseName = fmt.Sprintf("%v", queryParams["searchName"])
+	}
+
+	qFilterCityName := ""
+	if queryParams["searchCity"] != nil {
+		qFilterCityName = fmt.Sprintf("%v", queryParams["searchCity"])
+	}
+
+	format := "2006-01-02"
+
+	qFilterCheckInDate := ""
+	if queryParams["searchCheckInDate"] != nil {
+		qFilterCheckInDate = fmt.Sprintf("%v", queryParams["searchCheckInDate"])
+	} else {
+		// if check in date is nil but check out date is not nil then check in date = check in date - 1
+		if queryParams["searchCheckOutDate"] != nil {
+			checkOutDate, _ := time.Parse(format, fmt.Sprintf("%v", queryParams["searchCheckOutDate"]))
+			checkInDate := checkOutDate.AddDate(0, 0, -1)
+			qFilterCheckInDate = checkInDate.Format(format)
+		}
+	}
+
+	qFilterCheckOutDate := ""
+	if queryParams["searchCheckOutDate"] != nil {
+		qFilterCheckOutDate = fmt.Sprintf("%v", queryParams["searchCheckOutDate"])
+	} else {
+		// if check out date is nil but check in date is not nil then check out date = check in date + 1
+		if queryParams["searchCheckInDate"] != nil {
+			checkInDate, _ := time.Parse(format, fmt.Sprintf("%v", queryParams["searchCheckInDate"]))
+			checkOutDate := checkInDate.AddDate(0, 0, 1)
+			qFilterCheckOutDate = checkOutDate.Format(format)
+		}
+	}
+
+	qFilterReservation := ""
+	if queryParams["searchCheckOutDate"] != nil || queryParams["searchCheckInDate"] != nil {
+		qFilterReservation = fmt.Sprintf("AND t.house_id NOT IN (SELECT DISTINCT house_id FROM reservations WHERE '%s'::timestamp::date BETWEEN check_in_date::timestamp::date AND check_out_date::timestamp::date OR '%s'::timestamp::date BETWEEN check_in_date::timestamp::date AND check_out_date::timestamp::date)", qFilterCheckInDate, qFilterCheckOutDate)
+
 	}
 
 	qSortBy := fmt.Sprintf("ORDER BY %s", queryParams["sortBy"])
@@ -72,7 +109,7 @@ func (r *houseRepository) GetHouse(queryParams map[string]interface{}, querySear
 		qSort = fmt.Sprintf("%v", queryParams["sort"])
 
 	}
-	query := fmt.Sprintf("SELECT * FROM (?) t WHERE t.house_name ILIKE '%s' %s %s %s", fmt.Sprintf("%%%s%%", qFilterHouseName), qFilterCityName, qSortBy, qSort)
+	query := fmt.Sprintf("SELECT * FROM (?) t WHERE t.house_name ILIKE '%s' AND t.house_city_name ILIKE '%s' %s %s %s", fmt.Sprintf("%%%s%%", qFilterHouseName), fmt.Sprintf("%%%s%%", qFilterCityName), qFilterReservation, qSortBy, qSort)
 
 	result := r.db.Raw(query, r.db.Model(&models.House{}).
 		Select("houses.id AS house_id, houses.name AS house_name, houses.price AS house_price, houses.description AS house_description, cities.name AS house_city_name, houses.max_guest AS house_max_guest, house_statuses.status AS house_status, users.id AS host_id, users.name AS host_name, users.email AS host_email").
@@ -81,12 +118,6 @@ func (r *houseRepository) GetHouse(queryParams map[string]interface{}, querySear
 		Joins("JOIN house_statuses ON houses.house_status_id = house_statuses.id").
 		Where("house_statuses.status ILIKE ?", "active")).
 		Scan(&houseDetails)
-
-	// result := r.db.Model(&models.House{}).
-	// 	Select("houses.id AS house_id, houses.name AS house_name, houses.price AS house_price, houses.description AS house_description, cities.name AS house_city_name, houses.max_guest AS house_max_guest, houses.status AS house_status, users.id AS host_id, users.name AS host_name, users.email AS host_email").
-	// 	Joins("LEFT JOIN cities ON houses.city_id = cities.id").
-	// 	Joins("LEFT JOIN users ON houses.user_id = users.id").
-	// 	Find(&houseDetails)
 
 	if result.Error != nil {
 		return nil, result.Error

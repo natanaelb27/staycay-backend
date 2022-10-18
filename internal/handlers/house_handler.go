@@ -19,13 +19,13 @@ func (h *Handler) GetAllHousesHandler(c *gin.Context) {
 		queryParams[key] = values[0]
 	}
 
-	querySearchCity := make([]string, 0)
-	querySearchCity = append(querySearchCity, c.Request.URL.Query()["searchCity"]...)
+	// querySearchCity := make([]string, 0)
+	// querySearchCity = append(querySearchCity, c.Request.URL.Query()["searchCity"]...)
 	// for _, city := range c.Request.URL.Query()["searchCity"] {
 	// 	querySearchCity = append(querySearchCity, city)
 	// }
 
-	data, err := h.houseService.GetAllHouses(queryParams, querySearchCity)
+	data, err := h.houseService.GetAllHouses(queryParams)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, helpers.BuildErrorResponse(http.StatusInternalServerError, err.Error()))

@@ -10,7 +10,7 @@ import (
 )
 
 type HouseService interface {
-	GetAllHouses(queryParams map[string]interface{}, querySearchCity []string) ([]*dtos.HouseDetailsWithPhotoDTO, error)
+	GetAllHouses(queryParams map[string]interface{}) ([]*dtos.HouseDetailsWithPhotoDTO, error)
 	GetHouseByID(houseID int) (*dtos.HouseDetailsWithPhotoDTO, error)
 	GetHostHouses(hostID int) ([]*dtos.HouseDetailsWithPhotoDTO, error)
 	GetAllHouseStatuses() ([]*dtos.HouseStatusDTO, error)
@@ -44,7 +44,7 @@ func NewHouseService(c *HSConfig) HouseService {
 	}
 }
 
-func (s *houseService) GetAllHouses(queryParams map[string]interface{}, querySearchCity []string) ([]*dtos.HouseDetailsWithPhotoDTO, error) {
+func (s *houseService) GetAllHouses(queryParams map[string]interface{}) ([]*dtos.HouseDetailsWithPhotoDTO, error) {
 
 	// if rec, ok := query["searchCity"].(map[string]interface{}); ok {
 	// 	for key, val := range rec {
@@ -65,7 +65,7 @@ func (s *houseService) GetAllHouses(queryParams map[string]interface{}, querySea
 	// 	return nil, err
 	// }
 
-	houseDetails, err := s.houseRepository.GetHouse(queryParams, querySearchCity)
+	houseDetails, err := s.houseRepository.GetHouse(queryParams)
 
 	if err != nil {
 		return nil, err
