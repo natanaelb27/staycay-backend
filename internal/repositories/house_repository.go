@@ -65,19 +65,19 @@ func (r *houseRepository) GetHouse(queryParams map[string]interface{}) ([]*dtos.
 		qFilterHouseName = fmt.Sprintf("%v", queryParams["searchName"])
 	}
 
-	qFilterCityName := ""
-	if queryParams["searchCity"] != nil {
-		qFilterCityName = fmt.Sprintf("%v", queryParams["searchCity"])
+	qFilterCityID := ""
+	if queryParams["searchCity"] != nil && queryParams["searchCity"] != "0" {
+		qFilterCityID = fmt.Sprintf("AND t.house_city_id = %v", queryParams["searchCity"])
 	}
 
 	format := "2006-01-02"
 
 	qFilterCheckInDate := ""
-	if queryParams["searchCheckInDate"] != nil {
+	if queryParams["searchCheckInDate"] != nil && queryParams["searchCheckInDate"] != "" {
 		qFilterCheckInDate = fmt.Sprintf("%v", queryParams["searchCheckInDate"])
 	} else {
 		// if check in date is nil but check out date is not nil then check in date = check in date - 1
-		if queryParams["searchCheckOutDate"] != nil {
+		if queryParams["searchCheckOutDate"] != nil && queryParams["searchCheckOutDate"] != "" {
 			checkOutDate, _ := time.Parse(format, fmt.Sprintf("%v", queryParams["searchCheckOutDate"]))
 			checkInDate := checkOutDate.AddDate(0, 0, -1)
 			qFilterCheckInDate = checkInDate.Format(format)
@@ -85,11 +85,11 @@ func (r *houseRepository) GetHouse(queryParams map[string]interface{}) ([]*dtos.
 	}
 
 	qFilterCheckOutDate := ""
-	if queryParams["searchCheckOutDate"] != nil {
+	if queryParams["searchCheckOutDate"] != nil && queryParams["searchCheckOutDate"] != "" {
 		qFilterCheckOutDate = fmt.Sprintf("%v", queryParams["searchCheckOutDate"])
 	} else {
 		// if check out date is nil but check in date is not nil then check out date = check in date + 1
-		if queryParams["searchCheckInDate"] != nil {
+		if queryParams["searchCheckInDate"] != nil && queryParams["searchCheckInDate"] != "" {
 			checkInDate, _ := time.Parse(format, fmt.Sprintf("%v", queryParams["searchCheckInDate"]))
 			checkOutDate := checkInDate.AddDate(0, 0, 1)
 			qFilterCheckOutDate = checkOutDate.Format(format)
@@ -97,10 +97,14 @@ func (r *houseRepository) GetHouse(queryParams map[string]interface{}) ([]*dtos.
 	}
 
 	qFilterReservation := ""
-	if queryParams["searchCheckOutDate"] != nil || queryParams["searchCheckInDate"] != nil {
-		qFilterReservation = fmt.Sprintf("AND t.house_id NOT IN (SELECT DISTINCT house_id FROM reservations WHERE '%s'::timestamp::date BETWEEN check_in_date::timestamp::date AND check_out_date::timestamp::date OR '%s'::timestamp::date BETWEEN check_in_date::timestamp::date AND check_out_date::timestamp::date)", qFilterCheckInDate, qFilterCheckOutDate)
-
+	if (queryParams["searchCheckInDate"] != nil && queryParams["searchCheckInDate"] != "") || (queryParams["searchCheckOutDate"] != nil && queryParams["searchCheckOutDate"] != "") {
+		qFilterReservation = fmt.Sprintf(`AND t.house_id NOT IN (SELECT DISTINCT house_id FROM reservations WHERE '%s'::timestamp::date BETWEEN check_in_date::timestamp::date AND check_out_date::timestamp::date 
+			OR '%s'::timestamp::date BETWEEN check_in_date::timestamp::date AND check_out_date::timestamp::date 
+			OR check_in_date::timestamp::date BETWEEN '%s'::timestamp::date AND '%s'::timestamp::date
+			OR check_out_date::timestamp::date BETWEEN '%s'::timestamp::date AND '%s'::timestamp::date)`, qFilterCheckInDate, qFilterCheckOutDate, qFilterCheckInDate, qFilterCheckOutDate, qFilterCheckInDate, qFilterCheckOutDate)
 	}
+
+	println(qFilterReservation)
 
 	qSortBy := fmt.Sprintf("ORDER BY %s", queryParams["sortBy"])
 
@@ -109,10 +113,10 @@ func (r *houseRepository) GetHouse(queryParams map[string]interface{}) ([]*dtos.
 		qSort = fmt.Sprintf("%v", queryParams["sort"])
 
 	}
-	query := fmt.Sprintf("SELECT * FROM (?) t WHERE t.house_name ILIKE '%s' AND t.house_city_name ILIKE '%s' %s %s %s", fmt.Sprintf("%%%s%%", qFilterHouseName), fmt.Sprintf("%%%s%%", qFilterCityName), qFilterReservation, qSortBy, qSort)
+	query := fmt.Sprintf("SELECT * FROM (?) t WHERE t.house_name ILIKE '%s' %s %s %s %s", fmt.Sprintf("%%%s%%", qFilterHouseName), qFilterCityID, qFilterReservation, qSortBy, qSort)
 
 	result := r.db.Raw(query, r.db.Model(&models.House{}).
-		Select("houses.id AS house_id, houses.name AS house_name, houses.price AS house_price, houses.description AS house_description, cities.name AS house_city_name, houses.max_guest AS house_max_guest, house_statuses.status AS house_status, users.id AS host_id, users.name AS host_name, users.email AS host_email").
+		Select("houses.id AS house_id, houses.name AS house_name, houses.price AS house_price, houses.description AS house_description, cities.id AS house_city_id, cities.name AS house_city_name, houses.max_guest AS house_max_guest, house_statuses.status AS house_status, users.id AS host_id, users.name AS host_name, users.email AS host_email").
 		Joins("JOIN cities ON houses.city_id = cities.id").
 		Joins("JOIN users ON houses.user_id = users.id").
 		Joins("JOIN house_statuses ON houses.house_status_id = house_statuses.id").
