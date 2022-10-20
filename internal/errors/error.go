@@ -14,6 +14,7 @@ var (
 	ErrInvalidRoleNotAdminError                  = errors.New("user is not an admin")
 	ErrInvalidHostError                          = errors.New("user is not the host")
 	ErrInvalidUserReservationError               = errors.New("user is not the customer")
+	ErrInvalidHostAndUserReservationError        = errors.New("user is neither the host or the customer")
 	ErrDeleteUpcomingReservationError            = errors.New("house cannot be deleted because there is an upcoming reservation, house status will be changed to inactive instead")
 	ErrIdNotFoundError                           = errors.New("this id is not found")
 	ErrNotValidReservationDateConflict           = errors.New("reservation is not valid due to conflicting date")

@@ -14,7 +14,8 @@ import (
 type ReservationService interface {
 	AddReservation(userID int, request *dtos.AddReservationRequestDTO) (*models.Reservation, error)
 	GetHouseReservationsByUser(userID int, queryParams map[string]interface{}) ([]*dtos.HouseReservationsDTO, error)
-	GetHouseReservationsByHouse(houseID int, userID int, queryParams map[string]interface{}) ([]*dtos.HouseReservationsDTO, error)
+	GetHouseReservationsByHouse(houseID int, queryParams map[string]interface{}) ([]*dtos.HouseReservationsDTO, error)
+	GetHouseReservationsByID(reservationID int, userID int) (*dtos.HouseReservationsDTO, error)
 }
 
 type reservationService struct {
@@ -130,22 +131,32 @@ func (s *reservationService) GetHouseReservationsByUser(userID int, queryParams 
 	return houseReservations, nil
 }
 
-func (s *reservationService) GetHouseReservationsByHouse(houseID int, userID int, queryParams map[string]interface{}) ([]*dtos.HouseReservationsDTO, error) {
-	houseDetails, err := s.houseRepository.GetHouseByHouseID(houseID)
-
-	if err != nil {
-		return nil, err
-	}
-
-	if houseDetails.HostID != userID {
-		return nil, e.ErrInvalidHostError
-	}
-
+func (s *reservationService) GetHouseReservationsByHouse(houseID int, queryParams map[string]interface{}) ([]*dtos.HouseReservationsDTO, error) {
 	filterBy := fmt.Sprintf("%v", queryParams["filterBy"])
 	houseReservations, err := s.reservationRepository.GetHouseReservationsByHouseID(houseID, filterBy)
 
 	if err != nil {
 		return nil, err
+	}
+
+	return houseReservations, nil
+}
+
+func (s *reservationService) GetHouseReservationsByID(reservationID int, userID int) (*dtos.HouseReservationsDTO, error) {
+	houseReservations, err := s.reservationRepository.GetHouseReservationsByID(reservationID)
+
+	if err != nil {
+		return nil, err
+	}
+
+	houseDetails, err := s.houseRepository.GetHouseByHouseID(houseReservations.HouseID)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if houseReservations.UserID != userID && houseDetails.HostID != userID {
+		return nil, e.ErrInvalidHostAndUserReservationError
 	}
 
 	return houseReservations, nil

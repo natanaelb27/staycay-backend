@@ -34,6 +34,14 @@ type GetHouseReservationsByUserResponseDTO struct {
 	Reservation []*HouseReservationsDTO `json:"reservation"`
 }
 
+type GetHouseReservationsByHouseRequestDTO struct {
+	HouseID int `json:"house_id" binding:"required"`
+}
+
 type GetHouseReservationsByHouseResponseDTO struct {
 	Reservation []*HouseReservationsDTO `json:"reservation"`
+}
+
+type GetHouseReservationsByIDResponseDTO struct {
+	Reservation *HouseReservationsDTO `json:"reservation"`
 }

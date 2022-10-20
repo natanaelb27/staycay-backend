@@ -93,18 +93,21 @@ func (h *Handler) GetHouseReservationsByUserHandler(c *gin.Context) {
 }
 
 func (h *Handler) GetHouseReservationsByHouseHandler(c *gin.Context) {
+	var request *dtos.GetHouseReservationsByHouseRequestDTO
 	var response *dtos.GetHouseReservationsByHouseResponseDTO
 
-	houseID, _ := strconv.Atoi(c.Param("houseId"))
-
-	userContext := c.MustGet("user").(dtos.JwtData)
+	err := c.ShouldBindJSON(&request)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, helpers.BuildErrorResponse(http.StatusBadRequest, err.Error()))
+		return
+	}
 
 	queryParams := map[string]interface{}{}
 	for key, values := range c.Request.URL.Query() {
 		queryParams[key] = values[0]
 	}
 
-	data, err := h.reservationService.GetHouseReservationsByHouse(houseID, userContext.UserID, queryParams)
+	data, err := h.reservationService.GetHouseReservationsByHouse(request.HouseID, queryParams)
 
 	if err != nil {
 		if errors.Is(err, e.ErrInvalidHostError) {
@@ -122,4 +125,30 @@ func (h *Handler) GetHouseReservationsByHouseHandler(c *gin.Context) {
 
 	c.JSON(http.StatusOK, helpers.BuildSuccessResponse(http.StatusOK, http.StatusText(http.StatusOK), response))
 
+}
+
+func (h *Handler) GetHouseReservationsByIDHandler(c *gin.Context) {
+	var response *dtos.GetHouseReservationsByIDResponseDTO
+
+	reservationID, _ := strconv.Atoi(c.Param("reservationId"))
+
+	userContext := c.MustGet("user").(dtos.JwtData)
+
+	data, err := h.reservationService.GetHouseReservationsByID(reservationID, userContext.UserID)
+
+	if err != nil {
+		if errors.Is(err, e.ErrInvalidHostAndUserReservationError) {
+			c.JSON(http.StatusForbidden, helpers.BuildErrorResponse(http.StatusForbidden, e.ErrInvalidHostAndUserReservationError.Error()))
+			return
+		}
+
+		c.JSON(http.StatusInternalServerError, helpers.BuildErrorResponse(http.StatusInternalServerError, err.Error()))
+		return
+	}
+
+	response = &dtos.GetHouseReservationsByIDResponseDTO{
+		Reservation: data,
+	}
+
+	c.JSON(http.StatusOK, helpers.BuildSuccessResponse(http.StatusOK, http.StatusText(http.StatusOK), response))
 }

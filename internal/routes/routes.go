@@ -18,6 +18,7 @@ func InitAllRoutes(r *gin.Engine, h *handlers.Handler) {
 	r.GET("/house", h.GetAllHousesHandler)
 	r.GET("/house/:houseId", h.GetHouseByIDHandler)
 	r.GET("/house/status", h.GetAllHouseStatusesHandler)
+	r.GET("/house/reservation", h.GetHouseReservationsByHouseHandler)
 
 	// User
 	r.GET("/user/:userId", h.GetUserProfileByUserIDHandler)
@@ -29,13 +30,13 @@ func InitAllRoutes(r *gin.Engine, h *handlers.Handler) {
 	r.GET("/user", h.GetUserProfileHandler)
 	r.PATCH("/user/", h.UpdateUserProfileHandler)
 	r.PATCH("/user/role", h.UpdateUserRoleHandler)
+	r.GET("/user/reservation", h.GetHouseReservationsByUserHandler)
 
 	// Topup
 	r.POST("/topup", h.TopUpWalletHandler)
 
 	// Host
 	r.GET("/host/house", h.GetHostHousesHandler)
-	r.GET("/host/reservation/:houseId", h.GetHouseReservationsByHouseHandler)
 	r.POST("/host/house", h.AddNewHouseHandler)
 	r.PATCH("/host/house/:houseId", h.UpdateHouseHandler)
 	r.DELETE("/host/house/:houseId", h.DeleteHouseHandler)
@@ -43,7 +44,7 @@ func InitAllRoutes(r *gin.Engine, h *handlers.Handler) {
 	r.DELETE("/host/house/photo/:housePhotoId", h.DeleteHousePhotoHandler)
 
 	// Reservation
-	r.GET("/reservation", h.GetHouseReservationsByUserHandler)
+	r.GET("/reservation/:reservationId", h.GetHouseReservationsByIDHandler)
 	r.POST("/reservation", h.AddReservationHandler)
 
 	// Pickup
