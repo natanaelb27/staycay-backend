@@ -93,21 +93,16 @@ func (h *Handler) GetHouseReservationsByUserHandler(c *gin.Context) {
 }
 
 func (h *Handler) GetHouseReservationsByHouseHandler(c *gin.Context) {
-	var request *dtos.GetHouseReservationsByHouseRequestDTO
 	var response *dtos.GetHouseReservationsByHouseResponseDTO
 
-	err := c.ShouldBindJSON(&request)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, helpers.BuildErrorResponse(http.StatusBadRequest, err.Error()))
-		return
-	}
+	houseID, _ := strconv.Atoi(c.Param("houseId"))
 
 	queryParams := map[string]interface{}{}
 	for key, values := range c.Request.URL.Query() {
 		queryParams[key] = values[0]
 	}
 
-	data, err := h.reservationService.GetHouseReservationsByHouse(request.HouseID, queryParams)
+	data, err := h.reservationService.GetHouseReservationsByHouse(houseID, queryParams)
 
 	if err != nil {
 		if errors.Is(err, e.ErrInvalidHostError) {
