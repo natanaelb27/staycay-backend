@@ -52,18 +52,22 @@ func (r *reservationRepository) GetHouseReservationsByUserID(userID int, filterB
 	}
 
 	if filterBy == "ongoing" {
-		result = result.Where("NOW()::timestamp::date BETWEEN reservations.check_in_date::timestamp::date AND reservations.check_out_date::timestamp::date")
+		result = result.Where("NOW()::timestamp::date BETWEEN reservations.check_in_date::timestamp::date AND reservations.check_out_date::timestamp::date").Order("reservations.check_in_date asc")
 	}
 
 	if filterBy == "upcoming" {
-		result = result.Where("reservations.check_in_date::timestamp::date > NOW()")
+		result = result.Where("reservations.check_in_date::timestamp::date > NOW()::timestamp::date").Order("reservations.check_in_date asc")
 	}
 
 	if filterBy == "past" {
-		result = result.Where("reservations.check_out_date::timestamp::date < NOW()")
+		result = result.Where("reservations.check_out_date::timestamp::date < NOW()::timestamp::date").Order("reservations.check_in_date desc")
 	}
 
-	result.Order("reservations.check_in_date desc").Find(&houseReservation)
+	if filterBy == "all" {
+		result = result.Order("reservations.check_in_date desc")
+	}
+
+	result.Find(&houseReservation)
 
 	if result.Error != nil {
 		return nil, result.Error
@@ -89,18 +93,40 @@ func (r *reservationRepository) GetHouseReservationsByHouseID(houseID int, filte
 	}
 
 	if filterBy == "ongoing" {
-		result = result.Where("NOW()::timestamp::date BETWEEN reservations.check_in_date::timestamp::date AND reservations.check_out_date::timestamp::date")
+		result = result.Where("NOW()::timestamp::date BETWEEN reservations.check_in_date::timestamp::date AND reservations.check_out_date::timestamp::date").Order("reservations.check_in_date asc")
 	}
 
 	if filterBy == "upcoming" {
-		result = result.Where("reservations.check_in_date::timestamp::date > NOW()")
+		result = result.Where("reservations.check_in_date::timestamp::date > NOW()::timestamp::date").Order("reservations.check_in_date asc")
 	}
 
 	if filterBy == "past" {
-		result = result.Where("reservations.check_out_date::timestamp::date < NOW()")
+		result = result.Where("reservations.check_out_date::timestamp::date < NOW()::timestamp::date").Order("reservations.check_in_date desc")
+	}
+
+	if filterBy == "all" {
+		result = result.Order("reservations.check_in_date desc")
 	}
 
 	result.Find(&houseReservation)
+
+	// if filterBy == "today" {
+	// 	result = result.Where("NOW()::timestamp::date = reservations.check_in_date::timestamp::date")
+	// }
+
+	// if filterBy == "ongoing" {
+	// 	result = result.Where("NOW()::timestamp::date BETWEEN reservations.check_in_date::timestamp::date AND reservations.check_out_date::timestamp::date")
+	// }
+
+	// if filterBy == "upcoming" {
+	// 	result = result.Where("reservations.check_in_date::timestamp::date > NOW()::timestamp::date")
+	// }
+
+	// if filterBy == "past" {
+	// 	result = result.Where("reservations.check_out_date::timestamp::date < NOW()::timestamp::date")
+	// }
+
+	// result.Find(&houseReservation)
 
 	if result.Error != nil {
 		return nil, result.Error

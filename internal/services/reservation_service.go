@@ -42,6 +42,16 @@ func NewReservationService(c *RSConfig) ReservationService {
 }
 
 func (s *reservationService) AddReservation(userID int, request *dtos.AddReservationRequestDTO) (*models.Reservation, error) {
+	house, err := s.houseRepository.GetHouseByHouseID(request.HouseID)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if house.HostID == userID {
+		return nil, e.ErrInvalidReservationUserIsHostError
+	}
+
 	format := "2006-01-02"
 	checkInDate, _ := time.Parse(format, request.CheckInDate)
 	checkOutDate, _ := time.Parse(format, request.CheckOutDate)
@@ -61,13 +71,7 @@ func (s *reservationService) AddReservation(userID int, request *dtos.AddReserva
 		return nil, e.ErrInvalidReservationBeforeNowError
 	}
 
-	err := s.reservationRepository.ValidateReservation(request)
-
-	if err != nil {
-		return nil, err
-	}
-
-	house, err := s.houseRepository.GetHouseByHouseID(request.HouseID)
+	err = s.reservationRepository.ValidateReservation(request)
 
 	if err != nil {
 		return nil, err
