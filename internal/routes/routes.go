@@ -28,7 +28,7 @@ func InitAllRoutes(r *gin.Engine, h *handlers.Handler) {
 
 	// User
 	r.GET("/user", h.GetUserProfileHandler)
-	r.PATCH("/user/", h.UpdateUserProfileHandler)
+	r.PATCH("/user", h.UpdateUserProfileHandler)
 	r.PATCH("/user/role", h.UpdateUserRoleHandler)
 	r.GET("/user/reservation", h.GetHouseReservationsByUserHandler)
 
