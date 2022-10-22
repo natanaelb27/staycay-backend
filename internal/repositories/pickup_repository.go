@@ -113,7 +113,7 @@ func (r *pickupRepository) GetPickupDetailsByReservationID(reservationID int) (*
 		Joins("JOIN reservations ON pickups.reservation_id = reservations.id").
 		Joins("JOIN cities ON pickups.city_id = cities.id").
 		Where("reservation_id = ?", reservationID).
-		First(&houseReservation)
+		Find(&houseReservation)
 
 	if result.Error != nil {
 		return nil, result.Error

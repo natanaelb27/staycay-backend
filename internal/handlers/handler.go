@@ -111,6 +111,7 @@ func InitAllHandlers() *Handler {
 		PickupRepository:      pickupRepo,
 		ReservationRepository: reservationRepo,
 		UserRepository:        userRepo,
+		WalletRepository:      walletRepo,
 	})
 
 	gameService := s.NewGameService(&s.GSConfig{

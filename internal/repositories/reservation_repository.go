@@ -63,7 +63,7 @@ func (r *reservationRepository) GetHouseReservationsByUserID(userID int, filterB
 		result = result.Where("reservations.check_out_date::timestamp::date < NOW()")
 	}
 
-	result.Find(&houseReservation)
+	result.Order("reservations.check_in_date desc").Find(&houseReservation)
 
 	if result.Error != nil {
 		return nil, result.Error

@@ -20,12 +20,14 @@ type pickupService struct {
 	pickupRepository      r.PickupRepository
 	reservationRepository r.ReservationRepository
 	userRepository        r.UserRepository
+	walletRepository      r.WalletRepository
 }
 
 type PSConfig struct {
 	PickupRepository      r.PickupRepository
 	ReservationRepository r.ReservationRepository
 	UserRepository        r.UserRepository
+	WalletRepository      r.WalletRepository
 }
 
 func NewPickupService(c *PSConfig) PickupService {
@@ -33,6 +35,7 @@ func NewPickupService(c *PSConfig) PickupService {
 		pickupRepository:      c.PickupRepository,
 		reservationRepository: c.ReservationRepository,
 		userRepository:        c.UserRepository,
+		walletRepository:      c.WalletRepository,
 	}
 }
 
@@ -92,10 +95,16 @@ func (s *pickupService) RequestPickup(reservationID int, userID int, request *dt
 		ReservationID:  reservationID,
 		PickupStatusID: pickupStatus.ID,
 		PickupAddress:  request.PickupAddress,
-		CityID:         houseReservation.HouseCityID,
+		CityID:         request.CityID,
 		PickupPrice:    pickUpPrice,
 	}
 	pickupData, err := s.pickupRepository.CreatePickup(pickup)
+
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = s.walletRepository.SubtractWalletBalance(userID, pickUpPrice)
 
 	if err != nil {
 		return nil, err
@@ -105,11 +114,11 @@ func (s *pickupService) RequestPickup(reservationID int, userID int, request *dt
 }
 
 func (s *pickupService) GetPickupDetailsByReservation(reservationID int, userID int) (*dtos.GetPickupDetailsByReservationResponseDTO, error) {
-	err := s.pickupRepository.ValidatePickupReservationExists(reservationID)
+	// err := s.pickupRepository.ValidatePickupReservationExists(reservationID)
 
-	if err != nil {
-		return nil, err
-	}
+	// if err != nil {
+	// 	return nil, err
+	// }
 
 	houseReservation, err := s.reservationRepository.GetHouseReservationsByID(reservationID)
 

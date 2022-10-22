@@ -13,7 +13,18 @@ func main() {
 
 	db.Connect()
 
+	// r.Use(cors.New(cors.Config{
+	// 	AllowOrigins:     []string{"*"},
+	// 	AllowMethods:     []string{"POST", "PATCH", "GET", "DELETE", "PUT", "OPTIONS"},
+	// 	AllowHeaders:     []string{"Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, origin, Cache-Control, X-Requested-With"},
+	// 	ExposeHeaders:    []string{"Content-Length"},
+	// 	AllowCredentials: true,
+	// }))
+
 	r.Use(middlewares.CORSMiddleware())
+
+	// r.Use(cors.Default())
+
 	r.NoRoute(middlewares.NotFoundHandler)
 	h := handlers.InitAllHandlers()
 
