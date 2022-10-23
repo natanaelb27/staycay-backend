@@ -1,6 +1,10 @@
 package dtos
 
-import "time"
+import (
+	"time"
+
+	"git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend/internal/helpers"
+)
 
 type HouseReservationsDTO struct {
 	HouseID           int       `json:"house_id"`
@@ -31,10 +35,12 @@ type AddReservationResponseDTO struct {
 }
 
 type GetHouseReservationsByUserResponseDTO struct {
+	Pagination  *helpers.Pagination     `json:"pagination"`
 	Reservation []*HouseReservationsDTO `json:"reservation"`
 }
 
 type GetHouseReservationsByHouseResponseDTO struct {
+	Pagination  *helpers.Pagination     `json:"pagination"`
 	Reservation []*HouseReservationsDTO `json:"reservation"`
 }
 

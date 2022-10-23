@@ -7,14 +7,15 @@ import (
 
 	"git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend/internal/dtos"
 	e "git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend/internal/errors"
+	"git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend/internal/helpers"
 	"git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend/internal/models"
 	r "git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend/internal/repositories"
 )
 
 type ReservationService interface {
 	AddReservation(userID int, request *dtos.AddReservationRequestDTO) (*models.Reservation, error)
-	GetHouseReservationsByUser(userID int, queryParams map[string]interface{}) ([]*dtos.HouseReservationsDTO, error)
-	GetHouseReservationsByHouse(houseID int, queryParams map[string]interface{}) ([]*dtos.HouseReservationsDTO, error)
+	GetHouseReservationsByUser(userID int, queryParams map[string]interface{}) ([]*dtos.HouseReservationsDTO, *helpers.Pagination, error)
+	GetHouseReservationsByHouse(houseID int, queryParams map[string]interface{}) ([]*dtos.HouseReservationsDTO, *helpers.Pagination, error)
 	GetHouseReservationsByID(reservationID int, userID int) (*dtos.HouseReservationsDTO, error)
 }
 
@@ -124,26 +125,25 @@ func (s *reservationService) AddReservation(userID int, request *dtos.AddReserva
 	return reservation, nil
 }
 
-func (s *reservationService) GetHouseReservationsByUser(userID int, queryParams map[string]interface{}) ([]*dtos.HouseReservationsDTO, error) {
-	filterBy := fmt.Sprintf("%v", queryParams["filterBy"])
-	houseReservations, err := s.reservationRepository.GetHouseReservationsByUserID(userID, filterBy)
+func (s *reservationService) GetHouseReservationsByUser(userID int, queryParams map[string]interface{}) ([]*dtos.HouseReservationsDTO, *helpers.Pagination, error) {
+	// filterBy := fmt.Sprintf("%v", queryParams["filterBy"])
+	houseReservations, pagination, err := s.reservationRepository.GetHouseReservationsByUserID(userID, queryParams)
 
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
-	return houseReservations, nil
+	return houseReservations, pagination, nil
 }
 
-func (s *reservationService) GetHouseReservationsByHouse(houseID int, queryParams map[string]interface{}) ([]*dtos.HouseReservationsDTO, error) {
-	filterBy := fmt.Sprintf("%v", queryParams["filterBy"])
-	houseReservations, err := s.reservationRepository.GetHouseReservationsByHouseID(houseID, filterBy)
+func (s *reservationService) GetHouseReservationsByHouse(houseID int, queryParams map[string]interface{}) ([]*dtos.HouseReservationsDTO, *helpers.Pagination, error) {
+	houseReservations, pagination, err := s.reservationRepository.GetHouseReservationsByHouseID(houseID, queryParams)
 
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
-	return houseReservations, nil
+	return houseReservations, pagination, nil
 }
 
 func (s *reservationService) GetHouseReservationsByID(reservationID int, userID int) (*dtos.HouseReservationsDTO, error) {

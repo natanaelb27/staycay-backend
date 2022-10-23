@@ -297,11 +297,12 @@ func (s *houseService) DeleteHouse(houseID int, userID int) (*models.House, erro
 		return nil, err
 	}
 
+	// ini ga perlu
 	if strings.ToLower(user.Role) != "host" && strings.ToLower(user.Role) != "admin" {
 		return nil, e.ErrInvalidRoleNotHostError
 	}
 
-	if houseDetails.HostID != userID || strings.ToLower(user.Role) == "admin" {
+	if houseDetails.HostID != userID && strings.ToLower(user.Role) != "admin" {
 		return nil, e.ErrInvalidHostError
 	}
 
@@ -318,7 +319,10 @@ func (s *houseService) DeleteHouse(houseID int, userID int) (*models.House, erro
 		return nil, err
 	}
 
-	upcomingHouseReservation, err := s.reservationRepository.GetHouseReservationsByHouseID(houseID, "upcoming")
+	queryParams := make(map[string]interface{})
+	queryParams["filterBy"] = "upcoming"
+
+	upcomingHouseReservation, _, err := s.reservationRepository.GetHouseReservationsByHouseID(houseID, queryParams)
 
 	if len(upcomingHouseReservation) > 0 {
 		newData := &models.House{

@@ -1,15 +1,20 @@
 package repositories
 
 import (
+	"fmt"
+	"strconv"
+
 	"git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend/internal/dtos"
 	e "git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend/internal/errors"
+	"git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend/internal/helpers"
 	"git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend/internal/models"
 	"gorm.io/gorm"
 )
 
 type ReservationRepository interface {
-	GetHouseReservationsByUserID(userID int, filterBy string) ([]*dtos.HouseReservationsDTO, error)
-	GetHouseReservationsByHouseID(houseID int, filterBy string) ([]*dtos.HouseReservationsDTO, error)
+	// GetHouseReservationsByUserID(userID int, filterBy string) ([]*dtos.HouseReservationsDTO, error)
+	GetHouseReservationsByUserID(userID int, queryParams map[string]interface{}) ([]*dtos.HouseReservationsDTO, *helpers.Pagination, error)
+	GetHouseReservationsByHouseID(houseID int, queryParams map[string]interface{}) ([]*dtos.HouseReservationsDTO, *helpers.Pagination, error)
 	GetHouseReservationsByID(reservationID int) (*dtos.HouseReservationsDTO, error)
 	ValidateReservation(request *dtos.AddReservationRequestDTO) error
 	GetLastReservationID() (int, error)
@@ -30,8 +35,10 @@ func NewReservationRepository(c *RRConfig) ReservationRepository {
 	}
 }
 
-func (r *reservationRepository) GetHouseReservationsByUserID(userID int, filterBy string) ([]*dtos.HouseReservationsDTO, error) {
+func (r *reservationRepository) GetHouseReservationsByUserID(userID int, queryParams map[string]interface{}) ([]*dtos.HouseReservationsDTO, *helpers.Pagination, error) {
 	var houseReservation []*dtos.HouseReservationsDTO
+
+	filterBy := fmt.Sprintf("%v", queryParams["filterBy"])
 
 	result := r.db.Model(&models.Reservation{}).
 		Select(`houses.id AS house_id, houses.city_id AS house_city_id, reservations.user_id AS user_id, reservations.id AS reservation_id, reservations.reservation_code AS reservation_code, reservations.check_in_date AS check_in_date, reservations.check_out_date AS check_out_date, reservations.total_price AS total_price,
@@ -67,17 +74,80 @@ func (r *reservationRepository) GetHouseReservationsByUserID(userID int, filterB
 		result = result.Order("reservations.check_in_date desc")
 	}
 
-	result.Find(&houseReservation)
-
-	if result.Error != nil {
-		return nil, result.Error
+	limit := 0
+	if queryParams["limit"] != nil {
+		limit, _ = strconv.Atoi(queryParams["limit"].(string))
 	}
 
-	return houseReservation, nil
+	page := 0
+	if queryParams["page"] != nil {
+		page, _ = strconv.Atoi(queryParams["page"].(string))
+	}
+
+	pagination := helpers.Pagination{
+		Limit: limit,
+		Page:  page,
+	}
+
+	result.Scopes(helpers.Paginate(&pagination, result)).Find(&houseReservation)
+
+	if result.Error != nil {
+		return nil, nil, result.Error
+	}
+
+	return houseReservation, &pagination, nil
 }
 
-func (r *reservationRepository) GetHouseReservationsByHouseID(houseID int, filterBy string) ([]*dtos.HouseReservationsDTO, error) {
+// func (r *reservationRepository) GetHouseReservationsByUserID(userID int, filterBy string) ([]*dtos.HouseReservationsDTO, error) {
+// 	var houseReservation []*dtos.HouseReservationsDTO
+
+// 	result := r.db.Model(&models.Reservation{}).
+// 		Select(`houses.id AS house_id, houses.city_id AS house_city_id, reservations.user_id AS user_id, reservations.id AS reservation_id, reservations.reservation_code AS reservation_code, reservations.check_in_date AS check_in_date, reservations.check_out_date AS check_out_date, reservations.total_price AS total_price,
+// 		(CASE WHEN NOW()::timestamp::date = reservations.check_in_date::timestamp::date THEN 'today'
+// 		WHEN NOW()::timestamp::date BETWEEN reservations.check_in_date::timestamp::date AND reservations.check_out_date::timestamp::date THEN 'ongoing'
+// 		WHEN reservations.check_in_date::timestamp::date > NOW() THEN 'upcoming'
+// 		WHEN reservations.check_out_date::timestamp::date < NOW() THEN 'past' END) AS reservation_status`).
+// 		Joins("JOIN houses ON reservations.house_id = houses.id").
+// 		Where("reservations.user_id = ?", userID)
+
+// 	// result := r.db.Model(&models.House{}).
+// 	// 	Select("houses.id AS house_id, reservations.user_id AS user_id, reservations.id AS reservation_id, reservations.reservation_code AS reservation_code, reservations.check_in_date AS check_in_date, reservations.check_out_date AS check_out_date, reservations.total_price AS total_price").
+// 	// 	Joins("JOIN reservations ON houses.id = reservations.house_id").
+// 	// 	Where("reservations.user_id = ?", userID)
+
+// 	if filterBy == "today" {
+// 		result = result.Where("NOW()::timestamp::date = reservations.check_in_date::timestamp::date")
+// 	}
+
+// 	if filterBy == "ongoing" {
+// 		result = result.Where("NOW()::timestamp::date BETWEEN reservations.check_in_date::timestamp::date AND reservations.check_out_date::timestamp::date").Order("reservations.check_in_date asc")
+// 	}
+
+// 	if filterBy == "upcoming" {
+// 		result = result.Where("reservations.check_in_date::timestamp::date > NOW()::timestamp::date").Order("reservations.check_in_date asc")
+// 	}
+
+// 	if filterBy == "past" {
+// 		result = result.Where("reservations.check_out_date::timestamp::date < NOW()::timestamp::date").Order("reservations.check_in_date desc")
+// 	}
+
+// 	if filterBy == "all" {
+// 		result = result.Order("reservations.check_in_date desc")
+// 	}
+
+// 	result.Find(&houseReservation)
+
+// 	if result.Error != nil {
+// 		return nil, result.Error
+// 	}
+
+// 	return houseReservation, nil
+// }
+
+func (r *reservationRepository) GetHouseReservationsByHouseID(houseID int, queryParams map[string]interface{}) ([]*dtos.HouseReservationsDTO, *helpers.Pagination, error) {
 	var houseReservation []*dtos.HouseReservationsDTO
+
+	filterBy := fmt.Sprintf("%v", queryParams["filterBy"])
 
 	result := r.db.Model(&models.Reservation{}).
 		Select(`houses.id AS house_id, houses.city_id AS house_city_id, reservations.user_id AS user_id, reservations.id AS reservation_id, reservations.reservation_code AS reservation_code, reservations.check_in_date AS check_in_date, reservations.check_out_date AS check_out_date, reservations.total_price AS total_price,
@@ -108,6 +178,23 @@ func (r *reservationRepository) GetHouseReservationsByHouseID(houseID int, filte
 		result = result.Order("reservations.check_in_date desc")
 	}
 
+	limit := 0
+	if queryParams["limit"] != nil {
+		limit, _ = strconv.Atoi(queryParams["limit"].(string))
+	}
+
+	page := 0
+	if queryParams["page"] != nil {
+		page, _ = strconv.Atoi(queryParams["page"].(string))
+	}
+
+	pagination := helpers.Pagination{
+		Limit: limit,
+		Page:  page,
+	}
+
+	result.Scopes(helpers.Paginate(&pagination, result)).Find(&houseReservation)
+
 	result.Find(&houseReservation)
 
 	// if filterBy == "today" {
@@ -129,10 +216,10 @@ func (r *reservationRepository) GetHouseReservationsByHouseID(houseID int, filte
 	// result.Find(&houseReservation)
 
 	if result.Error != nil {
-		return nil, result.Error
+		return nil, nil, result.Error
 	}
 
-	return houseReservation, nil
+	return houseReservation, &pagination, nil
 }
 
 func (r *reservationRepository) GetHouseReservationsByID(reservationID int) (*dtos.HouseReservationsDTO, error) {

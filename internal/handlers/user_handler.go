@@ -95,6 +95,11 @@ func (h *Handler) UpdateUserProfileHandler(c *gin.Context) {
 	userData, err := h.userService.UpdateUserProfile(userContext.UserID, request)
 
 	if err != nil {
+		if errors.Is(err, e.ErrInvalidPasswordInputError) {
+			c.JSON(http.StatusBadRequest, helpers.BuildErrorResponse(http.StatusBadRequest, e.ErrInvalidPasswordInputError.Error()))
+			return
+		}
+		
 		if errors.Is(err, e.ErrOldPasswordNotMatchError) {
 			c.JSON(http.StatusBadRequest, helpers.BuildErrorResponse(http.StatusBadRequest, e.ErrOldPasswordNotMatchError.Error()))
 			return
