@@ -39,6 +39,11 @@ type GetHouseReservationsByUserResponseDTO struct {
 	Reservation []*HouseReservationsDTO `json:"reservation"`
 }
 
+type GetHouseReservationsByHostResponseDTO struct {
+	Pagination  *helpers.Pagination     `json:"pagination"`
+	Reservation []*HouseReservationsDTO `json:"reservation"`
+}
+
 type GetHouseReservationsByHouseResponseDTO struct {
 	Pagination  *helpers.Pagination     `json:"pagination"`
 	Reservation []*HouseReservationsDTO `json:"reservation"`

@@ -98,6 +98,31 @@ func (h *Handler) GetHouseReservationsByUserHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, helpers.BuildSuccessResponse(http.StatusOK, http.StatusText(http.StatusOK), response))
 }
 
+func (h *Handler) GetHouseReservationsByHostHandler(c *gin.Context) {
+	var response *dtos.GetHouseReservationsByHostResponseDTO
+
+	userContext := c.MustGet("user").(dtos.JwtData)
+
+	queryParams := map[string]interface{}{}
+	for key, values := range c.Request.URL.Query() {
+		queryParams[key] = values[0]
+	}
+
+	data, pagination, err := h.reservationService.GetHouseReservationsByHost(userContext.UserID, queryParams)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, helpers.BuildErrorResponse(http.StatusInternalServerError, err.Error()))
+		return
+	}
+
+	response = &dtos.GetHouseReservationsByHostResponseDTO{
+		Pagination:  pagination,
+		Reservation: data,
+	}
+
+	c.JSON(http.StatusOK, helpers.BuildSuccessResponse(http.StatusOK, http.StatusText(http.StatusOK), response))
+}
+
 func (h *Handler) GetHouseReservationsByHouseHandler(c *gin.Context) {
 	var response *dtos.GetHouseReservationsByHouseResponseDTO
 

@@ -37,6 +37,7 @@ func InitAllRoutes(r *gin.Engine, h *handlers.Handler) {
 
 	// Host
 	r.GET("/host/house", h.GetHostHousesHandler)
+	r.GET("/host/reservation", h.GetHouseReservationsByHostHandler)
 	r.POST("/host/house", h.AddNewHouseHandler)
 	r.PATCH("/host/house/:houseId", h.UpdateHouseHandler)
 	r.DELETE("/host/house/:houseId", h.DeleteHouseHandler)
