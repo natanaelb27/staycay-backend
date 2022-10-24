@@ -29,6 +29,7 @@ var (
 	ErrPickupOngoingReservation                  = errors.New("pickup is not available for ongoing reservation")
 	ErrInsufficientGameChanceError               = errors.New("insufficient game chance")
 	ErrInvalidCheckInDateUpdatePickupStatusError = errors.New("cannot update pickup status, check in date is not today")
+	ErrHousePhotoMustMoreThanOneError            = errors.New("each house must have at least 1 photo")
 	// ErrInvalidRoleAddHouseError = errors.New("only host can add a new house")
 )
 

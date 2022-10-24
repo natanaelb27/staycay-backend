@@ -324,6 +324,11 @@ func (s *houseService) DeleteHouse(houseID int, userID int) (*models.House, erro
 
 	upcomingHouseReservation, _, err := s.reservationRepository.GetHouseReservationsByHouseID(houseID, queryParams)
 
+	if err != nil {
+		return nil, err
+
+	}
+
 	if len(upcomingHouseReservation) > 0 {
 		newData := &models.House{
 			HouseStatusID: houseStatus.ID,
@@ -338,9 +343,10 @@ func (s *houseService) DeleteHouse(houseID int, userID int) (*models.House, erro
 		return house, e.ErrDeleteUpcomingReservationError
 	}
 
+	err = s.houseRepository.DeleteHousePhotoByHouseID(houseID)
+
 	if err != nil {
 		return nil, err
-
 	}
 
 	deletedHouse, err := s.houseRepository.DeleteHouseByID(houseID)
@@ -394,6 +400,12 @@ func (s *houseService) DeleteHousePhoto(housePhotoID int, userID int) (*models.H
 
 	if houseDetails.HostID != userID {
 		return nil, e.ErrInvalidHostError
+	}
+
+	totalRows, err := s.houseRepository.ValidateTotalHousePhoto(houseDetails.HouseID)
+
+	if totalRows <= 1 {
+		return nil, e.ErrHousePhotoMustMoreThanOneError
 	}
 
 	housePhoto, err := s.houseRepository.DeleteHousePhotoByID(housePhotoID)

@@ -23,7 +23,9 @@ type HouseRepository interface {
 	CreateNewHouse(newHouse *models.House) (*models.House, error)
 	AddHousePhoto(newHousePhoto *models.HousePhoto) (*models.HousePhoto, error)
 	UpdateHouseByHouseID(houseID int, houseNewData *models.House) (*models.House, error)
+	DeleteHousePhotoByHouseID(houseID int) error
 	DeleteHouseByID(houseID int) (*models.House, error)
+	ValidateTotalHousePhoto(houseID int) (int64, error)
 	DeleteHousePhotoByID(housePhotoID int) (*models.HousePhoto, error)
 }
 
@@ -118,7 +120,7 @@ func (r *houseRepository) GetHouse(queryParams map[string]interface{}) ([]*dtos.
 	result := r.db.Raw(query, r.db.Model(&models.House{}).
 		Select("houses.id AS house_id, houses.name AS house_name, houses.price AS house_price, houses.description AS house_description, cities.id AS house_city_id, cities.name AS house_city_name, houses.max_guest AS house_max_guest, house_statuses.status AS house_status, users.id AS host_id, users.name AS host_name, users.email AS host_email").
 		Joins("JOIN cities ON houses.city_id = cities.id").
-		Joins("JOIN users ON houses.user_id = users.id").
+		Joins("JOIN users ON houses.user_ValidateTotalHousePhoto(houseID int) (int64, error)id = users.id").
 		Joins("JOIN house_statuses ON houses.house_status_id = house_statuses.id").
 		Where("house_statuses.status ILIKE ?", "active")).
 		Scan(&houseDetails)
@@ -158,10 +160,6 @@ func (r *houseRepository) GetHousePhotoByHouseID(houseID int) ([]*dtos.HousePhot
 
 	if result.Error != nil {
 		return nil, result.Error
-	}
-
-	if result.RowsAffected == 0 {
-		return nil, e.ErrIdNotFoundError
 	}
 
 	return housePhotos, nil
@@ -284,7 +282,26 @@ func (r *houseRepository) GetHouseByHousePhotoID(housePhotoID int) (*dtos.HouseD
 		return nil, result.Error
 	}
 
+	if result.RowsAffected == 0 {
+		return nil, e.ErrIdNotFoundError
+	}
+
 	return houseDetails, nil
+}
+
+func (r *houseRepository) DeleteHousePhotoByHouseID(houseID int) error {
+	var housePhoto *models.HousePhoto
+
+	result := r.db.
+		Where("house_id = ?", houseID).
+		Delete(&housePhoto)
+
+	if result.Error != nil {
+		return result.Error
+	}
+
+	return nil
+
 }
 
 func (r *houseRepository) DeleteHouseByID(houseID int) (*models.House, error) {
@@ -300,6 +317,21 @@ func (r *houseRepository) DeleteHouseByID(houseID int) (*models.House, error) {
 	}
 
 	return house, nil
+}
+
+func (r *houseRepository) ValidateTotalHousePhoto(houseID int) (int64, error) {
+	var totalRows int64
+
+	result := r.db.
+		Model(&models.HousePhoto{}).
+		Where("house_id = ?", houseID).
+		Count(&totalRows)
+
+	if result.Error != nil {
+		return 0, result.Error
+	}
+
+	return totalRows, nil
 }
 
 func (r *houseRepository) DeleteHousePhotoByID(housePhotoID int) (*models.HousePhoto, error) {

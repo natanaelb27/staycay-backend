@@ -292,6 +292,11 @@ func (h *Handler) DeleteHousePhotoHandler(c *gin.Context) {
 			return
 		}
 
+		if errors.Is(err, e.ErrHousePhotoMustMoreThanOneError) {
+			c.JSON(http.StatusBadRequest, helpers.BuildErrorResponse(http.StatusBadRequest, e.ErrHousePhotoMustMoreThanOneError.Error()))
+			return
+		}
+
 		if errors.Is(err, e.ErrInvalidHostError) {
 			c.JSON(http.StatusForbidden, helpers.BuildErrorResponse(http.StatusForbidden, e.ErrInvalidHostError.Error()))
 			return
