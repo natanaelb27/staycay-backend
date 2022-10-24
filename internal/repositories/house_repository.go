@@ -120,7 +120,7 @@ func (r *houseRepository) GetHouse(queryParams map[string]interface{}) ([]*dtos.
 	result := r.db.Raw(query, r.db.Model(&models.House{}).
 		Select("houses.id AS house_id, houses.name AS house_name, houses.price AS house_price, houses.description AS house_description, cities.id AS house_city_id, cities.name AS house_city_name, houses.max_guest AS house_max_guest, house_statuses.status AS house_status, users.id AS host_id, users.name AS host_name, users.email AS host_email").
 		Joins("JOIN cities ON houses.city_id = cities.id").
-		Joins("JOIN users ON houses.user_ValidateTotalHousePhoto(houseID int) (int64, error)id = users.id").
+		Joins("JOIN users ON houses.user_id = users.id").
 		Joins("JOIN house_statuses ON houses.house_status_id = house_statuses.id").
 		Where("house_statuses.status ILIKE ?", "active")).
 		Scan(&houseDetails)
