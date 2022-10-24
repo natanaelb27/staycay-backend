@@ -24,6 +24,7 @@ type HouseDetailsDTO struct {
 	HouseName        string `json:"house_name"`
 	HousePrice       int    `json:"house_price"`
 	HouseDescription string `json:"house_description"`
+	HouseCityID      int    `json:"house_city_id"`
 	HouseCityName    string `json:"house_city_name"`
 	HouseMaxGuest    int    `json:"house_max_guest"`
 	HouseStatus      string `json:"house_status"`
@@ -37,6 +38,7 @@ type HouseDetailsWithPhotoDTO struct {
 	HouseName        string            `json:"house_name"`
 	HousePrice       int               `json:"house_price"`
 	HouseDescription string            `json:"house_description"`
+	HouseCityID      int               `json:"house_city_id"`
 	HouseCityName    string            `json:"house_city_name"`
 	HouseMaxGuest    int               `json:"house_max_guest"`
 	HouseStatus      string            `json:"house_status"`
@@ -55,6 +57,7 @@ type GetHouseByIDResponseDTO struct {
 	HouseName        string            `json:"house_name"`
 	HousePrice       int               `json:"house_price"`
 	HouseDescription string            `json:"house_description"`
+	HouseCityID      int               `json:"house_city_id"`
 	HouseCityName    string            `json:"house_city_name"`
 	HouseMaxGuest    int               `json:"house_max_guest"`
 	HouseStatus      string            `json:"house_status"`

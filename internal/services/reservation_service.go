@@ -165,7 +165,7 @@ func (s *reservationService) GetHouseReservationsByID(reservationID int, userID 
 		return nil, err
 	}
 
-	houseDetails, err := s.houseRepository.GetHouseByHouseID(houseReservations.HouseID)
+	houseDetails, err := s.houseRepository.GetUnscopedHouseByHouseID(houseReservations.HouseID)
 
 	if err != nil {
 		return nil, err
