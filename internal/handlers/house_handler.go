@@ -73,6 +73,40 @@ func (h *Handler) GetHouseByIDHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, helpers.BuildSuccessResponse(http.StatusOK, http.StatusText(http.StatusOK), response))
 }
 
+func (h *Handler) GetUnscopedHouseByIDHandler(c *gin.Context) {
+	var response *dtos.GetHouseByIDResponseDTO
+
+	houseID, _ := strconv.Atoi(c.Param("houseId"))
+
+	data, err := h.houseService.GetUnscopedHouseByID(houseID)
+
+	if err != nil {
+		if errors.Is(err, e.ErrIdNotFoundError) {
+			c.JSON(http.StatusBadRequest, helpers.BuildErrorResponse(http.StatusBadRequest, e.ErrIdNotFoundError.Error()))
+			return
+		}
+
+		c.JSON(http.StatusInternalServerError, helpers.BuildErrorResponse(http.StatusInternalServerError, err.Error()))
+		return
+	}
+
+	response = &dtos.GetHouseByIDResponseDTO{
+		HouseID:          data.HouseID,
+		HouseName:        data.HouseName,
+		HousePrice:       data.HousePrice,
+		HouseDescription: data.HouseDescription,
+		HouseCityName:    data.HouseCityName,
+		HouseMaxGuest:    data.HouseMaxGuest,
+		HouseStatus:      data.HouseStatus,
+		HousePhoto:       data.HousePhoto,
+		HostID:           data.HostID,
+		HostName:         data.HostName,
+		HostEmail:        data.HostEmail,
+	}
+
+	c.JSON(http.StatusOK, helpers.BuildSuccessResponse(http.StatusOK, http.StatusText(http.StatusOK), response))
+}
+
 func (h *Handler) GetHostHousesHandler(c *gin.Context) {
 	var response *dtos.GetHostHousesResponseDTO
 

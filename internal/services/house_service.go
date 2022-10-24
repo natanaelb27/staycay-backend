@@ -12,6 +12,7 @@ import (
 type HouseService interface {
 	GetAllHouses(queryParams map[string]interface{}) ([]*dtos.HouseDetailsWithPhotoDTO, error)
 	GetHouseByID(houseID int) (*dtos.HouseDetailsWithPhotoDTO, error)
+	GetUnscopedHouseByID(houseID int) (*dtos.HouseDetailsWithPhotoDTO, error)
 	GetHostHouses(hostID int) ([]*dtos.HouseDetailsWithPhotoDTO, error)
 	GetAllHouseStatuses() ([]*dtos.HouseStatusDTO, error)
 	AddNewHouse(userID int, request *dtos.AddNewHouseRequestDTO) (*models.House, []string, error)
@@ -105,6 +106,36 @@ func (s *houseService) GetHouseByID(houseID int) (*dtos.HouseDetailsWithPhotoDTO
 	}
 
 	housePhoto, err := s.houseRepository.GetHousePhotoByHouseID(houseID)
+
+	if err != nil {
+		return nil, err
+	}
+
+	houseData := &dtos.HouseDetailsWithPhotoDTO{
+		HouseID:          houseDetails.HouseID,
+		HouseName:        houseDetails.HouseName,
+		HousePrice:       houseDetails.HousePrice,
+		HouseDescription: houseDetails.HouseDescription,
+		HouseCityName:    houseDetails.HouseCityName,
+		HouseMaxGuest:    houseDetails.HouseMaxGuest,
+		HouseStatus:      houseDetails.HouseStatus,
+		HousePhoto:       housePhoto,
+		HostID:           houseDetails.HostID,
+		HostName:         houseDetails.HostName,
+		HostEmail:        houseDetails.HostEmail,
+	}
+
+	return houseData, nil
+}
+
+func (s *houseService) GetUnscopedHouseByID(houseID int) (*dtos.HouseDetailsWithPhotoDTO, error) {
+	houseDetails, err := s.houseRepository.GetUnscopedHouseByHouseID(houseID)
+
+	if err != nil {
+		return nil, err
+	}
+
+	housePhoto, err := s.houseRepository.GetUnscopedHousePhotoByHouseID(houseID)
 
 	if err != nil {
 		return nil, err
@@ -319,6 +350,16 @@ func (s *houseService) DeleteHouse(houseID int, userID int) (*models.House, erro
 		return nil, err
 	}
 
+	newData := &models.House{
+		HouseStatusID: houseStatus.ID,
+	}
+
+	_, err = s.houseRepository.UpdateHouseByHouseID(houseID, newData)
+
+	if err != nil {
+		return nil, err
+	}
+
 	queryParams := make(map[string]interface{})
 	queryParams["filterBy"] = "upcoming"
 
@@ -330,17 +371,7 @@ func (s *houseService) DeleteHouse(houseID int, userID int) (*models.House, erro
 	}
 
 	if len(upcomingHouseReservation) > 0 {
-		newData := &models.House{
-			HouseStatusID: houseStatus.ID,
-		}
-
-		house, err := s.houseRepository.UpdateHouseByHouseID(houseID, newData)
-
-		if err != nil {
-			return nil, err
-		}
-
-		return house, e.ErrDeleteUpcomingReservationError
+		return nil, e.ErrDeleteUpcomingReservationError
 	}
 
 	err = s.houseRepository.DeleteHousePhotoByHouseID(houseID)

@@ -15,7 +15,9 @@ type HouseRepository interface {
 	GetHouse(queryParams map[string]interface{}) ([]*dtos.HouseDetailsDTO, error)
 	GetHouseByHostID(hostID int) ([]*dtos.HouseDetailsDTO, error)
 	GetHousePhotoByHouseID(houseID int) ([]*dtos.HousePhotosDTO, error)
+	GetUnscopedHousePhotoByHouseID(houseID int) ([]*dtos.HousePhotosDTO, error)
 	GetHouseByHouseID(houseID int) (*dtos.HouseDetailsDTO, error)
+	GetUnscopedHouseByHouseID(houseID int) (*dtos.HouseDetailsDTO, error)
 	GetHouseByHousePhotoID(housePhotoID int) (*dtos.HouseDetailsDTO, error)
 	GetHouseStatusByName(status string) (*models.HouseStatus, error)
 	GetHouseStatus() ([]*dtos.HouseStatusDTO, error)
@@ -165,10 +167,49 @@ func (r *houseRepository) GetHousePhotoByHouseID(houseID int) ([]*dtos.HousePhot
 	return housePhotos, nil
 }
 
+func (r *houseRepository) GetUnscopedHousePhotoByHouseID(houseID int) ([]*dtos.HousePhotosDTO, error) {
+	var housePhotos []*dtos.HousePhotosDTO
+
+	result := r.db.Model(&models.HousePhoto{}).
+		Unscoped().
+		Select("id AS photo_id, photo").
+		Where("house_id = ?", houseID).
+		Find(&housePhotos)
+
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	return housePhotos, nil
+}
+
 func (r *houseRepository) GetHouseByHouseID(houseID int) (*dtos.HouseDetailsDTO, error) {
 	var houseDetails *dtos.HouseDetailsDTO
 
 	result := r.db.Model(&models.House{}).
+		Select("houses.id AS house_id, houses.name AS house_name, houses.price AS house_price, houses.description AS house_description, cities.name AS house_city_name, houses.max_guest AS house_max_guest, house_statuses.status AS house_status, users.id AS host_id, users.name AS host_name, users.email AS host_email").
+		Joins("JOIN cities ON houses.city_id = cities.id").
+		Joins("JOIN users ON houses.user_id = users.id").
+		Joins("JOIN house_statuses ON houses.house_status_id = house_statuses.id").
+		Where("houses.id = ?", houseID).
+		Find(&houseDetails)
+
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	if result.RowsAffected == 0 {
+		return nil, e.ErrIdNotFoundError
+	}
+
+	return houseDetails, nil
+}
+
+func (r *houseRepository) GetUnscopedHouseByHouseID(houseID int) (*dtos.HouseDetailsDTO, error) {
+	var houseDetails *dtos.HouseDetailsDTO
+
+	result := r.db.Model(&models.House{}).
+		Unscoped().
 		Select("houses.id AS house_id, houses.name AS house_name, houses.price AS house_price, houses.description AS house_description, cities.name AS house_city_name, houses.max_guest AS house_max_guest, house_statuses.status AS house_status, users.id AS host_id, users.name AS host_name, users.email AS host_email").
 		Joins("JOIN cities ON houses.city_id = cities.id").
 		Joins("JOIN users ON houses.user_id = users.id").
