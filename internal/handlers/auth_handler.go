@@ -75,6 +75,7 @@ func (h *Handler) LoginHandler(c *gin.Context) {
 	response = dtos.LoginResponseDTO{
 		UserID: user.ID,
 		Email:  user.Email,
+		Role:   user.Role,
 		Token:  *token,
 	}
 

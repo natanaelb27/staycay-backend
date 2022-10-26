@@ -74,6 +74,11 @@ func (r *houseRepository) GetHouse(queryParams map[string]interface{}) ([]*dtos.
 		qFilterCityID = fmt.Sprintf("AND t.house_city_id = %v", queryParams["searchCity"])
 	}
 
+	qFilterStatus := ""
+	if queryParams["searchStatus"] != nil {
+		qFilterStatus = fmt.Sprintf("AND t.house_status ILIKE '%v'", queryParams["searchStatus"])
+	}
+
 	format := "2006-01-02"
 
 	qFilterCheckInDate := ""
@@ -108,23 +113,20 @@ func (r *houseRepository) GetHouse(queryParams map[string]interface{}) ([]*dtos.
 			OR check_out_date::timestamp::date BETWEEN '%s'::timestamp::date AND '%s'::timestamp::date)`, qFilterCheckInDate, qFilterCheckOutDate, qFilterCheckInDate, qFilterCheckOutDate, qFilterCheckInDate, qFilterCheckOutDate)
 	}
 
-	println(qFilterReservation)
-
 	qSortBy := fmt.Sprintf("ORDER BY %s", queryParams["sortBy"])
 
 	qSort := ""
 	if queryParams["sort"] != nil {
 		qSort = fmt.Sprintf("%v", queryParams["sort"])
-
 	}
-	query := fmt.Sprintf("SELECT * FROM (?) t WHERE t.house_name ILIKE '%s' %s %s %s %s", fmt.Sprintf("%%%s%%", qFilterHouseName), qFilterCityID, qFilterReservation, qSortBy, qSort)
+
+	query := fmt.Sprintf("SELECT * FROM (?) t WHERE t.house_name ILIKE '%s' %s %s %s %s %s", fmt.Sprintf("%%%s%%", qFilterHouseName), qFilterCityID, qFilterStatus, qFilterReservation, qSortBy, qSort)
 
 	result := r.db.Raw(query, r.db.Model(&models.House{}).
 		Select("houses.id AS house_id, houses.name AS house_name, houses.price AS house_price, houses.description AS house_description, cities.id AS house_city_id, cities.name AS house_city_name, houses.max_guest AS house_max_guest, house_statuses.status AS house_status, users.id AS host_id, users.name AS host_name, users.email AS host_email").
 		Joins("JOIN cities ON houses.city_id = cities.id").
 		Joins("JOIN users ON houses.user_id = users.id").
-		Joins("JOIN house_statuses ON houses.house_status_id = house_statuses.id").
-		Where("house_statuses.status ILIKE ?", "active")).
+		Joins("JOIN house_statuses ON houses.house_status_id = house_statuses.id")).
 		Scan(&houseDetails)
 
 	if result.Error != nil {

@@ -33,6 +33,7 @@ type LoginRequestDTO struct {
 type LoginResponseDTO struct {
 	UserID int    `json:"user_id"`
 	Email  string `json:"email"`
+	Role   string `json:"role"`
 	Token  string `json:"token"`
 }
 
