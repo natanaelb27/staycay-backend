@@ -25,7 +25,8 @@ func InitAllRoutes(r *gin.Engine, h *handlers.Handler) {
 	r.GET("/user/:userId", h.GetUserProfileByUserIDHandler)
 
 	// Pickup
-	// r.GET("/pickup/status", h.GetAllPickupStatusesHandler)
+	r.GET("/pickup/status", h.GetAllPickupStatusesHandler)
+	r.GET("/pickup", h.GetAllPickupDetailsHandler)
 
 	// Need Authorizations
 	r.Use(middlewares.AuthorizeJWT)

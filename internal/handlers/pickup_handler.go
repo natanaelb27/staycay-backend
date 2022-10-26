@@ -135,18 +135,40 @@ func (h *Handler) AdminUpdatePickupStatusHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, helpers.BuildSuccessResponse(http.StatusOK, http.StatusText(http.StatusOK), response))
 }
 
-// func (h *Handler) GetAllPickupStatusesHandler(c *gin.Context) {
-// 	var response *dtos.GetAllPickupStatusesResponseDTO
+func (h *Handler) GetAllPickupStatusesHandler(c *gin.Context) {
+	var response *dtos.GetAllPickupStatusesResponseDTO
 
-// 	data, err := h.pickupService.GetAllPickupStatuses()
-// 	if err != nil {
-// 		c.JSON(http.StatusInternalServerError, helpers.BuildErrorResponse(http.StatusInternalServerError, err.Error()))
-// 		return
-// 	}
+	data, err := h.pickupService.GetAllPickupStatuses()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, helpers.BuildErrorResponse(http.StatusInternalServerError, err.Error()))
+		return
+	}
 
-// 	response = &dtos.GetAllPickupStatusesResponseDTO{
-// 		PickupStatus: data,
-// 	}
+	response = &dtos.GetAllPickupStatusesResponseDTO{
+		PickupStatus: data,
+	}
 
-// 	c.JSON(http.StatusOK, helpers.BuildSuccessResponse(http.StatusOK, http.StatusText(http.StatusOK), response))
-// }
+	c.JSON(http.StatusOK, helpers.BuildSuccessResponse(http.StatusOK, http.StatusText(http.StatusOK), response))
+}
+
+func (h *Handler) GetAllPickupDetailsHandler(c *gin.Context) {
+	var response *dtos.GetAllPickupDetailsResponseDTO
+
+	queryParams := map[string]interface{}{}
+	for key, values := range c.Request.URL.Query() {
+		queryParams[key] = values[0]
+	}
+
+	data, pagination, err := h.pickupService.GetAllPickupDetails(queryParams)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, helpers.BuildErrorResponse(http.StatusInternalServerError, err.Error()))
+		return
+	}
+
+	response = &dtos.GetAllPickupDetailsResponseDTO{
+		Pagination: pagination,
+		Pickup:     data,
+	}
+
+	c.JSON(http.StatusOK, helpers.BuildSuccessResponse(http.StatusOK, http.StatusText(http.StatusOK), response))
+}

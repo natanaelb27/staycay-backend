@@ -171,7 +171,13 @@ func (s *reservationService) GetHouseReservationsByID(reservationID int, userID 
 		return nil, err
 	}
 
-	if houseReservations.UserID != userID && houseDetails.HostID != userID {
+	userDetails, err := s.userRepository.GetUserDetails(userID)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if houseReservations.UserID != userID && houseDetails.HostID != userID && strings.ToLower(userDetails.Role) != "admin" {
 		return nil, e.ErrInvalidHostAndUserReservationError
 	}
 

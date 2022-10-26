@@ -6,6 +6,7 @@ import (
 
 	"git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend/internal/dtos"
 	e "git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend/internal/errors"
+	"git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend/internal/helpers"
 	"git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend/internal/models"
 	r "git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend/internal/repositories"
 )
@@ -14,6 +15,8 @@ type PickupService interface {
 	RequestPickup(reservationID int, userID int, request *dtos.RequestPickupRequestDTO) (*models.Pickup, error)
 	GetPickupDetailsByReservation(reservationID int, userID int) (*dtos.GetPickupDetailsByReservationResponseDTO, error)
 	AdminUpdatePickupStatus(pickupStatusID int, reservationID int, userID int) (*models.Pickup, error)
+	GetAllPickupStatuses() ([]*dtos.PickupStatusesDTO, error)
+	GetAllPickupDetails(queryParams map[string]interface{}) ([]*dtos.PickupDetailsDTO, *helpers.Pagination, error)
 }
 
 type pickupService struct {
@@ -187,21 +190,22 @@ func (s *pickupService) AdminUpdatePickupStatus(pickupStatusID int, reservationI
 	return updatedPickup, nil
 }
 
-// func (s *pickupService) GetAllPickupStatuses() ([]*dtos.CitiesDTO, error) {
-// 	pikcupStatuses, err := s.pickupRepository.GetPickupStatuses()
+func (s *pickupService) GetAllPickupStatuses() ([]*dtos.PickupStatusesDTO, error) {
+	pikcupStatuses, err := s.pickupRepository.GetPickupStatuses()
 
-// 	if err != nil {
-// 		return nil, err
-// 	}
+	if err != nil {
+		return nil, err
+	}
 
-// 	cityList := make([]*dtos.CitiesDTO, 0)
+	return pikcupStatuses, nil
+}
 
-// 	for _, city := range cities {
-// 		cityList = append(cityList, &dtos.CitiesDTO{
-// 			CityID:   city.ID,
-// 			CityName: city.Name,
-// 		})
-// 	}
+func (s *pickupService) GetAllPickupDetails(queryParams map[string]interface{}) ([]*dtos.PickupDetailsDTO, *helpers.Pagination, error) {
+	pickupStatuses, pagination, err := s.pickupRepository.GetPickupDetails(queryParams)
 
-// 	return cityList, nil
-// }
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return pickupStatuses, pagination, nil
+}

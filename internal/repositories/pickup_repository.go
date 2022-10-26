@@ -1,8 +1,12 @@
 package repositories
 
 import (
+	"fmt"
+	"strconv"
+
 	"git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend/internal/dtos"
 	e "git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend/internal/errors"
+	"git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend/internal/helpers"
 	"git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend/internal/models"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -16,6 +20,8 @@ type PickupRepository interface {
 	GetPickupStatusByName(status string) (*models.PickupStatus, error)
 	GetPickupDetailsByReservationID(reservationID int) (*dtos.GetPickupDetailsByReservationResponseDTO, error)
 	UpdatePickupStatusByReservation(pickupStatusID int, reservationID int) (*models.Pickup, error)
+	GetPickupStatuses() ([]*dtos.PickupStatusesDTO, error)
+	GetPickupDetails(queryParams map[string]interface{}) ([]*dtos.PickupDetailsDTO, *helpers.Pagination, error)
 }
 
 type pickupRepository struct {
@@ -106,7 +112,7 @@ func (r *pickupRepository) GetPickupStatusByName(status string) (*models.PickupS
 
 func (r *pickupRepository) GetPickupDetailsByReservationID(reservationID int) (*dtos.GetPickupDetailsByReservationResponseDTO, error) {
 	var houseReservation *dtos.GetPickupDetailsByReservationResponseDTO
-	
+
 	result := r.db.Model(&models.Reservation{}).
 		Select("pickups.id AS pickup_id, reservations.id AS reservation_id, reservations.house_id AS house_id, pickup_statuses.status AS pickup_status_name, pickups.pickup_address AS pickup_address, pickups.city_id AS pickup_city_id, cities.name AS pickup_city_name, pickups.pickup_price AS pickup_price").
 		Joins("LEFT JOIN pickups ON reservations.id = pickups.reservation_id").
@@ -135,4 +141,62 @@ func (r *pickupRepository) UpdatePickupStatusByReservation(pickupStatusID int, r
 	}
 
 	return &pickup, nil
+}
+
+func (r *pickupRepository) GetPickupStatuses() ([]*dtos.PickupStatusesDTO, error) {
+	var pickupStatuses []*dtos.PickupStatusesDTO
+
+	result := r.db.Model(&models.PickupStatus{}).
+		Select("id AS pickup_status_id, status AS pickup_status_name").
+		Find(&pickupStatuses)
+
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	return pickupStatuses, nil
+
+}
+
+func (r *pickupRepository) GetPickupDetails(queryParams map[string]interface{}) ([]*dtos.PickupDetailsDTO, *helpers.Pagination, error) {
+	var pickupDetails []*dtos.PickupDetailsDTO
+
+	filterPickupStatusName := ""
+	if queryParams["filterPickupStatusName"] != nil {
+		filterPickupStatusName = fmt.Sprintf("%v", queryParams["filterPickupStatusName"])
+	}
+
+	result := r.db.Model(&models.Pickup{}).
+		Select(`pickups.id AS pickup_id, pickups.reservation_id AS reservation_id, reservations.house_id AS house_id, pickups.pickup_status_id AS pickup_status_id,
+		pickup_statuses.status AS pickup_status_name, pickups.pickup_address AS pickup_address, pickups.city_id AS pickup_city_id, 
+		cities.name AS pickup_city_name, pickups.pickup_price AS pickup_price`).
+		Joins("JOIN pickup_statuses ON pickups.pickup_status_id = pickup_statuses.id").
+		Joins("JOIN reservations ON pickups.reservation_id = reservations.id").
+		Joins("JOIN cities ON pickups.city_id = cities.id").
+		Where("pickup_statuses.status ILIKE ?", fmt.Sprintf("%%%s%%", filterPickupStatusName)).
+		Order("pickup_id asc")
+
+	limit := 0
+	if queryParams["limit"] != nil {
+		limit, _ = strconv.Atoi(queryParams["limit"].(string))
+	}
+
+	page := 0
+	if queryParams["page"] != nil {
+		page, _ = strconv.Atoi(queryParams["page"].(string))
+	}
+
+	pagination := helpers.Pagination{
+		Limit: limit,
+		Page:  page,
+	}
+
+	result.Scopes(helpers.Paginate(&pagination, result)).Find(&pickupDetails)
+
+	if result.Error != nil {
+		return nil, nil, result.Error
+	}
+
+	return pickupDetails, &pagination, nil
+
 }

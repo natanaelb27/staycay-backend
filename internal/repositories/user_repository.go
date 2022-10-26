@@ -69,11 +69,14 @@ func (r *userRepository) GetUserByID(userID int) (*models.User, error) {
 		Where("id = ?", userID).
 		First(&user)
 
-	if result.RowsAffected == 0 {
-		return nil, gorm.ErrRecordNotFound
-	}
+	// if result.RowsAffected == 0 {
+	// 	return nil, gorm.ErrRecordNotFound
+	// }
 
 	if result.Error != nil {
+		if result.Error == gorm.ErrRecordNotFound {
+			return nil, e.ErrIdNotFoundError
+		}
 		return nil, result.Error
 	}
 
@@ -92,6 +95,10 @@ func (r *userRepository) GetUserByEmail(email string) (*models.User, error) {
 	// }
 
 	if result.Error != nil {
+		if result.Error == gorm.ErrRecordNotFound {
+			return nil, e.ErrCredentialError
+		}
+
 		return nil, result.Error
 	}
 

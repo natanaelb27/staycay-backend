@@ -6,7 +6,6 @@ import (
 	"git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend/internal/helpers"
 	"git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend/internal/models"
 	r "git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend/internal/repositories"
-	"gorm.io/gorm"
 )
 
 type AuthService interface {
@@ -125,7 +124,7 @@ func (s *authService) Login(userData dtos.LoginRequestDTO) (*models.User, *strin
 	}
 
 	if !helpers.CompareEncrypt(userData.Password, user.Password) {
-		return nil, nil, gorm.ErrRecordNotFound
+		return nil, nil, e.ErrCredentialError
 	}
 
 	dataToJwt := &dtos.JwtData{

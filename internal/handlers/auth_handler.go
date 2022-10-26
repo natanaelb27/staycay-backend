@@ -8,7 +8,6 @@ import (
 	e "git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend/internal/errors"
 	"git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend/internal/helpers"
 	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
 )
 
 func (h *Handler) RegisterHandler(c *gin.Context) {
@@ -63,7 +62,7 @@ func (h *Handler) LoginHandler(c *gin.Context) {
 
 	user, token, err := h.authService.Login(request)
 	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
+		if errors.Is(err, e.ErrCredentialError) {
 			c.JSON(http.StatusUnauthorized, helpers.BuildErrorResponse(http.StatusUnauthorized, e.ErrCredentialError.Error()))
 			return
 		}
