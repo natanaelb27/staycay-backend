@@ -102,7 +102,7 @@ func (h *Handler) AdminUpdatePickupStatusHandler(c *gin.Context) {
 
 	userContext := c.MustGet("user").(dtos.JwtData)
 
-	reservationID, _ := strconv.Atoi(c.Param("reservationId"))
+	pickupID, _ := strconv.Atoi(c.Param("pickupId"))
 
 	err := c.ShouldBindJSON(&request)
 	if err != nil {
@@ -110,7 +110,7 @@ func (h *Handler) AdminUpdatePickupStatusHandler(c *gin.Context) {
 		return
 	}
 
-	pickup, err := h.pickupService.AdminUpdatePickupStatus(request.PickupStatusID, reservationID, userContext.UserID)
+	pickup, err := h.pickupService.AdminUpdatePickupStatus(request.PickupStatusID, pickupID, userContext.UserID)
 
 	if err != nil {
 		if errors.Is(err, e.ErrInvalidRoleNotAdminError) {

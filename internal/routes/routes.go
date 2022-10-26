@@ -62,6 +62,6 @@ func InitAllRoutes(r *gin.Engine, h *handlers.Handler) {
 	r.POST("/game", h.PlayGameHandler)
 
 	// Admin
-	r.PATCH("admin/pickup/:reservationId", h.AdminUpdatePickupStatusHandler)
+	r.PATCH("admin/pickup/:pickupId", h.AdminUpdatePickupStatusHandler)
 
 }

@@ -14,13 +14,14 @@ import (
 
 type PickupRepository interface {
 	ValidateOnlyOnePickupReservation(reservationID int) error
-	ValidatePickupReservationExists(reservationID int) error
+	// ValidatePickupReservationExists(reservationID int) error
 	CreatePickup(pickup *models.Pickup) (*models.Pickup, error)
 	GetPickupStatusByID(pickupStatusID int) (*models.PickupStatus, error)
 	GetPickupStatusByName(status string) (*models.PickupStatus, error)
 	GetPickupDetailsByReservationID(reservationID int) (*dtos.GetPickupDetailsByReservationResponseDTO, error)
-	UpdatePickupStatusByReservation(pickupStatusID int, reservationID int) (*models.Pickup, error)
+	UpdatePickupStatusByID(pickupStatusID int, pickupID int) (*models.Pickup, error)
 	GetPickupStatuses() ([]*dtos.PickupStatusesDTO, error)
+	GetPickupByID(pickupID int) (*models.Pickup, error)
 	GetPickupDetails(queryParams map[string]interface{}) ([]*dtos.PickupDetailsDTO, *helpers.Pagination, error)
 }
 
@@ -54,21 +55,21 @@ func (r *pickupRepository) ValidateOnlyOnePickupReservation(reservationID int) e
 	return nil
 }
 
-func (r *pickupRepository) ValidatePickupReservationExists(reservationID int) error {
-	result := r.db.Model(&models.Pickup{}).
-		Where("reservation_id = ?", reservationID).
-		Find(&models.Pickup{})
+// func (r *pickupRepository) ValidatePickupReservationExists(reservationID int) error {
+// 	result := r.db.Model(&models.Pickup{}).
+// 		Where("reservation_id = ?", reservationID).
+// 		Find(&models.Pickup{})
 
-	if result.Error != nil {
-		return result.Error
-	}
+// 	if result.Error != nil {
+// 		return result.Error
+// 	}
 
-	if result.RowsAffected == 0 {
-		return e.ErrIdNotFoundError
-	}
+// 	if result.RowsAffected == 0 {
+// 		return e.ErrIdNotFoundError
+// 	}
 
-	return nil
-}
+// 	return nil
+// }
 
 func (r *pickupRepository) CreatePickup(pickup *models.Pickup) (*models.Pickup, error) {
 	// result := r.db.Where("reservation_id = ?", pickup.ReservationID).FirstOrCreate(&pickup)
@@ -128,12 +129,12 @@ func (r *pickupRepository) GetPickupDetailsByReservationID(reservationID int) (*
 	return houseReservation, nil
 }
 
-func (r *pickupRepository) UpdatePickupStatusByReservation(pickupStatusID int, reservationID int) (*models.Pickup, error) {
+func (r *pickupRepository) UpdatePickupStatusByID(pickupStatusID int, pickupID int) (*models.Pickup, error) {
 	var pickup models.Pickup
 
 	result := r.db.Model(&pickup).
 		Clauses(clause.Returning{}).
-		Where("reservation_id = ?", reservationID).
+		Where("id = ?", pickupID).
 		Update("pickup_status_id", pickupStatusID)
 
 	if result.Error != nil {
@@ -158,6 +159,25 @@ func (r *pickupRepository) GetPickupStatuses() ([]*dtos.PickupStatusesDTO, error
 
 }
 
+func (r *pickupRepository) GetPickupByID(pickupID int) (*models.Pickup, error) {
+	var pickup *models.Pickup
+
+	result := r.db.Model(&models.Pickup{}).
+		Where("id = ?", pickupID).
+		First(&pickup)
+
+	if result.Error != nil {
+		if result.Error == gorm.ErrRecordNotFound {
+			return nil, e.ErrIdNotFoundError
+		}
+
+		return nil, result.Error
+	}
+
+	return pickup, nil
+
+}
+
 func (r *pickupRepository) GetPickupDetails(queryParams map[string]interface{}) ([]*dtos.PickupDetailsDTO, *helpers.Pagination, error) {
 	var pickupDetails []*dtos.PickupDetailsDTO
 
@@ -172,9 +192,13 @@ func (r *pickupRepository) GetPickupDetails(queryParams map[string]interface{}) 
 		cities.name AS pickup_city_name, pickups.pickup_price AS pickup_price`).
 		Joins("JOIN pickup_statuses ON pickups.pickup_status_id = pickup_statuses.id").
 		Joins("JOIN reservations ON pickups.reservation_id = reservations.id").
-		Joins("JOIN cities ON pickups.city_id = cities.id").
-		Where("pickup_statuses.status ILIKE ?", fmt.Sprintf("%%%s%%", filterPickupStatusName)).
-		Order("pickup_id asc")
+		Joins("JOIN cities ON pickups.city_id = cities.id")
+
+	if filterPickupStatusName != "all" {
+		result.Where("pickup_statuses.status ILIKE ?", fmt.Sprintf("%%%s%%", filterPickupStatusName))
+	}
+
+	result.Order("pickup_id asc")
 
 	limit := 0
 	if queryParams["limit"] != nil {

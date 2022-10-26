@@ -14,7 +14,7 @@ import (
 type PickupService interface {
 	RequestPickup(reservationID int, userID int, request *dtos.RequestPickupRequestDTO) (*models.Pickup, error)
 	GetPickupDetailsByReservation(reservationID int, userID int) (*dtos.GetPickupDetailsByReservationResponseDTO, error)
-	AdminUpdatePickupStatus(pickupStatusID int, reservationID int, userID int) (*models.Pickup, error)
+	AdminUpdatePickupStatus(pickupStatusID int, pickupID int, userID int) (*models.Pickup, error)
 	GetAllPickupStatuses() ([]*dtos.PickupStatusesDTO, error)
 	GetAllPickupDetails(queryParams map[string]interface{}) ([]*dtos.PickupDetailsDTO, *helpers.Pagination, error)
 }
@@ -142,7 +142,7 @@ func (s *pickupService) GetPickupDetailsByReservation(reservationID int, userID 
 	return reservationPickup, nil
 }
 
-func (s *pickupService) AdminUpdatePickupStatus(pickupStatusID int, reservationID int, userID int) (*models.Pickup, error) {
+func (s *pickupService) AdminUpdatePickupStatus(pickupStatusID int, pickupID int, userID int) (*models.Pickup, error) {
 	user, err := s.userRepository.GetUserDetails(userID)
 
 	if err != nil {
@@ -153,11 +153,19 @@ func (s *pickupService) AdminUpdatePickupStatus(pickupStatusID int, reservationI
 		return nil, e.ErrInvalidRoleNotAdminError
 	}
 
-	err = s.pickupRepository.ValidatePickupReservationExists(reservationID)
+	// err = s.pickupRepository.ValidatePickupReservationExists(reservationID)
+
+	// if err != nil {
+	// 	return nil, err
+	// }
+
+	pickup, err := s.pickupRepository.GetPickupByID(pickupID)
 
 	if err != nil {
 		return nil, err
 	}
+
+	print(pickup.ReservationID)
 
 	pickupStatus, err := s.pickupRepository.GetPickupStatusByID(pickupStatusID)
 
@@ -165,8 +173,8 @@ func (s *pickupService) AdminUpdatePickupStatus(pickupStatusID int, reservationI
 		return nil, err
 	}
 
-	if strings.ToLower(pickupStatus.Status) == "on the way to pickup" {
-		houseReservation, err := s.reservationRepository.GetHouseReservationsByID(reservationID)
+	if strings.ToLower(pickupStatus.Status) == "on the way to pickup" || strings.ToLower(pickupStatus.Status) == "on the way to reservation" || strings.ToLower(pickupStatus.Status) == "completed" {
+		houseReservation, err := s.reservationRepository.GetHouseReservationsByID(pickup.ReservationID)
 
 		if err != nil {
 			return nil, err
@@ -181,7 +189,7 @@ func (s *pickupService) AdminUpdatePickupStatus(pickupStatusID int, reservationI
 		}
 	}
 
-	updatedPickup, err := s.pickupRepository.UpdatePickupStatusByReservation(pickupStatusID, reservationID)
+	updatedPickup, err := s.pickupRepository.UpdatePickupStatusByID(pickupStatusID, pickupID)
 
 	if err != nil {
 		return nil, err
