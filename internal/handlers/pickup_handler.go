@@ -134,3 +134,19 @@ func (h *Handler) AdminUpdatePickupStatusHandler(c *gin.Context) {
 
 	c.JSON(http.StatusOK, helpers.BuildSuccessResponse(http.StatusOK, http.StatusText(http.StatusOK), response))
 }
+
+// func (h *Handler) GetAllPickupStatusesHandler(c *gin.Context) {
+// 	var response *dtos.GetAllPickupStatusesResponseDTO
+
+// 	data, err := h.pickupService.GetAllPickupStatuses()
+// 	if err != nil {
+// 		c.JSON(http.StatusInternalServerError, helpers.BuildErrorResponse(http.StatusInternalServerError, err.Error()))
+// 		return
+// 	}
+
+// 	response = &dtos.GetAllPickupStatusesResponseDTO{
+// 		PickupStatus: data,
+// 	}
+
+// 	c.JSON(http.StatusOK, helpers.BuildSuccessResponse(http.StatusOK, http.StatusText(http.StatusOK), response))
+// }

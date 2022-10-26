@@ -106,13 +106,13 @@ func (r *pickupRepository) GetPickupStatusByName(status string) (*models.PickupS
 
 func (r *pickupRepository) GetPickupDetailsByReservationID(reservationID int) (*dtos.GetPickupDetailsByReservationResponseDTO, error) {
 	var houseReservation *dtos.GetPickupDetailsByReservationResponseDTO
-
-	result := r.db.Model(&models.Pickup{}).
-		Select("pickups.id AS pickup_id, pickups.reservation_id AS reservation_id, reservations.house_id AS house_id, pickup_statuses.status AS pickup_status_name, pickups.pickup_address AS pickup_address, pickups.city_id AS pickup_city_id, cities.name AS pickup_city_name, pickups.pickup_price AS pickup_price").
-		Joins("JOIN pickup_statuses ON pickups.pickup_status_id = pickup_statuses.id").
-		Joins("JOIN reservations ON pickups.reservation_id = reservations.id").
-		Joins("JOIN cities ON pickups.city_id = cities.id").
-		Where("reservation_id = ?", reservationID).
+	
+	result := r.db.Model(&models.Reservation{}).
+		Select("pickups.id AS pickup_id, reservations.id AS reservation_id, reservations.house_id AS house_id, pickup_statuses.status AS pickup_status_name, pickups.pickup_address AS pickup_address, pickups.city_id AS pickup_city_id, cities.name AS pickup_city_name, pickups.pickup_price AS pickup_price").
+		Joins("LEFT JOIN pickups ON reservations.id = pickups.reservation_id").
+		Joins("LEFT JOIN pickup_statuses ON pickups.pickup_status_id = pickup_statuses.id").
+		Joins("LEFT JOIN cities ON pickups.city_id = cities.id").
+		Where("reservations.id = ?", reservationID).
 		Find(&houseReservation)
 
 	if result.Error != nil {

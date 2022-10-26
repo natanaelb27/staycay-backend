@@ -24,6 +24,9 @@ func InitAllRoutes(r *gin.Engine, h *handlers.Handler) {
 	// User
 	r.GET("/user/:userId", h.GetUserProfileByUserIDHandler)
 
+	// Pickup
+	// r.GET("/pickup/status", h.GetAllPickupStatusesHandler)
+
 	// Need Authorizations
 	r.Use(middlewares.AuthorizeJWT)
 
@@ -50,8 +53,8 @@ func InitAllRoutes(r *gin.Engine, h *handlers.Handler) {
 	r.POST("/reservation", h.AddReservationHandler)
 
 	// Pickup
-	r.GET("/pickup/:reservationId", h.GetPickupDetailsByReservationHandler)
-	r.POST("/pickup/:reservationId", h.RequestPickupHandler)
+	r.GET("/pickup/reservation/:reservationId", h.GetPickupDetailsByReservationHandler)
+	r.POST("/pickup/reservation/:reservationId", h.RequestPickupHandler)
 
 	// Game
 	r.GET("/game", h.GetGameHandler)

@@ -30,14 +30,5 @@ func (s *cityService) GetAllCities() ([]*dtos.CitiesDTO, error) {
 		return nil, err
 	}
 
-	cityList := make([]*dtos.CitiesDTO, 0)
-
-	for _, city := range cities {
-		cityList = append(cityList, &dtos.CitiesDTO{
-			CityID:   city.ID,
-			CityName: city.Name,
-		})
-	}
-
-	return cityList, nil
+	return cities, nil
 }

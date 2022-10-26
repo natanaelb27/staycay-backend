@@ -1,12 +1,13 @@
 package repositories
 
 import (
+	"git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend/internal/dtos"
 	"git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend/internal/models"
 	"gorm.io/gorm"
 )
 
 type CityRepository interface {
-	GetCity() ([]*models.City, error)
+	GetCity() ([]*dtos.CitiesDTO, error)
 	GetCityIDByName(cityName string) (*models.City, error)
 }
 
@@ -24,10 +25,13 @@ func NewCityRepository(c *CRConfig) CityRepository {
 	}
 }
 
-func (r *cityRepository) GetCity() ([]*models.City, error) {
-	var city []*models.City
+func (r *cityRepository) GetCity() ([]*dtos.CitiesDTO, error) {
+	var city []*dtos.CitiesDTO
 
-	result := r.db.Find(&city)
+	result := r.db.
+		Model(&models.City{}).
+		Select("id AS city_id, name AS city_name").
+		Find(&city)
 
 	if result.Error != nil {
 		return nil, result.Error

@@ -38,3 +38,12 @@ type AdminUpdatePickupStatusResponseDTO struct {
 	ReservationID  int `json:"reservation_id"`
 	PickupStatusID int `json:"pickup_status_id"`
 }
+
+type PickupStatusesDTO struct {
+	PickupStatusID   int    `json:"pickup_status_id"`
+	PickupStatusName string `json:"pickup_status_name"`
+}
+
+type GetAllPickupStatusesResponseDTO struct {
+	PickupStatus []*PickupStatusesDTO `json:"pickup_status"`
+}

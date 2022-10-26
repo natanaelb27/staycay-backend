@@ -186,3 +186,22 @@ func (s *pickupService) AdminUpdatePickupStatus(pickupStatusID int, reservationI
 
 	return updatedPickup, nil
 }
+
+// func (s *pickupService) GetAllPickupStatuses() ([]*dtos.CitiesDTO, error) {
+// 	pikcupStatuses, err := s.pickupRepository.GetPickupStatuses()
+
+// 	if err != nil {
+// 		return nil, err
+// 	}
+
+// 	cityList := make([]*dtos.CitiesDTO, 0)
+
+// 	for _, city := range cities {
+// 		cityList = append(cityList, &dtos.CitiesDTO{
+// 			CityID:   city.ID,
+// 			CityName: city.Name,
+// 		})
+// 	}
+
+// 	return cityList, nil
+// }
