@@ -25,7 +25,7 @@ func (h *Handler) GetAllHousesHandler(c *gin.Context) {
 	// 	querySearchCity = append(querySearchCity, city)
 	// }
 
-	data, err := h.houseService.GetAllHouses(queryParams)
+	data, pagination, err := h.houseService.GetAllHouses(queryParams)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, helpers.BuildErrorResponse(http.StatusInternalServerError, err.Error()))
@@ -33,7 +33,8 @@ func (h *Handler) GetAllHousesHandler(c *gin.Context) {
 	}
 
 	response = &dtos.GetAllHousesResponseDTO{
-		House: data,
+		Pagination: pagination,
+		House:      data,
 	}
 
 	c.JSON(http.StatusOK, helpers.BuildSuccessResponse(http.StatusOK, http.StatusText(http.StatusOK), response))
@@ -114,7 +115,12 @@ func (h *Handler) GetHostHousesHandler(c *gin.Context) {
 
 	userContext := c.MustGet("user").(dtos.JwtData)
 
-	data, err := h.houseService.GetHostHouses(userContext.UserID)
+	queryParams := map[string]interface{}{}
+	for key, values := range c.Request.URL.Query() {
+		queryParams[key] = values[0]
+	}
+
+	data, pagination, err := h.houseService.GetHostHouses(userContext.UserID, queryParams)
 	if err != nil {
 		if errors.Is(err, e.ErrInvalidRoleNotHostError) {
 			c.JSON(http.StatusForbidden, helpers.BuildErrorResponse(http.StatusForbidden, e.ErrInvalidRoleNotHostError.Error()))
@@ -126,7 +132,8 @@ func (h *Handler) GetHostHousesHandler(c *gin.Context) {
 	}
 
 	response = &dtos.GetHostHousesResponseDTO{
-		House: data,
+		Pagination: pagination,
+		House:      data,
 	}
 
 	c.JSON(http.StatusOK, helpers.BuildSuccessResponse(http.StatusOK, http.StatusText(http.StatusOK), response))

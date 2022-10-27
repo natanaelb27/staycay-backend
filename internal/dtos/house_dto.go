@@ -1,5 +1,7 @@
 package dtos
 
+import "git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend/internal/helpers"
+
 // type HouseDetailsDTO struct {
 // 	HouseID          int            `json:"house_id"`
 // 	HouseName        string         `json:"house_name"`
@@ -49,7 +51,8 @@ type HouseDetailsWithPhotoDTO struct {
 }
 
 type GetAllHousesResponseDTO struct {
-	House []*HouseDetailsWithPhotoDTO `json:"house"`
+	Pagination *helpers.Pagination         `json:"pagination"`
+	House      []*HouseDetailsWithPhotoDTO `json:"house"`
 }
 
 type GetHouseByIDResponseDTO struct {
@@ -68,7 +71,8 @@ type GetHouseByIDResponseDTO struct {
 }
 
 type GetHostHousesResponseDTO struct {
-	House []*HouseDetailsWithPhotoDTO `json:"house"`
+	Pagination *helpers.Pagination         `json:"pagination"`
+	House      []*HouseDetailsWithPhotoDTO `json:"house"`
 }
 
 type HouseStatusDTO struct {

@@ -5,15 +5,16 @@ import (
 
 	"git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend/internal/dtos"
 	e "git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend/internal/errors"
+	"git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend/internal/helpers"
 	"git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend/internal/models"
 	r "git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend/internal/repositories"
 )
 
 type HouseService interface {
-	GetAllHouses(queryParams map[string]interface{}) ([]*dtos.HouseDetailsWithPhotoDTO, error)
+	GetAllHouses(queryParams map[string]interface{}) ([]*dtos.HouseDetailsWithPhotoDTO, *helpers.Pagination, error)
 	GetHouseByID(houseID int) (*dtos.HouseDetailsWithPhotoDTO, error)
 	GetUnscopedHouseByID(houseID int) (*dtos.HouseDetailsWithPhotoDTO, error)
-	GetHostHouses(hostID int) ([]*dtos.HouseDetailsWithPhotoDTO, error)
+	GetHostHouses(hostID int, queryParams map[string]interface{}) ([]*dtos.HouseDetailsWithPhotoDTO, *helpers.Pagination, error)
 	GetAllHouseStatuses() ([]*dtos.HouseStatusDTO, error)
 	AddNewHouse(userID int, request *dtos.AddNewHouseRequestDTO) (*models.House, []string, error)
 	UpdateHouse(houseID int, userID int, request *dtos.UpdateHouseRequestDTO) (*models.House, error)
@@ -45,7 +46,7 @@ func NewHouseService(c *HSConfig) HouseService {
 	}
 }
 
-func (s *houseService) GetAllHouses(queryParams map[string]interface{}) ([]*dtos.HouseDetailsWithPhotoDTO, error) {
+func (s *houseService) GetAllHouses(queryParams map[string]interface{}) ([]*dtos.HouseDetailsWithPhotoDTO, *helpers.Pagination, error) {
 
 	// if rec, ok := query["searchCity"].(map[string]interface{}); ok {
 	// 	for key, val := range rec {
@@ -66,10 +67,10 @@ func (s *houseService) GetAllHouses(queryParams map[string]interface{}) ([]*dtos
 	// 	return nil, err
 	// }
 
-	houseDetails, err := s.houseRepository.GetHouse(queryParams)
+	houseDetails, pagination, err := s.houseRepository.GetHouse(queryParams)
 
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	houseData := []*dtos.HouseDetailsWithPhotoDTO{}
@@ -77,7 +78,7 @@ func (s *houseService) GetAllHouses(queryParams map[string]interface{}) ([]*dtos
 		housePhoto, err := s.houseRepository.GetHousePhotoByHouseID(house.HouseID)
 
 		if err != nil {
-			return nil, err
+			return nil, nil, err
 		}
 
 		houseData = append(houseData, &dtos.HouseDetailsWithPhotoDTO{
@@ -96,7 +97,7 @@ func (s *houseService) GetAllHouses(queryParams map[string]interface{}) ([]*dtos
 		})
 	}
 
-	return houseData, nil
+	return houseData, pagination, nil
 }
 
 func (s *houseService) GetHouseByID(houseID int) (*dtos.HouseDetailsWithPhotoDTO, error) {
@@ -161,21 +162,21 @@ func (s *houseService) GetUnscopedHouseByID(houseID int) (*dtos.HouseDetailsWith
 	return houseData, nil
 }
 
-func (s *houseService) GetHostHouses(userID int) ([]*dtos.HouseDetailsWithPhotoDTO, error) {
-	userDetails, err := s.userRepository.GetUserDetails(userID)
+func (s *houseService) GetHostHouses(hostID int, queryParams map[string]interface{}) ([]*dtos.HouseDetailsWithPhotoDTO, *helpers.Pagination, error) {
+	userDetails, err := s.userRepository.GetUserDetails(hostID)
 
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	if userDetails.Role != "host" {
-		return nil, e.ErrInvalidRoleNotHostError
+		return nil, nil, e.ErrInvalidRoleNotHostError
 	}
 
-	houseDetails, err := s.houseRepository.GetHouseByHostID(userID)
+	houseDetails, pagination, err := s.houseRepository.GetHouseByHostID(hostID, queryParams)
 
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	houseData := []*dtos.HouseDetailsWithPhotoDTO{}
@@ -183,7 +184,7 @@ func (s *houseService) GetHostHouses(userID int) ([]*dtos.HouseDetailsWithPhotoD
 		housePhoto, err := s.houseRepository.GetHousePhotoByHouseID(house.HouseID)
 
 		if err != nil {
-			return nil, err
+			return nil, nil, err
 		}
 
 		houseData = append(houseData, &dtos.HouseDetailsWithPhotoDTO{
@@ -202,7 +203,7 @@ func (s *houseService) GetHostHouses(userID int) ([]*dtos.HouseDetailsWithPhotoD
 		})
 	}
 
-	return houseData, nil
+	return houseData, pagination, nil
 }
 
 func (s *houseService) GetAllHouseStatuses() ([]*dtos.HouseStatusDTO, error) {
