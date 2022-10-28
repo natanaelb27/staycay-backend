@@ -93,7 +93,6 @@ func InitAllHandlers() *Handler {
 
 	userService := s.NewUserService(&s.USConfig{
 		UserRepository: userRepo,
-		CityRepository: cityRepo,
 		HashHelper:     hashHelper,
 	})
 

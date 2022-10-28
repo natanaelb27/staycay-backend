@@ -17,20 +17,17 @@ type UserService interface {
 
 type userService struct {
 	userRepository r.UserRepository
-	cityRepository r.CityRepository
 	hashHelper     helpers.HashHelper
 }
 
 type USConfig struct {
 	UserRepository r.UserRepository
-	CityRepository r.CityRepository
 	HashHelper     helpers.HashHelper
 }
 
 func NewUserService(c *USConfig) UserService {
 	return &userService{
 		userRepository: c.UserRepository,
-		cityRepository: c.CityRepository,
 		hashHelper:     c.HashHelper,
 	}
 }
