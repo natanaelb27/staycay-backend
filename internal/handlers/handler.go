@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend/db"
+	"git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend/internal/helpers"
 	r "git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend/internal/repositories"
 	s "git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend/internal/services"
 )
@@ -72,11 +73,15 @@ func InitAllHandlers() *Handler {
 		DB: db,
 	})
 
+	hashHelper := helpers.NewHashHelper(&helpers.HHConfig{})
+
+	coinGuessHelper := helpers.NewCoinGuessHelper(&helpers.CGHConfig{})
+
 	authService := s.NewAuthService(&s.ASConfig{
 		UserRepository:   userRepo,
-		CityRepository:   cityRepo,
 		WalletRepository: walletRepo,
 		GameRepository:   gameRepo,
+		HashHelper:       hashHelper,
 	})
 
 	cityService := s.NewCityService(&s.CSConfig{
@@ -86,6 +91,7 @@ func InitAllHandlers() *Handler {
 	userService := s.NewUserService(&s.USConfig{
 		UserRepository: userRepo,
 		CityRepository: cityRepo,
+		HashHelper:     hashHelper,
 	})
 
 	houseService := s.NewHouseService(&s.HSConfig{
@@ -117,6 +123,7 @@ func InitAllHandlers() *Handler {
 	gameService := s.NewGameService(&s.GSConfig{
 		GameRepository:   gameRepo,
 		WalletRepository: walletRepo,
+		CoinGuessHelper:  coinGuessHelper,
 	})
 
 	h := New(&HandlerConfig{

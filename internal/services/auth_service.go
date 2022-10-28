@@ -15,24 +15,24 @@ type AuthService interface {
 
 type authService struct {
 	userRepository   r.UserRepository
-	cityRepository   r.CityRepository
 	walletRepository r.WalletRepository
 	gameRepository   r.GameRepository
+	hashHelper       helpers.HashHelper
 }
 
 type ASConfig struct {
 	UserRepository   r.UserRepository
-	CityRepository   r.CityRepository
 	WalletRepository r.WalletRepository
 	GameRepository   r.GameRepository
+	HashHelper       helpers.HashHelper
 }
 
 func NewAuthService(c *ASConfig) AuthService {
 	return &authService{
 		userRepository:   c.UserRepository,
-		cityRepository:   c.CityRepository,
 		walletRepository: c.WalletRepository,
 		gameRepository:   c.GameRepository,
+		hashHelper:       c.HashHelper,
 	}
 }
 
@@ -51,7 +51,7 @@ func (s *authService) Register(userData dtos.RegisterRequestDTO) (*models.User, 
 	// 	return nil, nil, err
 	// }
 
-	encryptedPassword, err := helpers.Encrypt(userData.Password)
+	encryptedPassword, err := s.hashHelper.Encrypt(userData.Password)
 
 	if err != nil {
 		return nil, nil, err
@@ -123,7 +123,7 @@ func (s *authService) Login(userData dtos.LoginRequestDTO) (*models.User, *strin
 		return nil, nil, err
 	}
 
-	if !helpers.CompareEncrypt(userData.Password, user.Password) {
+	if !s.hashHelper.CompareEncrypt(userData.Password, user.Password) {
 		return nil, nil, e.ErrCredentialError
 	}
 

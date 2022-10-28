@@ -15,17 +15,20 @@ type GameService interface {
 type gameService struct {
 	gameRepository   r.GameRepository
 	walletRepository r.WalletRepository
+	coinGuessHelper  helpers.CoinGuessHelper
 }
 
 type GSConfig struct {
 	GameRepository   r.GameRepository
 	WalletRepository r.WalletRepository
+	CoinGuessHelper  helpers.CoinGuessHelper
 }
 
 func NewGameService(c *GSConfig) GameService {
 	return &gameService{
 		gameRepository:   c.GameRepository,
 		walletRepository: c.WalletRepository,
+		coinGuessHelper:  c.CoinGuessHelper,
 	}
 }
 
@@ -44,7 +47,7 @@ func (s *gameService) PlayGame(userGuess string, userID int) (string, int, error
 	minAmount := 10000
 
 	coin := []string{"heads", "tails"}
-	randomIndex := helpers.Randomizer(len(coin))
+	randomIndex := s.coinGuessHelper.Randomizer(len(coin))
 	pick := coin[randomIndex]
 
 	amountWon := 0

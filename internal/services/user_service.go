@@ -18,17 +18,20 @@ type UserService interface {
 type userService struct {
 	userRepository r.UserRepository
 	cityRepository r.CityRepository
+	hashHelper     helpers.HashHelper
 }
 
 type USConfig struct {
 	UserRepository r.UserRepository
 	CityRepository r.CityRepository
+	HashHelper     helpers.HashHelper
 }
 
 func NewUserService(c *USConfig) UserService {
 	return &userService{
 		userRepository: c.UserRepository,
 		cityRepository: c.CityRepository,
+		hashHelper:     c.HashHelper,
 	}
 }
 
@@ -75,11 +78,11 @@ func (s *userService) UpdateUserProfile(userID int, request *dtos.UpdateUserProf
 			return nil, e.ErrInvalidPasswordInputError
 		}
 
-		if !helpers.CompareEncrypt(request.OldPassword, user.Password) {
+		if !s.hashHelper.CompareEncrypt(request.OldPassword, user.Password) {
 			return nil, e.ErrOldPasswordNotMatchError
 		}
 
-		encryptedPassword, err = helpers.Encrypt(request.Password)
+		encryptedPassword, err = s.hashHelper.Encrypt(request.Password)
 		if err != nil {
 			return nil, err
 		}

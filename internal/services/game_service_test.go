@@ -13,10 +13,12 @@ import (
 func Test_gameService_NewGameService(t *testing.T) {
 	gameRepository := mocks.NewGameRepository(t)
 	walletRepository := mocks.NewWalletRepository(t)
+	coinGuessHelper := mocks.NewCoinGuessHelper(t)
 	gameService := NewGameService(
 		&GSConfig{
 			GameRepository:   gameRepository,
 			WalletRepository: walletRepository,
+			CoinGuessHelper:  coinGuessHelper,
 		},
 	)
 
@@ -32,7 +34,8 @@ func Test_gameService_PlayGame(t *testing.T) {
 		name             string
 		gameRepository   *mocks.GameRepository
 		walletRepository *mocks.WalletRepository
-		mock             func(m *mocks.GameRepository, m2 *mocks.WalletRepository)
+		coinGuessHelper  *mocks.CoinGuessHelper
+		mock             func(m *mocks.GameRepository, m2 *mocks.WalletRepository, m3 *mocks.CoinGuessHelper)
 		args             args
 		want             string
 		want2            int
@@ -42,7 +45,8 @@ func Test_gameService_PlayGame(t *testing.T) {
 			name:             "Failed - GetGameData",
 			gameRepository:   mocks.NewGameRepository(t),
 			walletRepository: mocks.NewWalletRepository(t),
-			mock: func(m *mocks.GameRepository, m2 *mocks.WalletRepository) {
+			coinGuessHelper:  mocks.NewCoinGuessHelper(t),
+			mock: func(m *mocks.GameRepository, m2 *mocks.WalletRepository, m3 *mocks.CoinGuessHelper) {
 				m.On("GetGameData", 1).Return(nil, errors.New("error"))
 			},
 			args: args{
@@ -57,7 +61,8 @@ func Test_gameService_PlayGame(t *testing.T) {
 			name:             "Failed - Insufficient Game Chance",
 			gameRepository:   mocks.NewGameRepository(t),
 			walletRepository: mocks.NewWalletRepository(t),
-			mock: func(m *mocks.GameRepository, m2 *mocks.WalletRepository) {
+			coinGuessHelper:  mocks.NewCoinGuessHelper(t),
+			mock: func(m *mocks.GameRepository, m2 *mocks.WalletRepository, m3 *mocks.CoinGuessHelper) {
 				m.On("GetGameData", 1).Return(&models.GameChance{
 					Chance: 0,
 				}, nil)
@@ -74,10 +79,12 @@ func Test_gameService_PlayGame(t *testing.T) {
 			name:             "Failed - AddWalletBalance",
 			gameRepository:   mocks.NewGameRepository(t),
 			walletRepository: mocks.NewWalletRepository(t),
-			mock: func(m *mocks.GameRepository, m2 *mocks.WalletRepository) {
+			coinGuessHelper:  mocks.NewCoinGuessHelper(t),
+			mock: func(m *mocks.GameRepository, m2 *mocks.WalletRepository, m3 *mocks.CoinGuessHelper) {
 				m.On("GetGameData", 1).Return(&models.GameChance{
 					Chance: 10,
 				}, nil)
+				m3.On("Randomizer", 2).Return(1)
 				m2.On("AddWalletBalance", 1, 10000).Return(nil, errors.New("error"))
 			},
 			args: args{
@@ -92,10 +99,12 @@ func Test_gameService_PlayGame(t *testing.T) {
 			name:             "Failed - SubtractGameChance",
 			gameRepository:   mocks.NewGameRepository(t),
 			walletRepository: mocks.NewWalletRepository(t),
-			mock: func(m *mocks.GameRepository, m2 *mocks.WalletRepository) {
+			coinGuessHelper:  mocks.NewCoinGuessHelper(t),
+			mock: func(m *mocks.GameRepository, m2 *mocks.WalletRepository, m3 *mocks.CoinGuessHelper) {
 				m.On("GetGameData", 1).Return(&models.GameChance{
 					Chance: 10,
 				}, nil)
+				m3.On("Randomizer", 2).Return(1)
 				m2.On("AddWalletBalance", 1, 10000).Return(&models.Wallet{}, nil)
 				m.On("SubtractGameChance", 1, 1).Return(errors.New("error"))
 			},
@@ -111,11 +120,13 @@ func Test_gameService_PlayGame(t *testing.T) {
 			name:             "Failed - AddGameChance When Counter is 9",
 			gameRepository:   mocks.NewGameRepository(t),
 			walletRepository: mocks.NewWalletRepository(t),
-			mock: func(m *mocks.GameRepository, m2 *mocks.WalletRepository) {
+			coinGuessHelper:  mocks.NewCoinGuessHelper(t),
+			mock: func(m *mocks.GameRepository, m2 *mocks.WalletRepository, m3 *mocks.CoinGuessHelper) {
 				m.On("GetGameData", 1).Return(&models.GameChance{
 					Chance:  10,
 					Counter: 9,
 				}, nil)
+				m3.On("Randomizer", 2).Return(1)
 				m2.On("AddWalletBalance", 1, 10000).Return(&models.Wallet{}, nil)
 				m.On("SubtractGameChance", 1, 1).Return(nil)
 				m.On("AddGameChance", 1, 1).Return(errors.New("error"))
@@ -132,11 +143,13 @@ func Test_gameService_PlayGame(t *testing.T) {
 			name:             "Failed - ResetGameChanceCounter When Counter is 9",
 			gameRepository:   mocks.NewGameRepository(t),
 			walletRepository: mocks.NewWalletRepository(t),
-			mock: func(m *mocks.GameRepository, m2 *mocks.WalletRepository) {
+			coinGuessHelper:  mocks.NewCoinGuessHelper(t),
+			mock: func(m *mocks.GameRepository, m2 *mocks.WalletRepository, m3 *mocks.CoinGuessHelper) {
 				m.On("GetGameData", 1).Return(&models.GameChance{
 					Chance:  10,
 					Counter: 9,
 				}, nil)
+				m3.On("Randomizer", 2).Return(1)
 				m2.On("AddWalletBalance", 1, 10000).Return(&models.Wallet{}, nil)
 				m.On("SubtractGameChance", 1, 1).Return(nil)
 				m.On("AddGameChance", 1, 1).Return(nil)
@@ -154,11 +167,13 @@ func Test_gameService_PlayGame(t *testing.T) {
 			name:             "Failed - AddGameChanceCounter",
 			gameRepository:   mocks.NewGameRepository(t),
 			walletRepository: mocks.NewWalletRepository(t),
-			mock: func(m *mocks.GameRepository, m2 *mocks.WalletRepository) {
+			coinGuessHelper:  mocks.NewCoinGuessHelper(t),
+			mock: func(m *mocks.GameRepository, m2 *mocks.WalletRepository, m3 *mocks.CoinGuessHelper) {
 				m.On("GetGameData", 1).Return(&models.GameChance{
 					Chance:  10,
 					Counter: 1,
 				}, nil)
+				m3.On("Randomizer", 2).Return(1)
 				m2.On("AddWalletBalance", 1, 10000).Return(&models.Wallet{}, nil)
 				m.On("SubtractGameChance", 1, 1).Return(nil)
 				m.On("AddGameChanceCounter", 1, 1).Return(errors.New("error"))
@@ -175,11 +190,13 @@ func Test_gameService_PlayGame(t *testing.T) {
 			name:             "Success",
 			gameRepository:   mocks.NewGameRepository(t),
 			walletRepository: mocks.NewWalletRepository(t),
-			mock: func(m *mocks.GameRepository, m2 *mocks.WalletRepository) {
+			coinGuessHelper:  mocks.NewCoinGuessHelper(t),
+			mock: func(m *mocks.GameRepository, m2 *mocks.WalletRepository, m3 *mocks.CoinGuessHelper) {
 				m.On("GetGameData", 1).Return(&models.GameChance{
 					Chance:  10,
 					Counter: 1,
 				}, nil)
+				m3.On("Randomizer", 2).Return(0)
 				m2.On("AddWalletBalance", 1, 50000).Return(&models.Wallet{}, nil)
 				m.On("SubtractGameChance", 1, 1).Return(nil)
 				m.On("AddGameChanceCounter", 1, 1).Return(nil)
@@ -198,9 +215,10 @@ func Test_gameService_PlayGame(t *testing.T) {
 			s := &gameService{
 				gameRepository:   tt.gameRepository,
 				walletRepository: tt.walletRepository,
+				coinGuessHelper:  tt.coinGuessHelper,
 			}
 
-			tt.mock(tt.gameRepository, tt.walletRepository)
+			tt.mock(tt.gameRepository, tt.walletRepository, tt.coinGuessHelper)
 
 			got, got2, err := s.PlayGame(tt.args.userGuess, tt.args.userID)
 
