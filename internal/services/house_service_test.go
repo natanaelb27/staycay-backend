@@ -1240,3 +1240,138 @@ func Test_houseService_AddHousePhoto(t *testing.T) {
 		})
 	}
 }
+
+func Test_houseService_DeleteHousePhoto(t *testing.T) {
+	type args struct {
+		housePhotoID int
+		userID       int
+	}
+	tests := []struct {
+		name            string
+		houseRepository *mocks.HouseRepository
+		mock            func(m *mocks.HouseRepository)
+		args            args
+		want            *models.HousePhoto
+		wantErr         bool
+	}{
+		{
+			name:            "Failed - GetHouseByHousePhotoID",
+			houseRepository: mocks.NewHouseRepository(t),
+			mock: func(m *mocks.HouseRepository) {
+				m.On("GetHouseByHousePhotoID", 1).Return(nil, errors.New("error"))
+			},
+			args: args{
+				housePhotoID: 1,
+				userID:       1,
+			},
+			want:    nil,
+			wantErr: true,
+		},
+		{
+			name:            "Failed - User is not the Host",
+			houseRepository: mocks.NewHouseRepository(t),
+			mock: func(m *mocks.HouseRepository) {
+				m.On("GetHouseByHousePhotoID", 1).Return(&dtos.HouseDetailsDTO{
+					HostID: 2,
+				}, nil)
+			},
+			args: args{
+				housePhotoID: 1,
+				userID:       1,
+			},
+			want:    nil,
+			wantErr: true,
+		},
+		{
+			name:            "Failed - ValidateTotalHousePhoto",
+			houseRepository: mocks.NewHouseRepository(t),
+			mock: func(m *mocks.HouseRepository) {
+				m.On("GetHouseByHousePhotoID", 1).Return(&dtos.HouseDetailsDTO{
+					HouseID: 1,
+					HostID:  1,
+				}, nil)
+				m.On("ValidateTotalHousePhoto", 1).Return(int64(0), errors.New("error"))
+			},
+			args: args{
+				housePhotoID: 1,
+				userID:       1,
+			},
+			want:    nil,
+			wantErr: true,
+		},
+		{
+			name:            "Failed - House only have one or less Photo",
+			houseRepository: mocks.NewHouseRepository(t),
+			mock: func(m *mocks.HouseRepository) {
+				m.On("GetHouseByHousePhotoID", 1).Return(&dtos.HouseDetailsDTO{
+					HouseID: 1,
+					HostID:  1,
+				}, nil)
+				m.On("ValidateTotalHousePhoto", 1).Return(int64(1), nil)
+			},
+			args: args{
+				housePhotoID: 1,
+				userID:       1,
+			},
+			want:    nil,
+			wantErr: true,
+		},
+		{
+			name:            "Failed - DeleteHousePhotoByID",
+			houseRepository: mocks.NewHouseRepository(t),
+			mock: func(m *mocks.HouseRepository) {
+				m.On("GetHouseByHousePhotoID", 1).Return(&dtos.HouseDetailsDTO{
+					HouseID: 1,
+					HostID:  1,
+				}, nil)
+				m.On("ValidateTotalHousePhoto", 1).Return(int64(2), nil)
+				m.On("DeleteHousePhotoByID", 1).Return(nil, errors.New("error"))
+			},
+			args: args{
+				housePhotoID: 1,
+				userID:       1,
+			},
+			want:    nil,
+			wantErr: true,
+		},
+		{
+			name:            "Success",
+			houseRepository: mocks.NewHouseRepository(t),
+			mock: func(m *mocks.HouseRepository) {
+				m.On("GetHouseByHousePhotoID", 1).Return(&dtos.HouseDetailsDTO{
+					HouseID: 1,
+					HostID:  1,
+				}, nil)
+				m.On("ValidateTotalHousePhoto", 1).Return(int64(2), nil)
+				m.On("DeleteHousePhotoByID", 1).Return(&models.HousePhoto{}, nil)
+			},
+			args: args{
+				housePhotoID: 1,
+				userID:       1,
+			},
+			want:    &models.HousePhoto{},
+			wantErr: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			s := &houseService{
+				houseRepository: tt.houseRepository,
+			}
+
+			tt.mock(tt.houseRepository)
+
+			got, err := s.DeleteHousePhoto(tt.args.housePhotoID, tt.args.userID)
+
+			if (err != nil) != tt.wantErr {
+				t.Errorf("houseService.DeleteHousePhoto() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("houseService.DeleteHousePhoto() = %v, want %v", got, tt.want)
+			}
+
+		})
+	}
+}
