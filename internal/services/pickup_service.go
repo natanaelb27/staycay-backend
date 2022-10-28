@@ -49,10 +49,6 @@ func (s *pickupService) RequestPickup(reservationID int, userID int, request *dt
 		return nil, err
 	}
 
-	if houseReservation.UserID == 0 {
-		return nil, e.ErrIdNotFoundError
-	}
-
 	if houseReservation.UserID != userID {
 		return nil, e.ErrInvalidUserReservationError
 	}

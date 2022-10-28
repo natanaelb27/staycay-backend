@@ -303,6 +303,10 @@ func (r *reservationRepository) GetHouseReservationsByID(reservationID int) (*dt
 		return nil, result.Error
 	}
 
+	if result.RowsAffected == 0 {
+		return nil, e.ErrReservationNotFoundError
+	}
+
 	return houseReservation, nil
 }
 

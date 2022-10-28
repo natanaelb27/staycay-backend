@@ -28,8 +28,13 @@ func (h *Handler) RequestPickupHandler(c *gin.Context) {
 	data, err := h.pickupService.RequestPickup(reservationID, userContext.UserID, request)
 
 	if err != nil {
-		if errors.Is(err, e.ErrIdNotFoundError) {
-			c.JSON(http.StatusBadRequest, helpers.BuildErrorResponse(http.StatusBadRequest, e.ErrIdNotFoundError.Error()))
+		if errors.Is(err, e.ErrReservationNotFoundError) {
+			c.JSON(http.StatusNotFound, helpers.BuildErrorResponse(http.StatusNotFound, e.ErrReservationNotFoundError.Error()))
+			return
+		}
+
+		if errors.Is(err, e.ErrUserNotFoundError) {
+			c.JSON(http.StatusNotFound, helpers.BuildErrorResponse(http.StatusNotFound, e.ErrUserNotFoundError.Error()))
 			return
 		}
 
@@ -84,8 +89,8 @@ func (h *Handler) GetPickupDetailsByReservationHandler(c *gin.Context) {
 	response, err := h.pickupService.GetPickupDetailsByReservation(reservationID, userContext.UserID)
 
 	if err != nil {
-		if errors.Is(err, e.ErrIdNotFoundError) {
-			c.JSON(http.StatusBadRequest, helpers.BuildErrorResponse(http.StatusBadRequest, e.ErrIdNotFoundError.Error()))
+		if errors.Is(err, e.ErrReservationNotFoundError) {
+			c.JSON(http.StatusNotFound, helpers.BuildErrorResponse(http.StatusNotFound, e.ErrReservationNotFoundError.Error()))
 			return
 		}
 
@@ -113,13 +118,28 @@ func (h *Handler) AdminUpdatePickupStatusHandler(c *gin.Context) {
 	pickup, err := h.pickupService.AdminUpdatePickupStatus(request.PickupStatusID, pickupID, userContext.UserID)
 
 	if err != nil {
+		if errors.Is(err, e.ErrUserNotFoundError) {
+			c.JSON(http.StatusNotFound, helpers.BuildErrorResponse(http.StatusNotFound, e.ErrUserNotFoundError.Error()))
+			return
+		}
+
+		if errors.Is(err, e.ErrReservationNotFoundError) {
+			c.JSON(http.StatusNotFound, helpers.BuildErrorResponse(http.StatusNotFound, e.ErrReservationNotFoundError.Error()))
+			return
+		}
+
+		if errors.Is(err, e.ErrInvalidCheckInDateUpdatePickupStatusError) {
+			c.JSON(http.StatusBadRequest, helpers.BuildErrorResponse(http.StatusBadRequest, e.ErrInvalidCheckInDateUpdatePickupStatusError.Error()))
+			return
+		}
+
 		if errors.Is(err, e.ErrInvalidRoleNotAdminError) {
 			c.JSON(http.StatusForbidden, helpers.BuildErrorResponse(http.StatusForbidden, e.ErrInvalidRoleNotAdminError.Error()))
 			return
 		}
 
-		if errors.Is(err, e.ErrIdNotFoundError) {
-			c.JSON(http.StatusBadRequest, helpers.BuildErrorResponse(http.StatusBadRequest, e.ErrIdNotFoundError.Error()))
+		if errors.Is(err, e.ErrPickupNotFoundError) {
+			c.JSON(http.StatusNotFound, helpers.BuildErrorResponse(http.StatusNotFound, e.ErrPickupNotFoundError.Error()))
 			return
 		}
 

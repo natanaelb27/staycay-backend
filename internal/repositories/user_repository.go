@@ -56,6 +56,10 @@ func (r *userRepository) GetUserDetails(userID int) (*dtos.UserDetailsDTO, error
 		First(&userDetails)
 
 	if result.Error != nil {
+		if result.Error == gorm.ErrRecordNotFound {
+			return nil, e.ErrUserNotFoundError
+		}
+
 		return nil, result.Error
 	}
 
@@ -75,7 +79,7 @@ func (r *userRepository) GetUserByID(userID int) (*models.User, error) {
 
 	if result.Error != nil {
 		if result.Error == gorm.ErrRecordNotFound {
-			return nil, e.ErrIdNotFoundError
+			return nil, e.ErrUserNotFoundError
 		}
 		return nil, result.Error
 	}

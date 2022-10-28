@@ -18,6 +18,11 @@ func (h *Handler) GetUserProfileHandler(c *gin.Context) {
 	userDetails, err := h.userService.GetUserProfile(userContext.UserID)
 
 	if err != nil {
+		if errors.Is(err, e.ErrUserNotFoundError) {
+			c.JSON(http.StatusNotFound, helpers.BuildErrorResponse(http.StatusNotFound, e.ErrUserNotFoundError.Error()))
+			return
+		}
+
 		c.JSON(http.StatusInternalServerError, helpers.BuildErrorResponse(http.StatusInternalServerError, err.Error()))
 		return
 	}
@@ -44,6 +49,11 @@ func (h *Handler) GetUserProfileByUserIDHandler(c *gin.Context) {
 	userDetails, err := h.userService.GetUserProfileByUserID(userID)
 
 	if err != nil {
+		if errors.Is(err, e.ErrUserNotFoundError) {
+			c.JSON(http.StatusNotFound, helpers.BuildErrorResponse(http.StatusNotFound, e.ErrUserNotFoundError.Error()))
+			return
+		}
+
 		c.JSON(http.StatusInternalServerError, helpers.BuildErrorResponse(http.StatusInternalServerError, err.Error()))
 		return
 	}
@@ -95,8 +105,8 @@ func (h *Handler) UpdateUserProfileHandler(c *gin.Context) {
 	userData, err := h.userService.UpdateUserProfile(userContext.UserID, request)
 
 	if err != nil {
-		if errors.Is(err, e.ErrIdNotFoundError) {
-			c.JSON(http.StatusBadRequest, helpers.BuildErrorResponse(http.StatusBadRequest, e.ErrIdNotFoundError.Error()))
+		if errors.Is(err, e.ErrUserNotFoundError) {
+			c.JSON(http.StatusNotFound, helpers.BuildErrorResponse(http.StatusNotFound, e.ErrUserNotFoundError.Error()))
 			return
 		}
 

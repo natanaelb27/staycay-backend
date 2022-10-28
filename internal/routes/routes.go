@@ -17,7 +17,7 @@ func InitAllRoutes(r *gin.Engine, h *handlers.Handler) {
 	// House
 	r.GET("/house", h.GetAllHousesHandler)
 	r.GET("/house/:houseId", h.GetHouseByIDHandler)
-	r.GET("/house/unscoped/:houseId", h.GetUnscopedHouseByIDHandler)
+	// r.GET("/house/unscoped/:houseId", h.GetUnscopedHouseByIDHandler)
 	r.GET("/house/status", h.GetAllHouseStatusesHandler)
 	r.GET("/house/reservation/:houseId", h.GetHouseReservationsByHouseHandler)
 

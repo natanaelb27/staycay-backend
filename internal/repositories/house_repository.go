@@ -337,7 +337,7 @@ func (r *houseRepository) GetHouseByHouseID(houseID int) (*dtos.HouseDetailsDTO,
 	}
 
 	if result.RowsAffected == 0 {
-		return nil, e.ErrIdNotFoundError
+		return nil, e.ErrHouseNotFoundError
 	}
 
 	return houseDetails, nil
@@ -360,7 +360,7 @@ func (r *houseRepository) GetUnscopedHouseByHouseID(houseID int) (*dtos.HouseDet
 	}
 
 	if result.RowsAffected == 0 {
-		return nil, e.ErrIdNotFoundError
+		return nil, e.ErrHouseNotFoundError
 	}
 
 	return houseDetails, nil
@@ -462,7 +462,7 @@ func (r *houseRepository) GetHouseByHousePhotoID(housePhotoID int) (*dtos.HouseD
 	}
 
 	if result.RowsAffected == 0 {
-		return nil, e.ErrIdNotFoundError
+		return nil, e.ErrHousePhotoNotFoundError
 	}
 
 	return houseDetails, nil

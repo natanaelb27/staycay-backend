@@ -19,12 +19,6 @@ func (h *Handler) GetAllHousesHandler(c *gin.Context) {
 		queryParams[key] = values[0]
 	}
 
-	// querySearchCity := make([]string, 0)
-	// querySearchCity = append(querySearchCity, c.Request.URL.Query()["searchCity"]...)
-	// for _, city := range c.Request.URL.Query()["searchCity"] {
-	// 	querySearchCity = append(querySearchCity, city)
-	// }
-
 	data, pagination, err := h.houseService.GetAllHouses(queryParams)
 
 	if err != nil {
@@ -45,11 +39,16 @@ func (h *Handler) GetHouseByIDHandler(c *gin.Context) {
 
 	houseID, _ := strconv.Atoi(c.Param("houseId"))
 
-	data, err := h.houseService.GetHouseByID(houseID)
+	queryParams := map[string]interface{}{}
+	for key, values := range c.Request.URL.Query() {
+		queryParams[key] = values[0]
+	}
+
+	data, err := h.houseService.GetHouseByID(houseID, queryParams)
 
 	if err != nil {
-		if errors.Is(err, e.ErrIdNotFoundError) {
-			c.JSON(http.StatusBadRequest, helpers.BuildErrorResponse(http.StatusBadRequest, e.ErrIdNotFoundError.Error()))
+		if errors.Is(err, e.ErrHouseNotFoundError) {
+			c.JSON(http.StatusNotFound, helpers.BuildErrorResponse(http.StatusNotFound, e.ErrHouseNotFoundError.Error()))
 			return
 		}
 
@@ -75,40 +74,40 @@ func (h *Handler) GetHouseByIDHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, helpers.BuildSuccessResponse(http.StatusOK, http.StatusText(http.StatusOK), response))
 }
 
-func (h *Handler) GetUnscopedHouseByIDHandler(c *gin.Context) {
-	var response *dtos.GetHouseByIDResponseDTO
+// func (h *Handler) GetUnscopedHouseByIDHandler(c *gin.Context) {
+// 	var response *dtos.GetHouseByIDResponseDTO
 
-	houseID, _ := strconv.Atoi(c.Param("houseId"))
+// 	houseID, _ := strconv.Atoi(c.Param("houseId"))
 
-	data, err := h.houseService.GetUnscopedHouseByID(houseID)
+// 	data, err := h.houseService.GetUnscopedHouseByID(houseID)
 
-	if err != nil {
-		if errors.Is(err, e.ErrIdNotFoundError) {
-			c.JSON(http.StatusBadRequest, helpers.BuildErrorResponse(http.StatusBadRequest, e.ErrIdNotFoundError.Error()))
-			return
-		}
+// 	if err != nil {
+// 		if errors.Is(err, e.ErrIdNotFoundError) {
+// 			c.JSON(http.StatusBadRequest, helpers.BuildErrorResponse(http.StatusBadRequest, e.ErrIdNotFoundError.Error()))
+// 			return
+// 		}
 
-		c.JSON(http.StatusInternalServerError, helpers.BuildErrorResponse(http.StatusInternalServerError, err.Error()))
-		return
-	}
+// 		c.JSON(http.StatusInternalServerError, helpers.BuildErrorResponse(http.StatusInternalServerError, err.Error()))
+// 		return
+// 	}
 
-	response = &dtos.GetHouseByIDResponseDTO{
-		HouseID:          data.HouseID,
-		HouseName:        data.HouseName,
-		HousePrice:       data.HousePrice,
-		HouseDescription: data.HouseDescription,
-		HouseCityID:      data.HouseCityID,
-		HouseCityName:    data.HouseCityName,
-		HouseMaxGuest:    data.HouseMaxGuest,
-		HouseStatus:      data.HouseStatus,
-		HousePhoto:       data.HousePhoto,
-		HostID:           data.HostID,
-		HostName:         data.HostName,
-		HostEmail:        data.HostEmail,
-	}
+// 	response = &dtos.GetHouseByIDResponseDTO{
+// 		HouseID:          data.HouseID,
+// 		HouseName:        data.HouseName,
+// 		HousePrice:       data.HousePrice,
+// 		HouseDescription: data.HouseDescription,
+// 		HouseCityID:      data.HouseCityID,
+// 		HouseCityName:    data.HouseCityName,
+// 		HouseMaxGuest:    data.HouseMaxGuest,
+// 		HouseStatus:      data.HouseStatus,
+// 		HousePhoto:       data.HousePhoto,
+// 		HostID:           data.HostID,
+// 		HostName:         data.HostName,
+// 		HostEmail:        data.HostEmail,
+// 	}
 
-	c.JSON(http.StatusOK, helpers.BuildSuccessResponse(http.StatusOK, http.StatusText(http.StatusOK), response))
-}
+// 	c.JSON(http.StatusOK, helpers.BuildSuccessResponse(http.StatusOK, http.StatusText(http.StatusOK), response))
+// }
 
 func (h *Handler) GetHostHousesHandler(c *gin.Context) {
 	var response *dtos.GetHostHousesResponseDTO
@@ -122,6 +121,11 @@ func (h *Handler) GetHostHousesHandler(c *gin.Context) {
 
 	data, pagination, err := h.houseService.GetHostHouses(userContext.UserID, queryParams)
 	if err != nil {
+		if errors.Is(err, e.ErrUserNotFoundError) {
+			c.JSON(http.StatusNotFound, helpers.BuildErrorResponse(http.StatusNotFound, e.ErrUserNotFoundError.Error()))
+			return
+		}
+
 		if errors.Is(err, e.ErrInvalidRoleNotHostError) {
 			c.JSON(http.StatusForbidden, helpers.BuildErrorResponse(http.StatusForbidden, e.ErrInvalidRoleNotHostError.Error()))
 			return
@@ -170,6 +174,11 @@ func (h *Handler) AddNewHouseHandler(c *gin.Context) {
 
 	newHouse, photo, err := h.houseService.AddNewHouse(userContext.UserID, request)
 	if err != nil {
+		if errors.Is(err, e.ErrUserNotFoundError) {
+			c.JSON(http.StatusNotFound, helpers.BuildErrorResponse(http.StatusNotFound, e.ErrUserNotFoundError.Error()))
+			return
+		}
+
 		if errors.Is(err, e.ErrInvalidRoleNotHostError) {
 			c.JSON(http.StatusForbidden, helpers.BuildErrorResponse(http.StatusForbidden, e.ErrInvalidRoleNotHostError.Error()))
 			return
@@ -209,6 +218,16 @@ func (h *Handler) UpdateHouseHandler(c *gin.Context) {
 	newHouse, err := h.houseService.UpdateHouse(houseID, userContext.UserID, request)
 
 	if err != nil {
+		if errors.Is(err, e.ErrUserNotFoundError) {
+			c.JSON(http.StatusNotFound, helpers.BuildErrorResponse(http.StatusNotFound, e.ErrUserNotFoundError.Error()))
+			return
+		}
+
+		if errors.Is(err, e.ErrHouseNotFoundError) {
+			c.JSON(http.StatusNotFound, helpers.BuildErrorResponse(http.StatusNotFound, e.ErrHouseNotFoundError.Error()))
+			return
+		}
+
 		if errors.Is(err, e.ErrInvalidRoleNotHostError) {
 			c.JSON(http.StatusForbidden, helpers.BuildErrorResponse(http.StatusForbidden, e.ErrInvalidRoleNotHostError.Error()))
 			return
@@ -245,8 +264,13 @@ func (h *Handler) DeleteHouseHandler(c *gin.Context) {
 	data, err := h.houseService.DeleteHouse(houseID, userContext.UserID)
 
 	if err != nil {
-		if errors.Is(err, e.ErrIdNotFoundError) {
-			c.JSON(http.StatusBadRequest, helpers.BuildErrorResponse(http.StatusBadRequest, e.ErrIdNotFoundError.Error()))
+		if errors.Is(err, e.ErrUserNotFoundError) {
+			c.JSON(http.StatusNotFound, helpers.BuildErrorResponse(http.StatusNotFound, e.ErrUserNotFoundError.Error()))
+			return
+		}
+
+		if errors.Is(err, e.ErrHouseNotFoundError) {
+			c.JSON(http.StatusNotFound, helpers.BuildErrorResponse(http.StatusNotFound, e.ErrHouseNotFoundError.Error()))
 			return
 		}
 
@@ -299,6 +323,11 @@ func (h *Handler) AddHousePhotoHandler(c *gin.Context) {
 	photoList, err := h.houseService.AddHousePhoto(houseID, userContext.UserID, request)
 
 	if err != nil {
+		if errors.Is(err, e.ErrUserNotFoundError) {
+			c.JSON(http.StatusNotFound, helpers.BuildErrorResponse(http.StatusNotFound, e.ErrUserNotFoundError.Error()))
+			return
+		}
+
 		if errors.Is(err, e.ErrInvalidRoleNotHostError) {
 			c.JSON(http.StatusForbidden, helpers.BuildErrorResponse(http.StatusForbidden, e.ErrInvalidRoleNotHostError.Error()))
 			return
@@ -330,8 +359,8 @@ func (h *Handler) DeleteHousePhotoHandler(c *gin.Context) {
 	data, err := h.houseService.DeleteHousePhoto(housePhotoID, userContext.UserID)
 
 	if err != nil {
-		if errors.Is(err, e.ErrIdNotFoundError) {
-			c.JSON(http.StatusBadRequest, helpers.BuildErrorResponse(http.StatusBadRequest, e.ErrIdNotFoundError.Error()))
+		if errors.Is(err, e.ErrHousePhotoNotFoundError) {
+			c.JSON(http.StatusNotFound, helpers.BuildErrorResponse(http.StatusNotFound, e.ErrHousePhotoNotFoundError.Error()))
 			return
 		}
 

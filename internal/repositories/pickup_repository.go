@@ -168,7 +168,7 @@ func (r *pickupRepository) GetPickupByID(pickupID int) (*models.Pickup, error) {
 
 	if result.Error != nil {
 		if result.Error == gorm.ErrRecordNotFound {
-			return nil, e.ErrIdNotFoundError
+			return nil, e.ErrPickupNotFoundError
 		}
 
 		return nil, result.Error
@@ -186,6 +186,13 @@ func (r *pickupRepository) GetPickupDetails(queryParams map[string]interface{}) 
 		filterPickupStatusName = fmt.Sprintf("%v", queryParams["filterPickupStatusName"])
 	}
 
+	filterReservationCode := ""
+	println(queryParams["filterReservationCode"])
+	if queryParams["filterReservationCode"] != nil {
+		filterReservationCode = fmt.Sprintf("%v", queryParams["filterReservationCode"])
+	}
+	println(filterReservationCode)
+
 	result := r.db.Model(&models.Pickup{}).
 		Select(`pickups.id AS pickup_id, pickups.reservation_id AS reservation_id, reservations.house_id AS house_id, pickups.pickup_status_id AS pickup_status_id,
 		pickup_statuses.status AS pickup_status_name, pickups.pickup_address AS pickup_address, pickups.city_id AS pickup_city_id, 
@@ -196,6 +203,10 @@ func (r *pickupRepository) GetPickupDetails(queryParams map[string]interface{}) 
 
 	if filterPickupStatusName != "all" {
 		result.Where("pickup_statuses.status ILIKE ?", fmt.Sprintf("%%%s%%", filterPickupStatusName))
+	}
+
+	if filterReservationCode != "" {
+		result.Where("reservations.reservation_code ILIKE ?", fmt.Sprintf("%%%s%%", filterReservationCode))
 	}
 
 	result.Order("pickup_id asc")

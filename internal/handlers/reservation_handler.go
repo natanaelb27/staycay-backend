@@ -26,6 +26,16 @@ func (h *Handler) AddReservationHandler(c *gin.Context) {
 	data, err := h.reservationService.AddReservation(userContext.UserID, request)
 
 	if err != nil {
+		if errors.Is(err, e.ErrUserNotFoundError) {
+			c.JSON(http.StatusNotFound, helpers.BuildErrorResponse(http.StatusNotFound, e.ErrUserNotFoundError.Error()))
+			return
+		}
+
+		if errors.Is(err, e.ErrHouseNotFoundError) {
+			c.JSON(http.StatusNotFound, helpers.BuildErrorResponse(http.StatusNotFound, e.ErrHouseNotFoundError.Error()))
+			return
+		}
+
 		if errors.Is(err, e.ErrInvalidReservationUserIsHostError) {
 			c.JSON(http.StatusBadRequest, helpers.BuildErrorResponse(http.StatusBadRequest, e.ErrInvalidReservationUserIsHostError.Error()))
 			return
@@ -159,6 +169,21 @@ func (h *Handler) GetHouseReservationsByIDHandler(c *gin.Context) {
 	data, err := h.reservationService.GetHouseReservationsByID(reservationID, userContext.UserID)
 
 	if err != nil {
+		if errors.Is(err, e.ErrReservationNotFoundError) {
+			c.JSON(http.StatusNotFound, helpers.BuildErrorResponse(http.StatusNotFound, e.ErrReservationNotFoundError.Error()))
+			return
+		}
+
+		if errors.Is(err, e.ErrUserNotFoundError) {
+			c.JSON(http.StatusNotFound, helpers.BuildErrorResponse(http.StatusNotFound, e.ErrUserNotFoundError.Error()))
+			return
+		}
+
+		if errors.Is(err, e.ErrHouseNotFoundError) {
+			c.JSON(http.StatusNotFound, helpers.BuildErrorResponse(http.StatusNotFound, e.ErrHouseNotFoundError.Error()))
+			return
+		}
+
 		if errors.Is(err, e.ErrInvalidHostAndUserReservationError) {
 			c.JSON(http.StatusForbidden, helpers.BuildErrorResponse(http.StatusForbidden, e.ErrInvalidHostAndUserReservationError.Error()))
 			return

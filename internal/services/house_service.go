@@ -1,6 +1,7 @@
 package services
 
 import (
+	"fmt"
 	"strings"
 
 	"git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend/internal/dtos"
@@ -12,8 +13,8 @@ import (
 
 type HouseService interface {
 	GetAllHouses(queryParams map[string]interface{}) ([]*dtos.HouseDetailsWithPhotoDTO, *helpers.Pagination, error)
-	GetHouseByID(houseID int) (*dtos.HouseDetailsWithPhotoDTO, error)
-	GetUnscopedHouseByID(houseID int) (*dtos.HouseDetailsWithPhotoDTO, error)
+	GetHouseByID(houseID int, queryParams map[string]interface{}) (*dtos.HouseDetailsWithPhotoDTO, error)
+	// GetUnscopedHouseByID(houseID int) (*dtos.HouseDetailsWithPhotoDTO, error)
 	GetHostHouses(hostID int, queryParams map[string]interface{}) ([]*dtos.HouseDetailsWithPhotoDTO, *helpers.Pagination, error)
 	GetAllHouseStatuses() ([]*dtos.HouseStatusDTO, error)
 	AddNewHouse(userID int, request *dtos.AddNewHouseRequestDTO) (*models.House, []string, error)
@@ -100,7 +101,43 @@ func (s *houseService) GetAllHouses(queryParams map[string]interface{}) ([]*dtos
 	return houseData, pagination, nil
 }
 
-func (s *houseService) GetHouseByID(houseID int) (*dtos.HouseDetailsWithPhotoDTO, error) {
+func (s *houseService) GetHouseByID(houseID int, queryParams map[string]interface{}) (*dtos.HouseDetailsWithPhotoDTO, error) {
+	qUnscoped := ""
+	if queryParams["unscoped"] != nil {
+		qUnscoped = fmt.Sprintf("%v", queryParams["unscoped"])
+	}
+
+	if qUnscoped == "true" {
+		houseDetails, err := s.houseRepository.GetUnscopedHouseByHouseID(houseID)
+
+		if err != nil {
+			return nil, err
+		}
+
+		housePhoto, err := s.houseRepository.GetUnscopedHousePhotoByHouseID(houseID)
+
+		if err != nil {
+			return nil, err
+		}
+
+		houseData := &dtos.HouseDetailsWithPhotoDTO{
+			HouseID:          houseDetails.HouseID,
+			HouseName:        houseDetails.HouseName,
+			HousePrice:       houseDetails.HousePrice,
+			HouseDescription: houseDetails.HouseDescription,
+			HouseCityID:      houseDetails.HouseCityID,
+			HouseCityName:    houseDetails.HouseCityName,
+			HouseMaxGuest:    houseDetails.HouseMaxGuest,
+			HouseStatus:      houseDetails.HouseStatus,
+			HousePhoto:       housePhoto,
+			HostID:           houseDetails.HostID,
+			HostName:         houseDetails.HostName,
+			HostEmail:        houseDetails.HostEmail,
+		}
+
+		return houseData, nil
+	}
+
 	houseDetails, err := s.houseRepository.GetHouseByHouseID(houseID)
 
 	if err != nil {
@@ -131,36 +168,36 @@ func (s *houseService) GetHouseByID(houseID int) (*dtos.HouseDetailsWithPhotoDTO
 	return houseData, nil
 }
 
-func (s *houseService) GetUnscopedHouseByID(houseID int) (*dtos.HouseDetailsWithPhotoDTO, error) {
-	houseDetails, err := s.houseRepository.GetUnscopedHouseByHouseID(houseID)
+// func (s *houseService) GetUnscopedHouseByID(houseID int) (*dtos.HouseDetailsWithPhotoDTO, error) {
+// 	houseDetails, err := s.houseRepository.GetUnscopedHouseByHouseID(houseID)
 
-	if err != nil {
-		return nil, err
-	}
+// 	if err != nil {
+// 		return nil, err
+// 	}
 
-	housePhoto, err := s.houseRepository.GetUnscopedHousePhotoByHouseID(houseID)
+// 	housePhoto, err := s.houseRepository.GetUnscopedHousePhotoByHouseID(houseID)
 
-	if err != nil {
-		return nil, err
-	}
+// 	if err != nil {
+// 		return nil, err
+// 	}
 
-	houseData := &dtos.HouseDetailsWithPhotoDTO{
-		HouseID:          houseDetails.HouseID,
-		HouseName:        houseDetails.HouseName,
-		HousePrice:       houseDetails.HousePrice,
-		HouseDescription: houseDetails.HouseDescription,
-		HouseCityID:      houseDetails.HouseCityID,
-		HouseCityName:    houseDetails.HouseCityName,
-		HouseMaxGuest:    houseDetails.HouseMaxGuest,
-		HouseStatus:      houseDetails.HouseStatus,
-		HousePhoto:       housePhoto,
-		HostID:           houseDetails.HostID,
-		HostName:         houseDetails.HostName,
-		HostEmail:        houseDetails.HostEmail,
-	}
+// 	houseData := &dtos.HouseDetailsWithPhotoDTO{
+// 		HouseID:          houseDetails.HouseID,
+// 		HouseName:        houseDetails.HouseName,
+// 		HousePrice:       houseDetails.HousePrice,
+// 		HouseDescription: houseDetails.HouseDescription,
+// 		HouseCityID:      houseDetails.HouseCityID,
+// 		HouseCityName:    houseDetails.HouseCityName,
+// 		HouseMaxGuest:    houseDetails.HouseMaxGuest,
+// 		HouseStatus:      houseDetails.HouseStatus,
+// 		HousePhoto:       housePhoto,
+// 		HostID:           houseDetails.HostID,
+// 		HostName:         houseDetails.HostName,
+// 		HostEmail:        houseDetails.HostEmail,
+// 	}
 
-	return houseData, nil
-}
+// 	return houseData, nil
+// }
 
 func (s *houseService) GetHostHouses(hostID int, queryParams map[string]interface{}) ([]*dtos.HouseDetailsWithPhotoDTO, *helpers.Pagination, error) {
 	userDetails, err := s.userRepository.GetUserDetails(hostID)
@@ -333,7 +370,6 @@ func (s *houseService) DeleteHouse(houseID int, userID int) (*models.House, erro
 		return nil, err
 	}
 
-	// ini ga perlu
 	if strings.ToLower(user.Role) != "host" && strings.ToLower(user.Role) != "admin" {
 		return nil, e.ErrInvalidRoleNotHostError
 	}
