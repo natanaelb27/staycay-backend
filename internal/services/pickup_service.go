@@ -161,8 +161,6 @@ func (s *pickupService) AdminUpdatePickupStatus(pickupStatusID int, pickupID int
 		return nil, err
 	}
 
-	print(pickup.ReservationID)
-
 	pickupStatus, err := s.pickupRepository.GetPickupStatusByID(pickupStatusID)
 
 	if err != nil {
@@ -195,13 +193,13 @@ func (s *pickupService) AdminUpdatePickupStatus(pickupStatusID int, pickupID int
 }
 
 func (s *pickupService) GetAllPickupStatuses() ([]*dtos.PickupStatusesDTO, error) {
-	pikcupStatuses, err := s.pickupRepository.GetPickupStatuses()
+	pickupStatuses, err := s.pickupRepository.GetPickupStatuses()
 
 	if err != nil {
 		return nil, err
 	}
 
-	return pikcupStatuses, nil
+	return pickupStatuses, nil
 }
 
 func (s *pickupService) GetAllPickupDetails(queryParams map[string]interface{}) ([]*dtos.PickupDetailsDTO, *helpers.Pagination, error) {
