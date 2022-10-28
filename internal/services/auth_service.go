@@ -18,6 +18,7 @@ type authService struct {
 	walletRepository r.WalletRepository
 	gameRepository   r.GameRepository
 	hashHelper       helpers.HashHelper
+	jwtHelper        helpers.JwtHelper
 }
 
 type ASConfig struct {
@@ -25,6 +26,7 @@ type ASConfig struct {
 	WalletRepository r.WalletRepository
 	GameRepository   r.GameRepository
 	HashHelper       helpers.HashHelper
+	JwtHelper        helpers.JwtHelper
 }
 
 func NewAuthService(c *ASConfig) AuthService {
@@ -33,6 +35,7 @@ func NewAuthService(c *ASConfig) AuthService {
 		walletRepository: c.WalletRepository,
 		gameRepository:   c.GameRepository,
 		hashHelper:       c.HashHelper,
+		jwtHelper:        c.JwtHelper,
 	}
 }
 
@@ -107,7 +110,7 @@ func (s *authService) Register(userData dtos.RegisterRequestDTO) (*models.User, 
 		Email:  newUser.Email,
 	}
 
-	token, err := helpers.GenerateJwtToken(dataToJwt)
+	token, err := s.jwtHelper.GenerateJwtToken(dataToJwt)
 
 	if err != nil {
 		return nil, nil, err
@@ -132,7 +135,7 @@ func (s *authService) Login(userData dtos.LoginRequestDTO) (*models.User, *strin
 		Email:  user.Email,
 	}
 
-	token, err := helpers.GenerateJwtToken(dataToJwt)
+	token, err := s.jwtHelper.GenerateJwtToken(dataToJwt)
 
 	if err != nil {
 		return nil, nil, err

@@ -187,7 +187,30 @@ func Test_gameService_PlayGame(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name:             "Success",
+			name:             "Success - Lose Game",
+			gameRepository:   mocks.NewGameRepository(t),
+			walletRepository: mocks.NewWalletRepository(t),
+			coinGuessHelper:  mocks.NewCoinGuessHelper(t),
+			mock: func(m *mocks.GameRepository, m2 *mocks.WalletRepository, m3 *mocks.CoinGuessHelper) {
+				m.On("GetGameData", 1).Return(&models.GameChance{
+					Chance:  10,
+					Counter: 1,
+				}, nil)
+				m3.On("Randomizer", 2).Return(1)
+				m2.On("AddWalletBalance", 1, 10000).Return(&models.Wallet{}, nil)
+				m.On("SubtractGameChance", 1, 1).Return(nil)
+				m.On("AddGameChanceCounter", 1, 1).Return(nil)
+			},
+			args: args{
+				userGuess: "heads",
+				userID:    1,
+			},
+			want:    "tails",
+			want2:   10000,
+			wantErr: false,
+		},
+		{
+			name:             "Success - Win Game",
 			gameRepository:   mocks.NewGameRepository(t),
 			walletRepository: mocks.NewWalletRepository(t),
 			coinGuessHelper:  mocks.NewCoinGuessHelper(t),

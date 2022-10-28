@@ -77,11 +77,14 @@ func InitAllHandlers() *Handler {
 
 	coinGuessHelper := helpers.NewCoinGuessHelper(&helpers.CGHConfig{})
 
+	jwtHelper := helpers.NewJwtHelper(&helpers.JHConfig{})
+
 	authService := s.NewAuthService(&s.ASConfig{
 		UserRepository:   userRepo,
 		WalletRepository: walletRepo,
 		GameRepository:   gameRepo,
 		HashHelper:       hashHelper,
+		JwtHelper:        jwtHelper,
 	})
 
 	cityService := s.NewCityService(&s.CSConfig{

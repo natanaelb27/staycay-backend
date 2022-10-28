@@ -9,12 +9,26 @@ import (
 	"github.com/joho/godotenv"
 )
 
+type JwtHelper interface {
+	GenerateJwtToken(data interface{}) (*string, error)
+}
+
+type jwtHelper struct {
+}
+
+type JHConfig struct {
+}
+
+func NewJwtHelper(c *JHConfig) JwtHelper {
+	return &jwtHelper{}
+}
+
 type IdTokenClaims struct {
 	jwt.RegisteredClaims
 	Data interface{} `json:"data"`
 }
 
-func GenerateJwtToken(data interface{}) (*string, error) {
+func (h *jwtHelper) GenerateJwtToken(data interface{}) (*string, error) {
 	godotenv.Load(".env")
 	idExp, _ := strconv.ParseInt(os.Getenv("EXPIRED_TIME"), 10, 64)
 	unixTime := time.Now().Unix()
