@@ -99,7 +99,6 @@ func InitAllHandlers() *Handler {
 
 	houseService := s.NewHouseService(&s.HSConfig{
 		HouseRepository:       houseRepo,
-		CityRepository:        cityRepo,
 		UserRepository:        userRepo,
 		ReservationRepository: reservationRepo,
 	})

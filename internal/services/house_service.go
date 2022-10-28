@@ -26,14 +26,12 @@ type HouseService interface {
 
 type houseService struct {
 	houseRepository       r.HouseRepository
-	cityRepository        r.CityRepository
 	userRepository        r.UserRepository
 	reservationRepository r.ReservationRepository
 }
 
 type HSConfig struct {
 	HouseRepository       r.HouseRepository
-	CityRepository        r.CityRepository
 	UserRepository        r.UserRepository
 	ReservationRepository r.ReservationRepository
 }
@@ -41,7 +39,6 @@ type HSConfig struct {
 func NewHouseService(c *HSConfig) HouseService {
 	return &houseService{
 		houseRepository:       c.HouseRepository,
-		cityRepository:        c.CityRepository,
 		userRepository:        c.UserRepository,
 		reservationRepository: c.ReservationRepository,
 	}
@@ -321,14 +318,14 @@ func (s *houseService) UpdateHouse(houseID int, userID int, request *dtos.Update
 		return nil, err
 	}
 
+	if strings.ToLower(userDetails.Role) != "host" && strings.ToLower(userDetails.Role) != "admin" {
+		return nil, e.ErrInvalidRoleNotHostError
+	}
+
 	houseDetails, err := s.houseRepository.GetHouseByHouseID(houseID)
 
 	if err != nil {
 		return nil, err
-	}
-
-	if strings.ToLower(userDetails.Role) != "host" && strings.ToLower(userDetails.Role) != "admin" {
-		return nil, e.ErrInvalidRoleNotHostError
 	}
 
 	if houseDetails.HostID != userID && strings.ToLower(userDetails.Role) != "admin" {
@@ -475,6 +472,10 @@ func (s *houseService) DeleteHousePhoto(housePhotoID int, userID int) (*models.H
 	}
 
 	totalRows, err := s.houseRepository.ValidateTotalHousePhoto(houseDetails.HouseID)
+
+	if err != nil {
+		return nil, err
+	}
 
 	if totalRows <= 1 {
 		return nil, e.ErrHousePhotoMustMoreThanOneError
