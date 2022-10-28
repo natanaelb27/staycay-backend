@@ -46,7 +46,7 @@ func (r *reservationRepository) GetHouseReservationsByUserID(userID int, queryPa
 		(CASE WHEN NOW()::timestamp::date = reservations.check_in_date::timestamp::date THEN 'today'
 		WHEN NOW()::timestamp::date BETWEEN reservations.check_in_date::timestamp::date AND reservations.check_out_date::timestamp::date THEN 'ongoing'
 		WHEN reservations.check_in_date::timestamp::date > NOW() THEN 'upcoming'
-		WHEN reservations.check_out_date::timestamp::date < NOW() THEN 'past' END) AS reservation_status`).
+		WHEN reservations.check_out_date::timestamp::date < NOW() THEN 'completed' END) AS reservation_status`).
 		Joins("JOIN houses ON reservations.house_id = houses.id").
 		Where("reservations.user_id = ?", userID)
 
@@ -67,7 +67,7 @@ func (r *reservationRepository) GetHouseReservationsByUserID(userID int, queryPa
 		result = result.Where("reservations.check_in_date::timestamp::date > NOW()::timestamp::date").Order("reservations.check_in_date asc")
 	}
 
-	if filterBy == "past" {
+	if filterBy == "completed" {
 		result = result.Where("reservations.check_out_date::timestamp::date < NOW()::timestamp::date").Order("reservations.check_in_date desc")
 	}
 
@@ -109,7 +109,7 @@ func (r *reservationRepository) GetHouseReservationsByHostID(hostID int, queryPa
 		(CASE WHEN NOW()::timestamp::date = reservations.check_in_date::timestamp::date THEN 'today'
 		WHEN NOW()::timestamp::date BETWEEN reservations.check_in_date::timestamp::date AND reservations.check_out_date::timestamp::date THEN 'ongoing'
 		WHEN reservations.check_in_date::timestamp::date > NOW() THEN 'upcoming'
-		WHEN reservations.check_out_date::timestamp::date < NOW() THEN 'past' END) AS reservation_status`).
+		WHEN reservations.check_out_date::timestamp::date < NOW() THEN 'completed' END) AS reservation_status`).
 		Joins("JOIN houses ON reservations.house_id = houses.id").
 		Where("houses.user_id = ?", hostID)
 
@@ -130,7 +130,7 @@ func (r *reservationRepository) GetHouseReservationsByHostID(hostID int, queryPa
 		result = result.Where("reservations.check_in_date::timestamp::date > NOW()::timestamp::date").Order("reservations.check_in_date asc")
 	}
 
-	if filterBy == "past" {
+	if filterBy == "completed" {
 		result = result.Where("reservations.check_out_date::timestamp::date < NOW()::timestamp::date").Order("reservations.check_in_date desc")
 	}
 
@@ -170,7 +170,7 @@ func (r *reservationRepository) GetHouseReservationsByHostID(hostID int, queryPa
 // 		(CASE WHEN NOW()::timestamp::date = reservations.check_in_date::timestamp::date THEN 'today'
 // 		WHEN NOW()::timestamp::date BETWEEN reservations.check_in_date::timestamp::date AND reservations.check_out_date::timestamp::date THEN 'ongoing'
 // 		WHEN reservations.check_in_date::timestamp::date > NOW() THEN 'upcoming'
-// 		WHEN reservations.check_out_date::timestamp::date < NOW() THEN 'past' END) AS reservation_status`).
+// 		WHEN reservations.check_out_date::timestamp::date < NOW() THEN 'completed' END) AS reservation_status`).
 // 		Joins("JOIN houses ON reservations.house_id = houses.id").
 // 		Where("reservations.user_id = ?", userID)
 
@@ -191,7 +191,7 @@ func (r *reservationRepository) GetHouseReservationsByHostID(hostID int, queryPa
 // 		result = result.Where("reservations.check_in_date::timestamp::date > NOW()::timestamp::date").Order("reservations.check_in_date asc")
 // 	}
 
-// 	if filterBy == "past" {
+// 	if filterBy == "completed" {
 // 		result = result.Where("reservations.check_out_date::timestamp::date < NOW()::timestamp::date").Order("reservations.check_in_date desc")
 // 	}
 
@@ -218,7 +218,7 @@ func (r *reservationRepository) GetHouseReservationsByHouseID(houseID int, query
 		(CASE WHEN NOW()::timestamp::date = reservations.check_in_date::timestamp::date THEN 'today'
 		WHEN NOW()::timestamp::date BETWEEN reservations.check_in_date::timestamp::date AND reservations.check_out_date::timestamp::date THEN 'ongoing'
 		WHEN reservations.check_in_date::timestamp::date > NOW() THEN 'upcoming'
-		WHEN reservations.check_out_date::timestamp::date < NOW() THEN 'past' END) AS reservation_status`).
+		WHEN reservations.check_out_date::timestamp::date < NOW() THEN 'completed' END) AS reservation_status`).
 		Joins("JOIN houses ON reservations.house_id = houses.id").
 		Where("reservations.house_id = ?", houseID)
 
@@ -234,7 +234,7 @@ func (r *reservationRepository) GetHouseReservationsByHouseID(houseID int, query
 		result = result.Where("reservations.check_in_date::timestamp::date > NOW()::timestamp::date").Order("reservations.check_in_date asc")
 	}
 
-	if filterBy == "past" {
+	if filterBy == "completed" {
 		result = result.Where("reservations.check_out_date::timestamp::date < NOW()::timestamp::date").Order("reservations.check_in_date desc")
 	}
 
@@ -273,7 +273,7 @@ func (r *reservationRepository) GetHouseReservationsByHouseID(houseID int, query
 	// 	result = result.Where("reservations.check_in_date::timestamp::date > NOW()::timestamp::date")
 	// }
 
-	// if filterBy == "past" {
+	// if filterBy == "completed" {
 	// 	result = result.Where("reservations.check_out_date::timestamp::date < NOW()::timestamp::date")
 	// }
 
@@ -294,7 +294,7 @@ func (r *reservationRepository) GetHouseReservationsByID(reservationID int) (*dt
 		(CASE WHEN NOW()::timestamp::date = reservations.check_in_date::timestamp::date THEN 'today'
 		WHEN NOW()::timestamp::date BETWEEN reservations.check_in_date::timestamp::date AND reservations.check_out_date::timestamp::date THEN 'ongoing'
 		WHEN reservations.check_in_date::timestamp::date > NOW() THEN 'upcoming'
-		WHEN reservations.check_out_date::timestamp::date < NOW() THEN 'past' END) AS reservation_status`).
+		WHEN reservations.check_out_date::timestamp::date < NOW() THEN 'completed' END) AS reservation_status`).
 		Joins("JOIN houses ON reservations.house_id = houses.id").
 		Where("reservations.id = ?", reservationID).
 		Find(&houseReservation)

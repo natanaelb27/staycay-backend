@@ -53,7 +53,7 @@ func (s *pickupService) RequestPickup(reservationID int, userID int, request *dt
 		return nil, e.ErrInvalidUserReservationError
 	}
 
-	if houseReservation.ReservationStatus == "past" {
+	if houseReservation.ReservationStatus == "completed" {
 		return nil, e.ErrPickupCompletedReservation
 	}
 
