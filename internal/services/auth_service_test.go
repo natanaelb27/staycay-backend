@@ -11,7 +11,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func Test_cityService_NewAuthService(t *testing.T) {
+func Test_authService_NewAuthService(t *testing.T) {
 	userRepository := mocks.NewUserRepository(t)
 	walletRepository := mocks.NewWalletRepository(t)
 	gameRepository := mocks.NewGameRepository(t)
