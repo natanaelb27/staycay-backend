@@ -1,9 +1,8 @@
 package services
 
 import (
-	"math/rand"
-
 	e "git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend/internal/errors"
+	"git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend/internal/helpers"
 	"git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend/internal/models"
 	r "git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend/internal/repositories"
 )
@@ -45,7 +44,7 @@ func (s *gameService) PlayGame(userGuess string, userID int) (string, int, error
 	minAmount := 10000
 
 	coin := []string{"heads", "tails"}
-	randomIndex := rand.Intn(len(coin))
+	randomIndex := helpers.Randomizer(len(coin))
 	pick := coin[randomIndex]
 
 	amountWon := 0
