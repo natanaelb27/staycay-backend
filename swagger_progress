@@ -1,0 +1,1146 @@
+openapi: 3.0.3
+info:
+  title: Staycay API
+  description: |-
+    A RESTful API
+  termsOfService: http://swagger.io/terms/
+  contact:
+    email: apiteam@swagger.io
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  version: 0.0.1
+servers:
+  - url: http://localhost:8080
+security:
+  - bearerAuth: []
+tags:
+  - name: auth
+    description: Authentication Process
+  - name: user
+    description: Everything about users
+  - name: house
+    description: Everything about houses
+  - name: city
+    description: Everything about cities
+  - name: wallet
+    description: Everything about wallet operations
+  - name: game
+    description: Everything about game operations
+
+paths:
+  /login:
+      post:
+        tags:
+          - auth
+        summary: Logs user into the system
+        description: ''
+        operationId: login
+        requestBody:
+          $ref: '#/components/requestBodies/LoginRequest'
+        responses:
+          '200':
+            description: Successful Operation
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/LoginResponse'
+          '400':
+            $ref: '#/components/responses/400'
+          '401':
+            $ref: '#/components/responses/401'
+          '500':
+            $ref: '#/components/responses/500'
+            
+  /register:
+      post:
+        tags:
+          - auth
+        summary: Register user into the system
+        description: ''
+        operationId: register
+        requestBody:
+          $ref: '#/components/requestBodies/RegisterRequest'
+        responses:
+          '201':
+            description: Successful Operation
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/RegisterResponse'
+          '400':
+            $ref: '#/components/responses/400'
+          '409':
+            $ref: '#/components/responses/409'
+          '500':
+            $ref: '#/components/responses/500'
+            
+  /user:
+    get:
+      tags:
+        - user
+      summary: Get user profile
+      description: ''
+      operationId: getUser
+      responses:
+        '200':
+          description: Successful Operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetUserProfileResponse'
+        '404':
+          $ref: '#/components/responses/404'
+        '500':
+          $ref: '#/components/responses/500'
+    patch:
+      tags:
+        - user
+      summary: Update user profile
+      description: ''
+      operationId: updateUserProfile
+      requestBody:
+        $ref: '#/components/requestBodies/UpdateUserProfileRequest'
+      responses:
+        '200':
+          description: Successful Operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpdateUserProfileResponse'
+        '500':
+          $ref: '#/components/responses/500'
+          
+  /user/{userId}:
+    get:
+      tags:
+        - user
+      summary: Get user profile by id
+      description: ''
+      operationId: getUserById
+      parameters:
+        - name: userId
+          in: path
+          description: ID of user that needs to be fetched
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Successful Operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetUserProfileByIDResponse'
+        '404':
+          $ref: '#/components/responses/404'
+        '500':
+          $ref: '#/components/responses/500'
+  
+  /user/role:
+    patch:
+      tags:
+        - user
+      summary: Update user role to host
+      description: ''
+      operationId: updateRole
+      responses:
+        '200':
+          description: Successful Operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpdateUserRoleResponse'
+        '500':
+          $ref: '#/components/responses/500'
+          
+  /user/reservation:
+    get:
+      tags:
+        - user
+      summary: Get user's reservation
+      description: ''
+      operationId: getUserReservation
+      parameters:
+        - name: filterBy
+          in: query
+          description: Filter by reservation status
+          required: false
+          schema:
+            type: string
+            enum: ["all", "today", "ongoing", "upcoming", "completed"]
+        - name: limit
+          in: query
+          description: Size of each page
+          required: false
+          schema:
+            type: integer
+            example: 10
+        - name: page
+          in: query
+          description: View which page (default view last page)
+          required: false
+          schema:
+            type: integer
+            example: 1
+      responses:
+        '200':
+          description: Successful Operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetUserReservationResponse'
+        '500':
+          $ref: '#/components/responses/500'
+          
+  /house:
+    get:
+      tags:
+        - house
+      summary: Get all houses
+      description: ''
+      operationId: getHouse
+      parameters:
+        - name: searchName
+          in: query
+          description: Search by house name
+          required: false
+          schema:
+            type: string
+            example: blue house
+        - name: searchCity
+          in: query
+          description: Search by city id
+          required: false
+          schema:
+            type: integer
+            example: 1
+        - name: searchStatus
+          in: query
+          description: Search by house's status
+          required: false
+          schema:
+            type: string
+            enum: ["Active", "Inactive", "Deactivated by Admin"]
+        - name: searchCheckInDate
+          in: query
+          description: Search by check in date
+          required: false
+          schema:
+            type: string
+            format: date
+            example: "2022-11-11"
+        - name: searchCheckOutDate
+          in: query
+          description: Search by check out date
+          required: false
+          schema:
+            type: string
+            format: date
+            example: "2022-11-12"
+        - name: sortBy
+          in: query
+          description: Sort houses by several options
+          required: false
+          schema:
+            type: string
+            enum: ["name", "city_name", "price"]
+        - name: sort
+          in: query
+          description: Sort by ascending or descending
+          required: false
+          schema:
+            type: string
+            enum: ["asc", "desc"]
+        - name: limit
+          in: query
+          description: Size of each page
+          required: false
+          schema:
+            type: integer
+            example: 10
+        - name: page
+          in: query
+          description: View which page (default view last page)
+          required: false
+          schema:
+            type: integer
+            example: 1
+      responses:
+        '200':
+          description: Successful Operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetAllHousesResponse'
+        '500':
+          $ref: '#/components/responses/500'
+          
+  /house/{houseId}:
+    get:
+      tags:
+        - house
+      summary: Get house by id
+      description: ''
+      operationId: getHouseById
+      parameters:
+        - name: houseId
+          in: path
+          description: ID of house that needs to be fetched
+          required: true
+          schema:
+            type: integer
+            example: 1
+        - name: unscoped
+          in: query
+          description: Get deleted data if set to true
+          required: true
+          schema:
+            type: boolean
+            enum: [true, false]
+      responses:
+        '200':
+          description: Successful Operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetHouseByIDResponse'
+        '404':
+          $ref: '#/components/responses/404'
+        '500':
+          $ref: '#/components/responses/500'
+          
+  /house/status:
+    get:
+      tags:
+        - house
+      summary: Get all house statuses
+      description: ''
+      operationId: getHouseStatus
+      responses:
+        '200':
+          description: Successful Operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetAllHouseStatusesResponse'
+        '500':
+          $ref: '#/components/responses/500'
+          
+  /house/reservation/{houseId}:
+    get:
+      tags:
+        - house
+      summary: Get house's reservation by house id
+      description: ''
+      operationId: getHouseReservationByHouseId
+      parameters:
+        - name: houseId
+          in: path
+          description: ID of house that needs to be fetched
+          required: true
+          schema:
+            type: integer
+            example: 1
+      responses:
+        '200':
+          description: Successful Operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetHouseReservationResponse'
+        '404':
+          $ref: '#/components/responses/404'
+        '500':
+          $ref: '#/components/responses/500'
+            
+  /city:
+    get:
+      tags:
+        - city
+      summary: Get all cities
+      description: ''
+      operationId: getCity
+      responses:
+        '200':
+          description: Successful Operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetAllCitiesResponse'
+        '500':
+          $ref: '#/components/responses/500'
+          
+          
+  /topup:
+      post:
+        tags:
+          - wallet
+        summary: Top up wallet balance
+        description: ''
+        operationId: topup
+        requestBody:
+          $ref: '#/components/requestBodies/TopUpWalletRequest'
+        responses:
+          '200':
+            description: Successful Operation
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/TopUpWalletResponse'
+          '400':
+            $ref: '#/components/responses/400'
+          '500':
+            $ref: '#/components/responses/500'
+            
+  /game:
+    get:
+      tags:
+        - game
+      summary: Get user's game data
+      description: ''
+      operationId: getGame
+      responses:
+        '200':
+          description: Successful Operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetGameResponse'
+        '500':
+          $ref: '#/components/responses/500'
+    post:
+      tags:
+        - game
+      summary: Play a coin guessing game
+      description: 'Guess either heads or tails'
+      operationId: playGame
+      requestBody:
+          $ref: '#/components/requestBodies/PlayGameRequest'
+      responses:
+        '200':
+          description: Successful Operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlayGameResponse'
+        '400':
+          $ref: '#/components/responses/400'
+        '500':
+          $ref: '#/components/responses/500'
+     
+components:
+  schemas:
+    LoginRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          example: 'acong.suherman@email.com'
+        password:
+          type: string
+          example: "Password123"
+              
+    RegisterRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          example: 'Kevin Subakti'
+        email:
+          type: string
+          format: email
+          example: 'kevin.subakti@email.com'
+        password:
+          type: string
+          example: "Password123"
+        address:
+          type: string
+          example: "Merpati Street"
+        city_id:
+          type: integer
+          example: 1
+        is_admin:
+          type: boolean
+          example: false
+          
+    UpdateUserProfileRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          example: 'Acong Suherman Cipto'
+        old_password:
+          type: string
+          example: "OldPassword123"
+        password:
+          type: string
+          example: "NewPassword123"
+        address:
+          type: string
+          example: "Badak Street"
+        city_id:
+          type: integer
+          example: 2
+          
+    TopUpWalletRequest:
+      type: object
+      properties:
+        amount:
+          type: integer
+          example: 50000
+          
+    PlayGameRequest:
+      type: object
+      properties:
+        user_guess:
+          type: string
+          example: "heads"
+          
+    
+    UserDetails:
+      type: object
+      properties:
+        user_id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: 'Acong Suherman'
+        email:
+          type: string
+          format: email
+          example: 'acong.suherman@email.com'
+        address:
+          type: string
+          example: 'Merpati Street'
+        city_id:
+          type: integer
+          example: 1
+        city_name:
+          type: string
+          example: 'Bandung'
+        role:
+          type: string
+          example: 'user'
+        wallet_id:
+          type: integer
+          example: 1
+        balance:
+          type: integer
+          example: 150000
+          
+    Pagination:
+      type: object
+      properties:
+        limit:
+          type: integer
+          example: 10
+        page:
+          type: integer
+          example: 1
+        total_rows:
+          type: integer
+          example: 1
+        total_pages:
+          type: integer
+          example: 1
+          
+    ReservationDetails:
+      type: object
+      properties:
+        house_id:
+          type: integer
+          example: 1
+        house_city_id:
+          type: integer
+          example: 1
+        user_id:
+          type: integer
+          example: 1
+        reservation_id:
+          type: integer
+          example: 1
+        reservation_code:
+          type: string
+          example: "RC20221001120221003"
+        check_in_date:
+          type: string
+          format: date-time
+          example: "2022-10-01T07:00:00+07:00"
+        check_out_date:
+          type: string
+          format: date-time
+          example: "2022-10-03T07:00:00+07:00"
+        total_price:
+          type: integer
+          example: 200000
+        reservation_status: 
+          type: string
+          example: "completed"
+          
+    HouseDetails:
+      type: object
+      properties:
+        house_id:
+          type: integer
+          example: 1
+        house_name:
+          type: string
+          example: "Blue House"
+        house_price:
+          type: integer
+          example: 100000
+        house_description:
+          type: string
+          example: "A blue colored house"
+        house_city_id:
+          type: integer
+          example: 1
+        house_city_name:
+          type: string
+          example: "Bandung"
+        house_max_guest:
+          type: integer
+          example: 5
+        house_status:
+          type: string
+          example: Inactive
+        house_photo:
+          type: array
+          items:
+            type: object
+            properties:
+              photo_id:
+                type: integer
+                example: 1
+              photo:
+                type: string
+                example: "photourl"
+        host_id:
+          type: integer
+          example: 1
+        host_name:
+          type: string
+          example: "Acong Suherman"
+        host_email:
+          type: string
+          example: "acong.suherman@email.com"
+    
+    LoginResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            user_id:
+              type: integer
+              example: 1
+            email:
+              type: string
+              example: acong.suherman@email.com
+            role:
+              type: string
+              example: user
+            token:
+              type: string
+              example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJTdGF5Q2F5IEFQSSIsImV4cCI6MTY2NzEzNTQ1MiwiaWF0IjoxNjY3MDQ5MDUyLCJkYXRhIjp7InVzZXJfaWQiOjIsImVtYWlsIjoiYWNvbmcuc3VoZXJtYW5AZW1haWwuY29tIn19.kvpU6tNHmnoxp084edDS5cUWkocdoGDS4btQSAoq-Js'
+        code:
+          type: integer
+          example: 200
+        message:
+          type: string
+          example: "OK"
+        error:
+          type: boolean
+          example: false
+          
+    RegisterResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            id:
+              type: integer
+              example: 5
+            name:
+              type: string
+              example: 'Acong Suherman'
+            email:
+              type: string
+              format: email
+              example: 'acong.suherman@email.com'
+            token:
+              type: string
+              example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJTdGF5Q2F5IEFQSSIsImV4cCI6MTY2NzEzNTQ1MiwiaWF0IjoxNjY3MDQ5MDUyLCJkYXRhIjp7InVzZXJfaWQiOjIsImVtYWlsIjoiYWNvbmcuc3VoZXJtYW5AZW1haWwuY29tIn19.kvpU6tNHmnoxp084edDS5cUWkocdoGDS4btQSAoq-Js"
+        code:
+          type: integer
+          example: 201
+        message:
+          type: string
+          example: "Created"
+        error:
+          type: boolean
+          example: false
+          
+    GetUserProfileResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/UserDetails'
+        code:
+          type: integer
+          example: 200
+        message:
+          type: string
+          example: "OK"
+        error:
+          type: boolean
+          example: false
+          
+    GetUserProfileByIDResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/UserDetails'
+        code:
+          type: integer
+          example: 200
+        message:
+          type: string
+          example: "OK"
+        error:
+          type: boolean
+          example: false
+          
+    UpdateUserProfileResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            user_id:
+              type: integer
+              example: 1
+            name:
+              type: string
+              example: 'Acong Suherman Cipto'
+            address:
+              type: string
+              example: 'Badak Street'
+            city_id:
+              type: integer
+              example: 2
+              
+        code:
+          type: integer
+          example: 200
+        message:
+          type: string
+          example: "OK"
+        error:
+          type: boolean
+          example: false
+          
+    UpdateUserRoleResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            user_id:
+              type: integer
+              example: 1
+            role:
+              type: string
+              example: 'host'
+        code:
+          type: integer
+          example: 200
+        message:
+          type: string
+          example: "OK"
+        error:
+          type: boolean
+          example: false
+          
+    GetUserReservationResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            pagination:
+                $ref: '#/components/schemas/Pagination'
+            reservation:
+              type: array
+              items:
+                $ref: '#/components/schemas/ReservationDetails'
+        code:
+          type: integer
+          example: 200
+        message:
+          type: string
+          example: "OK"
+        error:
+          type: boolean
+          example: false
+          
+    GetAllHousesResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            pagination:
+                $ref: '#/components/schemas/Pagination'
+            house:
+              type: array
+              items:
+                $ref: '#/components/schemas/HouseDetails'
+        code:
+          type: integer
+          example: 200
+        message:
+          type: string
+          example: "OK"
+        error:
+          type: boolean
+          example: false
+          
+    GetHouseByIDResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/HouseDetails'
+        code:
+          type: integer
+          example: 200
+        message:
+          type: string
+          example: "OK"
+        error:
+          type: boolean
+          example: false
+          
+    GetAllHouseStatusesResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            house_status:
+              type: array
+              items:
+                type: object
+                properties:
+                  house_status_id:
+                    type: integer
+                    example: 1
+                  house_status_name:
+                    type: string
+                    example: "Active"
+        code:
+          type: integer
+          example: 200
+        message:
+          type: string
+          example: "OK"
+        error:
+          type: boolean
+          example: false
+          
+    GetHouseReservationResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            reservation:
+              type: array
+              items:
+                $ref: '#/components/schemas/ReservationDetails'
+        code:
+          type: integer
+          example: 200
+        message:
+          type: string
+          example: "OK"
+        error:
+          type: boolean
+          example: false
+          
+    GetAllCitiesResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            city:
+              type: array
+              items:
+                type: object
+                properties:
+                  city_id:
+                    type: integer
+                    example: 1
+                  city_name:
+                    type: string
+                    example: 'Bandung'
+        code:
+          type: integer
+          example: 200
+        message:
+          type: string
+          example: "OK"
+        error:
+          type: boolean
+          example: false
+          
+    TopUpWalletResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            user_id:
+              type: integer
+              example: 1
+            wallet_id:
+              type: integer
+              example: 1
+            balance:
+              type: integer
+              example: 150000
+            amount:
+              type: integer
+              example: 50000
+        code:
+          type: integer
+          example: 200
+        message:
+          type: string
+          example: "OK"
+        error:
+          type: boolean
+          example: false
+          
+    GetGameResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            user_id:
+              type: integer
+              example: 1
+            chance:
+              type: integer
+              example: 15
+            counter:
+              type: integer
+              example: 5
+        code:
+          type: integer
+          example: 200
+        message:
+          type: string
+          example: "OK"
+        error:
+          type: boolean
+          example: false
+      
+    PlayGameResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            user_guess:
+              type: string
+              example: "heads"
+            correct_guess:
+              type: string
+              example: "heads"
+            amount_won:
+              type: integer
+              example: 50000
+        code:
+          type: integer
+          example: 200
+        message:
+          type: string
+          example: "OK"
+        error:
+          type: boolean
+          example: false
+   
+  requestBodies:
+    LoginRequest:
+      description: user login
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/LoginRequest'
+      required: true
+      
+    RegisterRequest:
+      description: register user
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/RegisterRequest'
+      required: true
+    
+    UpdateUserProfileRequest:
+      description: update user profile
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UpdateUserProfileRequest'
+      required: false
+        
+    TopUpWalletRequest:
+      description: top up wallet
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/TopUpWalletRequest'
+      required: true
+        
+    PlayGameRequest:
+      description: play game
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PlayGameRequest'
+      required: true
+      
+    
+  responses:
+    '400':
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              data:
+                type: string
+                example: null
+              code:
+                type: integer
+                example: 400
+              message:
+                type: string
+                example: "Bad Request"
+              error:
+                type: boolean
+                example: true
+    '401':
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              data:
+                type: string
+                example: null
+              code:
+                type: integer
+                example: 401
+              message:
+                type: string
+                example: "Unauthorized"
+              error:
+                type: boolean
+                example: true
+                
+    '403':
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              data:
+                type: string
+                example: null
+              code:
+                type: integer
+                example: 403
+              message:
+                type: string
+                example: "Forbidden"
+              error:
+                type: boolean
+                example: true
+                
+    '404':
+      description: Not Found
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              data:
+                type: string
+                example: null
+              code:
+                type: integer
+                example: 404
+              message:
+                type: string
+                example: "Not Found"
+              error:
+                type: boolean
+                example: true
+                
+    '409':
+      description: Conflict
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              data:
+                type: string
+                example: null
+              code:
+                type: integer
+                example: 409
+              message:
+                type: string
+                example: "Conflict"
+              error:
+                type: boolean
+                example: true
+                
+    '500':
+      description: Internal Server Error
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              data:
+                type: string
+                example: null
+              code:
+                type: integer
+                example: 500
+              message:
+                type: string
+                example: "Internal Server Error"
+              error:
+                type: boolean
+                example: true
+                
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

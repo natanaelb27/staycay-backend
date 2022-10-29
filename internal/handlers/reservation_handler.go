@@ -146,6 +146,11 @@ func (h *Handler) GetHouseReservationsByHouseHandler(c *gin.Context) {
 	data, err := h.reservationService.GetHouseReservationsByHouse(houseID, queryParams)
 
 	if err != nil {
+		if errors.Is(err, e.ErrHouseNotFoundError) {
+			c.JSON(http.StatusNotFound, helpers.BuildErrorResponse(http.StatusNotFound, e.ErrHouseNotFoundError.Error()))
+			return
+		}
+
 		c.JSON(http.StatusInternalServerError, helpers.BuildErrorResponse(http.StatusInternalServerError, err.Error()))
 		return
 	}

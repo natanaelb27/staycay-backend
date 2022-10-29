@@ -149,6 +149,12 @@ func (s *reservationService) GetHouseReservationsByHost(hostID int, queryParams 
 }
 
 func (s *reservationService) GetHouseReservationsByHouse(houseID int, queryParams map[string]interface{}) ([]*dtos.HouseReservationsDTO, error) {
+	_, err := s.houseRepository.GetHouseByHouseID(houseID)
+
+	if err != nil {
+		return nil, err
+	}
+
 	houseReservations, err := s.reservationRepository.GetHouseReservationsByHouseID(houseID, queryParams)
 
 	if err != nil {

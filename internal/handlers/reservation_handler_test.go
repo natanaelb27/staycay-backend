@@ -423,6 +423,18 @@ func TestHandler_GetHouseReservationsByHouseHandler(t *testing.T) {
 		wants              int
 	}{
 		{
+			name:               "Failed - House not Found",
+			reservationService: mocks.NewReservationService(t),
+			args: args{
+				method:   http.MethodGet,
+				endPoint: "/house/reservation",
+			},
+			mock: func(m *mocks.ReservationService) {
+				m.On("GetHouseReservationsByHouse", MockParamsHouseID, MockQueryParams).Return(nil, e.ErrHouseNotFoundError)
+			},
+			wants: http.StatusNotFound,
+		},
+		{
 			name:               "Failed - Internal Server Error",
 			reservationService: mocks.NewReservationService(t),
 			args: args{

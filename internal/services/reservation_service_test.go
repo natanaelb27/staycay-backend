@@ -604,15 +604,32 @@ func Test_reservationService_GetHouseReservationsByHouse(t *testing.T) {
 	tests := []struct {
 		name                  string
 		reservationRepository *mocks.ReservationRepository
-		mock                  func(m *mocks.ReservationRepository)
+		houseRepository       *mocks.HouseRepository
+		mock                  func(m *mocks.ReservationRepository, m2 *mocks.HouseRepository)
 		args                  args
 		want                  []*dtos.HouseReservationsDTO
 		wantErr               bool
 	}{
 		{
+			name:                  "Failed - GetHouseByHouseID",
+			reservationRepository: mocks.NewReservationRepository(t),
+			houseRepository:       mocks.NewHouseRepository(t),
+			mock: func(m *mocks.ReservationRepository, m2 *mocks.HouseRepository) {
+				m2.On("GetHouseByHouseID", 1).Return(nil, errors.New("error"))
+			},
+			args: args{
+				houseID:     1,
+				queryParams: map[string]interface{}{},
+			},
+			want:    nil,
+			wantErr: true,
+		},
+		{
 			name:                  "Failed - GetHouseReservationsByHouseID",
 			reservationRepository: mocks.NewReservationRepository(t),
-			mock: func(m *mocks.ReservationRepository) {
+			houseRepository:       mocks.NewHouseRepository(t),
+			mock: func(m *mocks.ReservationRepository, m2 *mocks.HouseRepository) {
+				m2.On("GetHouseByHouseID", 1).Return(nil, nil)
 				m.On("GetHouseReservationsByHouseID", 1, map[string]interface{}{}).Return(nil, errors.New("error"))
 			},
 			args: args{
@@ -625,7 +642,9 @@ func Test_reservationService_GetHouseReservationsByHouse(t *testing.T) {
 		{
 			name:                  "Success",
 			reservationRepository: mocks.NewReservationRepository(t),
-			mock: func(m *mocks.ReservationRepository) {
+			houseRepository:       mocks.NewHouseRepository(t),
+			mock: func(m *mocks.ReservationRepository, m2 *mocks.HouseRepository) {
+				m2.On("GetHouseByHouseID", 1).Return(nil, nil)
 				m.On("GetHouseReservationsByHouseID", 1, map[string]interface{}{}).Return([]*dtos.HouseReservationsDTO{}, nil)
 			},
 			args: args{
@@ -640,9 +659,10 @@ func Test_reservationService_GetHouseReservationsByHouse(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			s := &reservationService{
 				reservationRepository: tt.reservationRepository,
+				houseRepository:       tt.houseRepository,
 			}
 
-			tt.mock(tt.reservationRepository)
+			tt.mock(tt.reservationRepository, tt.houseRepository)
 
 			got, err := s.GetHouseReservationsByHouse(tt.args.houseID, tt.args.queryParams)
 
