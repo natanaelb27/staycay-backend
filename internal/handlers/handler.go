@@ -1,6 +1,9 @@
 package handlers
 
 import (
+	"net/url"
+	"strconv"
+
 	"git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend/db"
 	"git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend/internal/dtos"
 	"git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend/internal/helpers"
@@ -150,5 +153,33 @@ var MockUser = dtos.JwtData{
 
 func MiddlewareMockUser(c *gin.Context) {
 	c.Set("user", MockUser)
+	c.Next()
+}
+
+var MockParamsHouseID = 1
+var MockParamsHousePhotoID = 1
+var MockParamsUserID = 1
+
+func MiddlewareMockParams(c *gin.Context) {
+	c.Params = []gin.Param{
+		{Key: "houseId",
+			Value: strconv.Itoa(MockParamsHouseID)},
+		{Key: "housePhotoId",
+			Value: strconv.Itoa(MockParamsHousePhotoID)},
+		{Key: "userId",
+			Value: strconv.Itoa(MockParamsUserID)},
+	}
+	c.Next()
+}
+
+var MockQueryParams = map[string]interface{}{
+	"key": "value",
+}
+
+func MiddlewareMockQueryParams(c *gin.Context) {
+	v := url.URL{
+		RawQuery: "key=value",
+	}
+	c.Request.URL = &v
 	c.Next()
 }

@@ -189,7 +189,7 @@ func TestHandler_RegisterHandler(t *testing.T) {
 
 			r := gin.Default()
 
-			r.POST(tt.args.endPoint, MiddlewareMockUser, h.RegisterHandler)
+			r.POST(tt.args.endPoint, h.RegisterHandler)
 
 			jsonValue, _ := json.Marshal(tt.request)
 
@@ -303,7 +303,7 @@ func TestHandler_LoginHandler(t *testing.T) {
 
 			r := gin.Default()
 
-			r.POST(tt.args.endPoint, MiddlewareMockUser, h.LoginHandler)
+			r.POST(tt.args.endPoint, h.LoginHandler)
 
 			jsonValue, _ := json.Marshal(tt.request)
 

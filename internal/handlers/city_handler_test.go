@@ -59,7 +59,7 @@ func TestHandler_GetAllCitiesHandler(t *testing.T) {
 
 			r := gin.Default()
 
-			r.GET(tt.args.endPoint, MiddlewareMockUser, h.GetAllCitiesHandler)
+			r.GET(tt.args.endPoint, h.GetAllCitiesHandler)
 
 			req, _ := http.NewRequest(
 				tt.args.method,
