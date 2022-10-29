@@ -12,7 +12,7 @@ type RequestPickupResponseDTO struct {
 	ReservationID  int    `json:"reservation_id"`
 	PickupStatusID int    `json:"pickup_status_id"`
 	PickupAddress  string `json:"pickup_address"`
-	CityID         int    `json:"city_id"`
+	PickupCityID   int    `json:"pickup_city_id"`
 	PickupPrice    int    `json:"pickup_price"`
 }
 

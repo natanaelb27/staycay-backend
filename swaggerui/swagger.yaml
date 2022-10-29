@@ -1,8 +1,8 @@
 openapi: 3.0.3
 info:
-  title: Staycay API
+  title: StayCay API
   description: |-
-    A RESTful API
+    A RESTful API to support StayCay
   termsOfService: http://swagger.io/terms/
   contact:
     email: apiteam@swagger.io
@@ -25,6 +25,12 @@ tags:
     description: Everything about host operations
   - name: house
     description: Everything about houses
+  - name: reservation
+    description: Everything about reservations
+  - name: pickup
+    description: Everything about pickups
+  - name: admin
+    description: Everything about admin operations
   - name: wallet
     description: Everything about wallet operations
   - name: game
@@ -235,7 +241,7 @@ paths:
     post:
       tags:
         - host
-      summary: Add new house as host
+      summary: Add new house
       description: ''
       operationId: addNewHouse
       requestBody:
@@ -261,7 +267,7 @@ paths:
     patch:
       tags:
         - host
-      summary: Update house as host
+      summary: Update house
       description: ''
       operationId: updateHouse
       parameters:
@@ -291,7 +297,7 @@ paths:
     delete:
       tags:
         - host
-      summary: Delete house as host
+      summary: Delete house
       description: ''
       operationId: deleteHouse
       parameters:
@@ -321,7 +327,7 @@ paths:
     post:
       tags:
         - host
-      summary: Add new house photo as host
+      summary: Add new house photo
       description: ''
       operationId: addNewHousePhoto
       parameters:
@@ -340,6 +346,37 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AddNewHousePhotoResponse'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '500':
+          $ref: '#/components/responses/500'
+          
+          
+  /host/house/photo/{housePhotoId}:
+    delete:
+      tags:
+        - host
+      summary: Delete house photo
+      description: ''
+      operationId: deleteHousePhoto
+      parameters:
+        - name: housePhotoId
+          in: path
+          description: ID of house photo that will be updated
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Successful Operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeleteHousePhotoResponse'
+        '400':
+          $ref: '#/components/responses/400'
         '403':
           $ref: '#/components/responses/403'
         '404':
@@ -546,7 +583,180 @@ paths:
           $ref: '#/components/responses/404'
         '500':
           $ref: '#/components/responses/500'
-            
+          
+  /reservation:
+    post:
+      tags:
+        - reservation
+      summary: Add reservation
+      description: ''
+      operationId: addReservation
+      requestBody:
+        $ref: '#/components/requestBodies/AddReservationRequest'
+      responses:
+        '200':
+          description: Successful Operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AddReservationResponse'
+        '400':
+          $ref: '#/components/responses/400'
+        '404':
+          $ref: '#/components/responses/404'
+        '500':
+          $ref: '#/components/responses/500'
+          
+  /reservation/{reservationId}:
+    get:
+      tags:
+        - reservation
+      summary: Get reservation details by id
+      description: ''
+      operationId: getReservationDetailsById
+      parameters:
+        - name: reservationId
+          in: path
+          description: ID of reservation that needs to be fetched
+          required: true
+          schema:
+            type: integer
+            example: 1
+      responses:
+        '200':
+          description: Successful Operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetReservationDetailsByIDResponse'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '500':
+          $ref: '#/components/responses/500'
+  /pickup/reservation/{reservationId}:
+    get:
+      tags:
+        - pickup
+      summary: Get pickup details by reservation id
+      description: ''
+      operationId: getPickupDetailsByReservationId
+      parameters:
+        - name: reservationId
+          in: path
+          description: ID of reservation that needs to be fetched
+          required: true
+          schema:
+            type: integer
+            example: 1
+      responses:
+        '200':
+          description: Successful Operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetPickupDetailsByReservationIDResponse'
+        '404':
+          $ref: '#/components/responses/404'
+        '500':
+          $ref: '#/components/responses/500'
+          
+    post:
+      tags:
+        - pickup
+      summary: Request pickup
+      description: ''
+      operationId: requestPickup
+      parameters:
+        - name: reservationId
+          in: path
+          description: ID of reservation that will be requested for pickup
+          required: true
+          schema:
+            type: integer
+            example: 1
+      requestBody:
+        $ref: '#/components/requestBodies/RequestPickupRequest'
+      responses:
+        '200':
+          description: Successful Operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RequestPickupResponse'
+        '400':
+          $ref: '#/components/responses/400'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '500':
+          $ref: '#/components/responses/500'
+          
+  /pickup/status:
+    get:
+      tags:
+        - pickup
+      summary: Get all pickup statuses
+      description: ''
+      operationId: getPickupStatuses
+      responses:
+        '200':
+          description: Successful Operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetAllPickupStatusesResponse'
+        '500':
+          $ref: '#/components/responses/500'
+          
+          
+  /pickup:
+    get:
+      tags:
+        - pickup
+      summary: Get all pickup details
+      description: ''
+      operationId: getPickupDetails
+      parameters:
+        - name: filterPickupStatusName
+          in: query
+          description: Filter by pickup status name
+          required: false
+          schema:
+            type: string
+            example: Pending Admin
+        - name: filterReservationCode
+          in: query
+          description: Filter by reservation code
+          required: false
+          schema:
+            type: string
+            example: 'RC20221001120221003'
+        - name: limit
+          in: query
+          description: Size of each page
+          required: false
+          schema:
+            type: integer
+            example: 10
+        - name: page
+          in: query
+          description: View which page (default view last page)
+          required: false
+          schema:
+            type: integer
+            example: 1
+      responses:
+        '200':
+          description: Successful Operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetAllPickupDetailsResponse'
+        '500':
+          $ref: '#/components/responses/500'
   /city:
     get:
       tags:
@@ -564,6 +774,38 @@ paths:
         '500':
           $ref: '#/components/responses/500'
           
+  /admin/pickup/{pickupId}:
+    patch:
+        tags:
+          - admin
+        summary: Update house
+        description: ''
+        operationId: updatePickupStatus
+        parameters:
+          - name: pickupId
+            in: path
+            description: ID of pickup that will be updated
+            required: true
+            schema:
+              type: integer
+        requestBody:
+          $ref: '#/components/requestBodies/AdminUpdatePickupStatusRequest'
+        responses:
+          '200':
+            description: Successful Operation
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/AdminUpdatePickupStatusResponse'
+          '400':
+            $ref: '#/components/responses/400'
+          '403':
+            $ref: '#/components/responses/403'
+          '404':
+            $ref: '#/components/responses/404'
+          '500':
+            $ref: '#/components/responses/500'
+  
           
   /topup:
     post:
@@ -732,6 +974,39 @@ components:
           type: integer
           example: 2
           
+    AddReservationRequest:
+      type: object
+      properties:
+        house_id:
+          type: integer
+          example: 1
+        check_in_date:
+          type: string
+          format: date
+          example: '2022-11-11'
+        check_out_date:
+          type: string
+          format: date
+          example: '2022-11-12'
+      
+          
+    RequestPickupRequest:
+      type: object
+      properties:
+        pickup_address:
+          type: string
+          example: 'Main Street'
+        city_id:
+          type: integer
+          example: 1
+          
+    AdminUpdatePickupStatusRequest:
+      type: object
+      properties:
+        pickup_status_id:
+          type: integer
+          example: 2
+          
     TopUpWalletRequest:
       type: object
       properties:
@@ -745,8 +1020,7 @@ components:
         user_guess:
           type: string
           example: "heads"
-          
-    
+        
     UserDetails:
       type: object
       properties:
@@ -1209,8 +1483,30 @@ components:
         error:
           type: boolean
           example: false
+          
+    DeleteHousePhotoResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            house_id:
+              type: integer
+              example: 1
+            photo:
+              type: string
+              example: 'photourl'
+            
+        code:
+          type: integer
+          example: 200
+        message:
+          type: string
+          example: "OK"
+        error:
+          type: boolean
+          example: false
       
-    
     GetAllHousesResponse:
       type: object
       properties:
@@ -1295,6 +1591,207 @@ components:
           type: boolean
           example: false
           
+    AddReservationResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            reservation_id:
+              type: integer
+              example: 1
+            house_id:
+              type: integer
+              example: 1
+            user_id:
+              type: integer
+              example: 1
+            reservation_code:
+              type: string
+              example: "RC20221111120221112"
+            check_in_date:
+              type: string
+              format: date-time
+              example: "2022-11-11T07:00:00+07:00"
+            check_out_date:
+              type: string
+              format: date-time
+              example: "2022-11-12T07:00:00+07:00"
+            total_price:
+              type: integer
+              example: 100000
+        code:
+          type: integer
+          example: 200
+        message:
+          type: string
+          example: "OK"
+        error:
+          type: boolean
+          example: false
+          
+    GetReservationDetailsByIDResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            reservation:
+                $ref: '#/components/schemas/ReservationDetails'
+              
+          
+    GetPickupDetailsByReservationIDResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            pickup_id:
+              type: integer
+              example: 1
+            reservation_id:
+              type: integer
+              example: 1
+            house_id:
+              type: integer
+              example: 1
+            pickup_status_name:
+              type: string
+              example: 'Pending Admin'
+            pickup_address:
+              type: string
+              example: 'Merpati Street'
+            pickup_city_id:
+              type: integer
+              example: 1
+            pickup_city_name:
+              type: string
+              example: 'Bandung'
+            pickup_price:
+              type: integer
+              example: 100000
+        code:
+          type: integer
+          example: 200
+        message:
+          type: string
+          example: "OK"
+        error:
+          type: boolean
+          example: false
+          
+    RequestPickupResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            pickup_id:
+              type: integer
+              example: 1
+            reservation_id:
+              type: integer
+              example: 1
+            pickup_status_id:
+              type: integer
+              example: 1
+            pickup_address:
+              type: string
+              example: 'Main Street'
+            pickup_city_id:
+              type: integer
+              example: 1
+            pickup_price:
+              type: integer
+              example: 100000
+        code:
+          type: integer
+          example: 200
+        message:
+          type: string
+          example: "OK"
+        error:
+          type: boolean
+          example: false
+      
+          
+    GetAllPickupStatusesResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            pickup_status:
+              type: array
+              items:
+                type: object
+                properties:
+                  pickup_status_id:
+                    type: integer
+                    example: 1
+                  pickup_status_name:
+                    type: string
+                    example: 'Pending Admin'
+        code:
+          type: integer
+          example: 200
+        message:
+          type: string
+          example: "OK"
+        error:
+          type: boolean
+          example: false
+          
+    GetAllPickupDetailsResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            pagination:
+                $ref: '#/components/schemas/Pagination'
+            pickup:
+              type: array
+              items:
+                type: object
+                properties:
+                  pickup_id:
+                    type: integer
+                    example: 1
+                  reservation_id:
+                    type: integer
+                    example: 1
+                  house_id:
+                    type: integer
+                    example: 1
+                  pickup_status_id:
+                    type: integer
+                    example: 1
+                  pickup_status_name:
+                    type: string
+                    example: 'Pending Admin'
+                  pickup_address:
+                    type: string
+                    example: 'Main Street'
+                  pickup_city_id:
+                    type: integer
+                    example: 1
+                  pickup_city_name:
+                    type: string
+                    example: 'Bandung'
+                  pickup_price:
+                    type: integer
+                    example: 100000
+        code:
+          type: integer
+          example: 200
+        message:
+          type: string
+          example: "OK"
+        error:
+          type: boolean
+          example: false
+          
     GetAllCitiesResponse:
       type: object
       properties:
@@ -1321,6 +1818,19 @@ components:
         error:
           type: boolean
           example: false
+          
+    AdminUpdatePickupStatusResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            reservation_id:
+              type: integer
+              example: 1
+            pickup_status_id:
+              type: integer
+              example: 2
           
     TopUpWalletResponse:
       type: object
@@ -1448,7 +1958,28 @@ components:
           schema:
             $ref: '#/components/schemas/UpdateHouseRequest'
       required: true
-        
+      
+    AddReservationRequest:
+      description: add reservation
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AddReservationRequest'
+      
+    RequestPickupRequest:
+      description: request pickup
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/RequestPickupRequest'
+      
+    AdminUpdatePickupStatusRequest:
+      description: update pickup status
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AdminUpdatePickupStatusRequest'
+    
     TopUpWalletRequest:
       description: top up wallet
       content:

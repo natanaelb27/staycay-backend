@@ -72,7 +72,7 @@ func (h *Handler) RequestPickupHandler(c *gin.Context) {
 		ReservationID:  data.ReservationID,
 		PickupStatusID: data.PickupStatusID,
 		PickupAddress:  data.PickupAddress,
-		CityID:         data.CityID,
+		PickupCityID:   data.CityID,
 		PickupPrice:    data.PickupPrice,
 	}
 
