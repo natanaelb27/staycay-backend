@@ -144,6 +144,7 @@ type AddHousePhotoResponseDTO struct {
 
 type DeleteHouseResponseDTO struct {
 	HouseID       int    `json:"house_id"`
+	Name          string `json:"name"`
 	Price         int    `json:"price"`
 	Description   string `json:"description"`
 	CityID        int    `json:"city_id"`

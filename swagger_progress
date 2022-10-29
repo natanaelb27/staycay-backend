@@ -110,6 +110,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/UpdateUserProfileResponse'
+        '400':
+          $ref: '#/components/responses/400'
         '500':
           $ref: '#/components/responses/500'
           
@@ -245,6 +247,99 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AddNewHouseResponse'
+        '400':
+          $ref: '#/components/responses/400'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '500':
+          $ref: '#/components/responses/500'
+          
+          
+  /host/house/{houseId}:
+    patch:
+      tags:
+        - host
+      summary: Update house as host
+      description: ''
+      operationId: updateHouse
+      parameters:
+        - name: houseId
+          in: path
+          description: ID of house that will be updated
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        $ref: '#/components/requestBodies/UpdateHouseRequest'
+      responses:
+        '200':
+          description: Successful Operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpdateHouseResponse'
+        '400':
+          $ref: '#/components/responses/400'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '500':
+          $ref: '#/components/responses/500'
+    delete:
+      tags:
+        - host
+      summary: Delete house as host
+      description: ''
+      operationId: deleteHouse
+      parameters:
+        - name: houseId
+          in: path
+          description: ID of house that will be updated
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Successful Operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeleteHouseResponse'
+        '400':
+          $ref: '#/components/responses/400'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '500':
+          $ref: '#/components/responses/500'
+          
+  /host/house/photo/{houseId}:
+    post:
+      tags:
+        - host
+      summary: Add new house photo as host
+      description: ''
+      operationId: addNewHousePhoto
+      parameters:
+        - name: houseId
+          in: path
+          description: ID of house that will be updated with new photo
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        $ref: '#/components/requestBodies/AddNewHousePhotoRequest'
+      responses:
+        '200':
+          description: Successful Operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AddNewHousePhotoResponse'
         '403':
           $ref: '#/components/responses/403'
         '404':
@@ -471,25 +566,25 @@ paths:
           
           
   /topup:
-      post:
-        tags:
-          - wallet
-        summary: Top up wallet balance
-        description: ''
-        operationId: topup
-        requestBody:
-          $ref: '#/components/requestBodies/TopUpWalletRequest'
-        responses:
-          '200':
-            description: Successful Operation
-            content:
-              application/json:
-                schema:
-                  $ref: '#/components/schemas/TopUpWalletResponse'
-          '400':
-            $ref: '#/components/responses/400'
-          '500':
-            $ref: '#/components/responses/500'
+    post:
+      tags:
+        - wallet
+      summary: Top up wallet balance
+      description: ''
+      operationId: topup
+      requestBody:
+        $ref: '#/components/requestBodies/TopUpWalletRequest'
+      responses:
+        '200':
+          description: Successful Operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TopUpWalletResponse'
+        '400':
+          $ref: '#/components/responses/400'
+        '500':
+          $ref: '#/components/responses/500'
             
   /game:
     get:
@@ -605,6 +700,37 @@ components:
           items:
             type: string
             example: 'photourl'
+            
+    AddNewHousePhotoRequest:
+      type: object
+      properties:
+        photo:
+          type: array
+          items:
+            type: string
+            example: 'photourl'
+            
+    UpdateHouseRequest:    
+      type: object
+      properties:
+        name:
+          type: string
+          example: 'Updated House'
+        price:
+          type: integer
+          example: 100000
+        description:
+          type: string
+          example: 'Updated House Description'
+        city_id:
+          type: integer
+          example: 2
+        max_guest:
+          type: integer
+          example: 5
+        house_status_id:
+          type: integer
+          example: 2
           
     TopUpWalletRequest:
       type: object
@@ -991,7 +1117,99 @@ components:
           type: boolean
           example: false
         
-    
+    AddNewHousePhotoResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            photo:
+              type: array
+              items:
+                type: string
+                example: 'photourl'
+            
+        code:
+          type: integer
+          example: 200
+        message:
+          type: string
+          example: "OK"
+        error:
+          type: boolean
+          example: false
+          
+    UpdateHouseResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            name:
+              type: string
+              example: 'Updated House'
+            price:
+              type: integer
+              example: 100000
+            description:
+              type: string
+              example: 'Updated House Description'
+            city_id:
+              type: integer
+              example: 2
+            max_guest:
+              type: integer
+              example: 5
+            house_status_id:
+              type: integer
+              example: 2
+        code:
+          type: integer
+          example: 200
+        message:
+          type: string
+          example: "OK"
+        error:
+          type: boolean
+          example: false
+          
+    DeleteHouseResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            house_id:
+              type: integer
+              example: 1
+            name:
+              type: string
+              example: 'House'
+            price:
+              type: integer
+              example: 100000
+            description:
+              type: string
+              example: 'House Description'
+            city_id:
+              type: integer
+              example: 2
+            max_guest:
+              type: integer
+              example: 5
+            house_status_id:
+              type: integer
+              example: 2
+        code:
+          type: integer
+          example: 200
+        message:
+          type: string
+          example: "OK"
+        error:
+          type: boolean
+          example: false
+      
     
     GetAllHousesResponse:
       type: object
@@ -1213,6 +1431,22 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/AddNewHouseRequest'
+      required: true
+      
+    AddNewHousePhotoRequest:
+      description: add new house photo
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AddNewHousePhotoRequest'
+      required: true
+      
+    UpdateHouseRequest:
+      description: update house
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UpdateHouseRequest'
       required: true
         
     TopUpWalletRequest:

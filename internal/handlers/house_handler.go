@@ -295,6 +295,7 @@ func (h *Handler) DeleteHouseHandler(c *gin.Context) {
 
 	response = &dtos.DeleteHouseResponseDTO{
 		HouseID:       data.ID,
+		Name:          data.Name,
 		Price:         data.Price,
 		Description:   data.Description,
 		CityID:        data.CityID,
