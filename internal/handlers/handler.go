@@ -158,6 +158,7 @@ func MiddlewareMockUser(c *gin.Context) {
 
 var MockParamsHouseID = 1
 var MockParamsHousePhotoID = 1
+var MockParamsReservationID = 1
 var MockParamsUserID = 1
 
 func MiddlewareMockParams(c *gin.Context) {
@@ -166,6 +167,8 @@ func MiddlewareMockParams(c *gin.Context) {
 			Value: strconv.Itoa(MockParamsHouseID)},
 		{Key: "housePhotoId",
 			Value: strconv.Itoa(MockParamsHousePhotoID)},
+		{Key: "reservationId",
+			Value: strconv.Itoa(MockParamsReservationID)},
 		{Key: "userId",
 			Value: strconv.Itoa(MockParamsUserID)},
 	}
