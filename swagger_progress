@@ -17,12 +17,14 @@ security:
 tags:
   - name: auth
     description: Authentication Process
-  - name: user
-    description: Everything about users
-  - name: house
-    description: Everything about houses
   - name: city
     description: Everything about cities
+  - name: user
+    description: Everything about users
+  - name: host
+    description: Everything about host operations
+  - name: house
+    description: Everything about houses
   - name: wallet
     description: Everything about wallet operations
   - name: game
@@ -190,6 +192,102 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/GetUserReservationResponse'
+        '500':
+          $ref: '#/components/responses/500'
+          
+  /host/house:
+    get:
+      tags:
+        - host
+      summary: Get host's house
+      description: ''
+      operationId: getHostHouse
+      parameters:
+        - name: limit
+          in: query
+          description: Size of each page
+          required: false
+          schema:
+            type: integer
+            example: 10
+        - name: page
+          in: query
+          description: View which page (default view last page)
+          required: false
+          schema:
+            type: integer
+            example: 1
+      responses:
+        '200':
+          description: Successful Operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetAllHostHouseResponse'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '500':
+          $ref: '#/components/responses/500'
+    post:
+      tags:
+        - host
+      summary: Add new house as host
+      description: ''
+      operationId: addNewHouse
+      requestBody:
+        $ref: '#/components/requestBodies/AddNewHouseRequest'
+      responses:
+        '200':
+          description: Successful Operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AddNewHouseResponse'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '500':
+          $ref: '#/components/responses/500'
+  
+  /host/reservation:
+    get:
+      tags:
+        - host
+      summary: Get host's reservation
+      description: ''
+      operationId: getHostReservation
+      parameters:
+        - name: filterBy
+          in: query
+          description: Filter by reservation status
+          required: false
+          schema:
+            type: string
+            enum: ["all", "today", "ongoing", "upcoming", "completed"]
+        - name: limit
+          in: query
+          description: Size of each page
+          required: false
+          schema:
+            type: integer
+            example: 10
+        - name: page
+          in: query
+          description: View which page (default view last page)
+          required: false
+          schema:
+            type: integer
+            example: 1
+      responses:
+        '200':
+          description: Successful Operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetHostReservationResponse'
         '500':
           $ref: '#/components/responses/500'
           
@@ -483,6 +581,30 @@ components:
         city_id:
           type: integer
           example: 2
+          
+    AddNewHouseRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          example: 'New House'
+        price:
+          type: integer
+          example: 100000
+        description:
+          type: string
+          example: 'New House Description'
+        city_id:
+          type: integer
+          example: 2
+        max_guest:
+          type: integer
+          example: 3
+        photo:
+          type: array
+          items:
+            type: string
+            example: 'photourl'
           
     TopUpWalletRequest:
       type: object
@@ -788,6 +910,89 @@ components:
           type: boolean
           example: false
           
+    GetHostReservationResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            pagination:
+                $ref: '#/components/schemas/Pagination'
+            reservation:
+              type: array
+              items:
+                $ref: '#/components/schemas/ReservationDetails'
+        code:
+          type: integer
+          example: 200
+        message:
+          type: string
+          example: "OK"
+        error:
+          type: boolean
+          example: false
+          
+    GetAllHostHouseResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            pagination:
+                $ref: '#/components/schemas/Pagination'
+            house:
+              type: array
+              items:
+                $ref: '#/components/schemas/HouseDetails'
+        code:
+          type: integer
+          example: 200
+        message:
+          type: string
+          example: "OK"
+        error:
+          type: boolean
+          example: false
+    
+    AddNewHouseResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            name:
+              type: string
+              example: 'New House'
+            price:
+              type: integer
+              example: 100000
+            description:
+              type: string
+              example: 'New House Description'
+            city_id:
+              type: integer
+              example: 2
+            max_guest:
+              type: integer
+              example: 3
+            photo:
+              type: array
+              items:
+                type: string
+                example: 'photourl'
+            
+        code:
+          type: integer
+          example: 200
+        message:
+          type: string
+          example: "OK"
+        error:
+          type: boolean
+          example: false
+        
+    
+    
     GetAllHousesResponse:
       type: object
       properties:
@@ -1001,6 +1206,14 @@ components:
           schema:
             $ref: '#/components/schemas/UpdateUserProfileRequest'
       required: false
+      
+    AddNewHouseRequest:
+      description: add new house
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AddNewHouseRequest'
+      required: true
         
     TopUpWalletRequest:
       description: top up wallet

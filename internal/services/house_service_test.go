@@ -1163,12 +1163,53 @@ func Test_houseService_AddHousePhoto(t *testing.T) {
 			wantErr: true,
 		},
 		{
+			name:            "Failed - GetHouseByHouseID",
+			houseRepository: mocks.NewHouseRepository(t),
+			userRepository:  mocks.NewUserRepository(t),
+			mock: func(m *mocks.HouseRepository, m2 *mocks.UserRepository) {
+				m2.On("GetUserDetails", 1).Return(&dtos.UserDetailsDTO{
+					Role: "host",
+				}, nil)
+				m.On("GetHouseByHouseID", 1).Return(nil, errors.New("error"))
+			},
+			args: args{
+				houseID: 1,
+				userID:  1,
+				request: &dtos.AddHousePhotoRequestDTO{},
+			},
+			want:    nil,
+			wantErr: true,
+		},
+		{
+			name:            "Failed - User is not the Host",
+			houseRepository: mocks.NewHouseRepository(t),
+			userRepository:  mocks.NewUserRepository(t),
+			mock: func(m *mocks.HouseRepository, m2 *mocks.UserRepository) {
+				m2.On("GetUserDetails", 1).Return(&dtos.UserDetailsDTO{
+					Role: "host",
+				}, nil)
+				m.On("GetHouseByHouseID", 1).Return(&dtos.HouseDetailsDTO{
+					HostID: 2,
+				}, nil)
+			},
+			args: args{
+				houseID: 1,
+				userID:  1,
+				request: &dtos.AddHousePhotoRequestDTO{},
+			},
+			want:    nil,
+			wantErr: true,
+		},
+		{
 			name:            "Failed - AddHousePhoto",
 			houseRepository: mocks.NewHouseRepository(t),
 			userRepository:  mocks.NewUserRepository(t),
 			mock: func(m *mocks.HouseRepository, m2 *mocks.UserRepository) {
 				m2.On("GetUserDetails", 1).Return(&dtos.UserDetailsDTO{
 					Role: "host",
+				}, nil)
+				m.On("GetHouseByHouseID", 1).Return(&dtos.HouseDetailsDTO{
+					HostID: 1,
 				}, nil)
 				m.On("AddHousePhoto", &models.HousePhoto{
 					HouseID: 1,
@@ -1188,12 +1229,15 @@ func Test_houseService_AddHousePhoto(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name:            "Failed - AddHousePhoto",
+			name:            "Success",
 			houseRepository: mocks.NewHouseRepository(t),
 			userRepository:  mocks.NewUserRepository(t),
 			mock: func(m *mocks.HouseRepository, m2 *mocks.UserRepository) {
 				m2.On("GetUserDetails", 1).Return(&dtos.UserDetailsDTO{
 					Role: "host",
+				}, nil)
+				m.On("GetHouseByHouseID", 1).Return(&dtos.HouseDetailsDTO{
+					HostID: 1,
 				}, nil)
 				m.On("AddHousePhoto", &models.HousePhoto{
 					HouseID: 1,

@@ -380,6 +380,16 @@ func (s *houseService) AddHousePhoto(houseID int, userID int, request *dtos.AddH
 		return nil, e.ErrInvalidRoleNotHostError
 	}
 
+	houseDetails, err := s.houseRepository.GetHouseByHouseID(houseID)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if houseDetails.HostID != userID {
+		return nil, e.ErrInvalidHostError
+	}
+
 	photoList := make([]string, 0)
 
 	if len(request.Photo) > 0 {
