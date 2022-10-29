@@ -2,9 +2,11 @@ package handlers
 
 import (
 	"git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend/db"
+	"git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend/internal/dtos"
 	"git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend/internal/helpers"
 	r "git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend/internal/repositories"
 	s "git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend/internal/services"
+	"github.com/gin-gonic/gin"
 )
 
 type Handler struct {
@@ -139,4 +141,14 @@ func InitAllHandlers() *Handler {
 	})
 
 	return h
+}
+
+var MockUser = dtos.JwtData{
+	UserID: 1,
+	Email:  "email123@email.com",
+}
+
+func MiddlewareMockUser(c *gin.Context) {
+	c.Set("user", MockUser)
+	c.Next()
 }

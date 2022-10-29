@@ -15,11 +15,11 @@ type AuthService struct {
 }
 
 // Login provides a mock function with given fields: userData
-func (_m *AuthService) Login(userData dtos.LoginRequestDTO) (*models.User, *string, error) {
+func (_m *AuthService) Login(userData *dtos.LoginRequestDTO) (*models.User, *string, error) {
 	ret := _m.Called(userData)
 
 	var r0 *models.User
-	if rf, ok := ret.Get(0).(func(dtos.LoginRequestDTO) *models.User); ok {
+	if rf, ok := ret.Get(0).(func(*dtos.LoginRequestDTO) *models.User); ok {
 		r0 = rf(userData)
 	} else {
 		if ret.Get(0) != nil {
@@ -28,7 +28,7 @@ func (_m *AuthService) Login(userData dtos.LoginRequestDTO) (*models.User, *stri
 	}
 
 	var r1 *string
-	if rf, ok := ret.Get(1).(func(dtos.LoginRequestDTO) *string); ok {
+	if rf, ok := ret.Get(1).(func(*dtos.LoginRequestDTO) *string); ok {
 		r1 = rf(userData)
 	} else {
 		if ret.Get(1) != nil {
@@ -37,7 +37,7 @@ func (_m *AuthService) Login(userData dtos.LoginRequestDTO) (*models.User, *stri
 	}
 
 	var r2 error
-	if rf, ok := ret.Get(2).(func(dtos.LoginRequestDTO) error); ok {
+	if rf, ok := ret.Get(2).(func(*dtos.LoginRequestDTO) error); ok {
 		r2 = rf(userData)
 	} else {
 		r2 = ret.Error(2)
@@ -47,11 +47,11 @@ func (_m *AuthService) Login(userData dtos.LoginRequestDTO) (*models.User, *stri
 }
 
 // Register provides a mock function with given fields: userData
-func (_m *AuthService) Register(userData dtos.RegisterRequestDTO) (*models.User, *string, error) {
+func (_m *AuthService) Register(userData *dtos.RegisterRequestDTO) (*models.User, *string, error) {
 	ret := _m.Called(userData)
 
 	var r0 *models.User
-	if rf, ok := ret.Get(0).(func(dtos.RegisterRequestDTO) *models.User); ok {
+	if rf, ok := ret.Get(0).(func(*dtos.RegisterRequestDTO) *models.User); ok {
 		r0 = rf(userData)
 	} else {
 		if ret.Get(0) != nil {
@@ -60,7 +60,7 @@ func (_m *AuthService) Register(userData dtos.RegisterRequestDTO) (*models.User,
 	}
 
 	var r1 *string
-	if rf, ok := ret.Get(1).(func(dtos.RegisterRequestDTO) *string); ok {
+	if rf, ok := ret.Get(1).(func(*dtos.RegisterRequestDTO) *string); ok {
 		r1 = rf(userData)
 	} else {
 		if ret.Get(1) != nil {
@@ -69,7 +69,7 @@ func (_m *AuthService) Register(userData dtos.RegisterRequestDTO) (*models.User,
 	}
 
 	var r2 error
-	if rf, ok := ret.Get(2).(func(dtos.RegisterRequestDTO) error); ok {
+	if rf, ok := ret.Get(2).(func(*dtos.RegisterRequestDTO) error); ok {
 		r2 = rf(userData)
 	} else {
 		r2 = ret.Error(2)

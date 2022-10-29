@@ -9,8 +9,8 @@ import (
 )
 
 type AuthService interface {
-	Register(userData dtos.RegisterRequestDTO) (*models.User, *string, error)
-	Login(userData dtos.LoginRequestDTO) (*models.User, *string, error)
+	Register(userData *dtos.RegisterRequestDTO) (*models.User, *string, error)
+	Login(userData *dtos.LoginRequestDTO) (*models.User, *string, error)
 }
 
 type authService struct {
@@ -39,7 +39,7 @@ func NewAuthService(c *ASConfig) AuthService {
 	}
 }
 
-func (s *authService) Register(userData dtos.RegisterRequestDTO) (*models.User, *string, error) {
+func (s *authService) Register(userData *dtos.RegisterRequestDTO) (*models.User, *string, error) {
 	if !helpers.VerifyEMailAddress(userData.Email) {
 		return nil, nil, e.ErrInvalidEmailInputError
 	}
@@ -119,7 +119,7 @@ func (s *authService) Register(userData dtos.RegisterRequestDTO) (*models.User, 
 	return newUser, token, nil
 }
 
-func (s *authService) Login(userData dtos.LoginRequestDTO) (*models.User, *string, error) {
+func (s *authService) Login(userData *dtos.LoginRequestDTO) (*models.User, *string, error) {
 	user, err := s.userRepository.GetUserByEmail(userData.Email)
 
 	if err != nil {

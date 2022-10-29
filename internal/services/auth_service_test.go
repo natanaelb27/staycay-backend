@@ -32,7 +32,7 @@ func Test_authService_NewAuthService(t *testing.T) {
 
 func Test_authService_Register(t *testing.T) {
 	type args struct {
-		userData dtos.RegisterRequestDTO
+		userData *dtos.RegisterRequestDTO
 	}
 	tests := []struct {
 		name             string
@@ -57,7 +57,7 @@ func Test_authService_Register(t *testing.T) {
 			mock: func(m *mocks.UserRepository, m2 *mocks.WalletRepository, m3 *mocks.GameRepository, m4 *mocks.HashHelper, m5 *mocks.JwtHelper) {
 			},
 			args: args{
-				userData: dtos.RegisterRequestDTO{
+				userData: &dtos.RegisterRequestDTO{
 					Name:     "Name",
 					Email:    "invalid_email",
 					Password: "Password123",
@@ -80,7 +80,7 @@ func Test_authService_Register(t *testing.T) {
 			mock: func(m *mocks.UserRepository, m2 *mocks.WalletRepository, m3 *mocks.GameRepository, m4 *mocks.HashHelper, m5 *mocks.JwtHelper) {
 			},
 			args: args{
-				userData: dtos.RegisterRequestDTO{
+				userData: &dtos.RegisterRequestDTO{
 					Name:     "Name",
 					Email:    "valid@email.com",
 					Password: "invalid",
@@ -104,7 +104,7 @@ func Test_authService_Register(t *testing.T) {
 				m4.On("Encrypt", "Password123").Return("", errors.New("error"))
 			},
 			args: args{
-				userData: dtos.RegisterRequestDTO{
+				userData: &dtos.RegisterRequestDTO{
 					Name:     "Name",
 					Email:    "valid@email.com",
 					Password: "Password123",
@@ -136,7 +136,7 @@ func Test_authService_Register(t *testing.T) {
 				}).Return(nil, errors.New("error"))
 			},
 			args: args{
-				userData: dtos.RegisterRequestDTO{
+				userData: &dtos.RegisterRequestDTO{
 					Name:     "Name",
 					Email:    "valid@email.com",
 					Password: "Password123",
@@ -180,7 +180,7 @@ func Test_authService_Register(t *testing.T) {
 				}).Return(errors.New("error"))
 			},
 			args: args{
-				userData: dtos.RegisterRequestDTO{
+				userData: &dtos.RegisterRequestDTO{
 					Name:     "Name",
 					Email:    "valid@email.com",
 					Password: "Password123",
@@ -229,7 +229,7 @@ func Test_authService_Register(t *testing.T) {
 				}).Return(errors.New("error"))
 			},
 			args: args{
-				userData: dtos.RegisterRequestDTO{
+				userData: &dtos.RegisterRequestDTO{
 					Name:     "Name",
 					Email:    "valid@email.com",
 					Password: "Password123",
@@ -282,7 +282,7 @@ func Test_authService_Register(t *testing.T) {
 				}).Return(nil, errors.New("error"))
 			},
 			args: args{
-				userData: dtos.RegisterRequestDTO{
+				userData: &dtos.RegisterRequestDTO{
 					Name:     "Name",
 					Email:    "valid@email.com",
 					Password: "Password123",
@@ -335,7 +335,7 @@ func Test_authService_Register(t *testing.T) {
 				}).Return(nil, nil)
 			},
 			args: args{
-				userData: dtos.RegisterRequestDTO{
+				userData: &dtos.RegisterRequestDTO{
 					Name:     "Name",
 					Email:    "valid@email.com",
 					Password: "Password123",
@@ -396,7 +396,7 @@ func Test_authService_Register(t *testing.T) {
 				}).Return(nil, nil)
 			},
 			args: args{
-				userData: dtos.RegisterRequestDTO{
+				userData: &dtos.RegisterRequestDTO{
 					Name:     "Name",
 					Email:    "valid@email.com",
 					Password: "Password123",
@@ -450,7 +450,7 @@ func Test_authService_Register(t *testing.T) {
 
 func Test_authService_Login(t *testing.T) {
 	type args struct {
-		userData dtos.LoginRequestDTO
+		userData *dtos.LoginRequestDTO
 	}
 	tests := []struct {
 		name           string
@@ -472,7 +472,7 @@ func Test_authService_Login(t *testing.T) {
 				m.On("GetUserByEmail", "email123@email.com").Return(nil, errors.New("error"))
 			},
 			args: args{
-				userData: dtos.LoginRequestDTO{
+				userData: &dtos.LoginRequestDTO{
 					Email:    "email123@email.com",
 					Password: "Password123",
 				},
@@ -495,7 +495,7 @@ func Test_authService_Login(t *testing.T) {
 				m2.On("CompareEncrypt", "Password123", "PasswordEncrypted").Return(false)
 			},
 			args: args{
-				userData: dtos.LoginRequestDTO{
+				userData: &dtos.LoginRequestDTO{
 					Email:    "email123@email.com",
 					Password: "Password123",
 				},
@@ -522,7 +522,7 @@ func Test_authService_Login(t *testing.T) {
 				}).Return(nil, errors.New("error"))
 			},
 			args: args{
-				userData: dtos.LoginRequestDTO{
+				userData: &dtos.LoginRequestDTO{
 					Email:    "email123@email.com",
 					Password: "Password123",
 				},
@@ -550,7 +550,7 @@ func Test_authService_Login(t *testing.T) {
 				}).Return(nil, nil)
 			},
 			args: args{
-				userData: dtos.LoginRequestDTO{
+				userData: &dtos.LoginRequestDTO{
 					Email:    "email123@email.com",
 					Password: "Password123",
 				},

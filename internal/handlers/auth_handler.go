@@ -11,8 +11,8 @@ import (
 )
 
 func (h *Handler) RegisterHandler(c *gin.Context) {
-	var request dtos.RegisterRequestDTO
-	var response dtos.RegisterResponseDTO
+	var request *dtos.RegisterRequestDTO
+	var response *dtos.RegisterResponseDTO
 
 	err := c.ShouldBindJSON(&request)
 	if err != nil {
@@ -41,7 +41,7 @@ func (h *Handler) RegisterHandler(c *gin.Context) {
 		return
 	}
 
-	response = dtos.RegisterResponseDTO{
+	response = &dtos.RegisterResponseDTO{
 		UserID: newUser.ID,
 		Email:  newUser.Email,
 		Token:  *token,
@@ -51,8 +51,8 @@ func (h *Handler) RegisterHandler(c *gin.Context) {
 }
 
 func (h *Handler) LoginHandler(c *gin.Context) {
-	var request dtos.LoginRequestDTO
-	var response dtos.LoginResponseDTO
+	var request *dtos.LoginRequestDTO
+	var response *dtos.LoginResponseDTO
 
 	err := c.ShouldBindJSON(&request)
 	if err != nil {
@@ -71,7 +71,7 @@ func (h *Handler) LoginHandler(c *gin.Context) {
 		return
 	}
 
-	response = dtos.LoginResponseDTO{
+	response = &dtos.LoginResponseDTO{
 		UserID: user.ID,
 		Email:  user.Email,
 		Role:   user.Role,
