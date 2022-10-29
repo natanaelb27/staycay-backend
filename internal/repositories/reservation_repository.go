@@ -109,8 +109,7 @@ func (r *reservationRepository) GetHouseReservationsByHostID(hostID int, queryPa
 		(CASE WHEN NOW()::timestamp::date = reservations.check_in_date::timestamp::date THEN 'today'
 		WHEN NOW()::timestamp::date BETWEEN reservations.check_in_date::timestamp::date AND reservations.check_out_date::timestamp::date THEN 'ongoing'
 		WHEN reservations.check_in_date::timestamp::date > NOW() THEN 'upcoming'
-	result.Scopes(helpers.Paginate(&pagination, result)).Find(&houseReservation)
-	WHEN reservations.check_out_date::timestamp::date < NOW() THEN 'completed' END) AS reservation_status`).
+		WHEN reservations.check_out_date::timestamp::date < NOW() THEN 'completed' END) AS reservation_status`).
 		Joins("JOIN houses ON reservations.house_id = houses.id").
 		Where("houses.user_id = ?", hostID)
 
