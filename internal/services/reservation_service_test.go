@@ -607,35 +607,32 @@ func Test_reservationService_GetHouseReservationsByHouse(t *testing.T) {
 		mock                  func(m *mocks.ReservationRepository)
 		args                  args
 		want                  []*dtos.HouseReservationsDTO
-		want2                 *helpers.Pagination
 		wantErr               bool
 	}{
 		{
 			name:                  "Failed - GetHouseReservationsByHouseID",
 			reservationRepository: mocks.NewReservationRepository(t),
 			mock: func(m *mocks.ReservationRepository) {
-				m.On("GetHouseReservationsByHouseID", 1, map[string]interface{}{}).Return(nil, nil, errors.New("error"))
+				m.On("GetHouseReservationsByHouseID", 1, map[string]interface{}{}).Return(nil, errors.New("error"))
 			},
 			args: args{
 				houseID:     1,
 				queryParams: map[string]interface{}{},
 			},
 			want:    nil,
-			want2:   nil,
 			wantErr: true,
 		},
 		{
 			name:                  "Success",
 			reservationRepository: mocks.NewReservationRepository(t),
 			mock: func(m *mocks.ReservationRepository) {
-				m.On("GetHouseReservationsByHouseID", 1, map[string]interface{}{}).Return([]*dtos.HouseReservationsDTO{}, &helpers.Pagination{}, nil)
+				m.On("GetHouseReservationsByHouseID", 1, map[string]interface{}{}).Return([]*dtos.HouseReservationsDTO{}, nil)
 			},
 			args: args{
 				houseID:     1,
 				queryParams: map[string]interface{}{},
 			},
 			want:    []*dtos.HouseReservationsDTO{},
-			want2:   &helpers.Pagination{},
 			wantErr: false,
 		},
 	}
@@ -647,7 +644,7 @@ func Test_reservationService_GetHouseReservationsByHouse(t *testing.T) {
 
 			tt.mock(tt.reservationRepository)
 
-			got, got2, err := s.GetHouseReservationsByHouse(tt.args.houseID, tt.args.queryParams)
+			got, err := s.GetHouseReservationsByHouse(tt.args.houseID, tt.args.queryParams)
 
 			if (err != nil) != tt.wantErr {
 				t.Errorf("reservationService.GetHouseReservationsByHouse() error = %v, wantErr %v", err, tt.wantErr)
@@ -656,10 +653,6 @@ func Test_reservationService_GetHouseReservationsByHouse(t *testing.T) {
 
 			if !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("reservationService.GetHouseReservationsByHouse() = %v, want %v", got, tt.want)
-			}
-
-			if !reflect.DeepEqual(got2, tt.want2) {
-				t.Errorf("reservationService.GetHouseReservationsByHouse() = %v, want %v", got2, tt.want2)
 			}
 
 		})

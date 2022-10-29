@@ -955,7 +955,7 @@ func Test_houseService_DeleteHouse(t *testing.T) {
 				}).Return(nil, nil)
 				m3.On("GetHouseReservationsByHouseID", 1, map[string]interface{}{
 					"filterBy": "upcoming",
-				}).Return(nil, nil, errors.New("error"))
+				}).Return(nil, errors.New("error"))
 			},
 			args: args{
 				houseID: 1,
@@ -988,7 +988,7 @@ func Test_houseService_DeleteHouse(t *testing.T) {
 					{
 						ReservationID: 1,
 					},
-				}, nil, nil)
+				}, nil)
 			},
 			args: args{
 				houseID: 1,
@@ -1017,7 +1017,7 @@ func Test_houseService_DeleteHouse(t *testing.T) {
 				}).Return(nil, nil)
 				m3.On("GetHouseReservationsByHouseID", 1, map[string]interface{}{
 					"filterBy": "upcoming",
-				}).Return([]*dtos.HouseReservationsDTO{}, nil, nil)
+				}).Return([]*dtos.HouseReservationsDTO{}, nil)
 				m.On("DeleteHousePhotoByHouseID", 1).Return(errors.New("error"))
 			},
 			args: args{
@@ -1047,7 +1047,7 @@ func Test_houseService_DeleteHouse(t *testing.T) {
 				}).Return(nil, nil)
 				m3.On("GetHouseReservationsByHouseID", 1, map[string]interface{}{
 					"filterBy": "upcoming",
-				}).Return([]*dtos.HouseReservationsDTO{}, nil, nil)
+				}).Return([]*dtos.HouseReservationsDTO{}, nil)
 				m.On("DeleteHousePhotoByHouseID", 1).Return(nil)
 				m.On("DeleteHouseByID", 1).Return(nil, errors.New("error"))
 			},
@@ -1078,7 +1078,7 @@ func Test_houseService_DeleteHouse(t *testing.T) {
 				}).Return(nil, nil)
 				m3.On("GetHouseReservationsByHouseID", 1, map[string]interface{}{
 					"filterBy": "upcoming",
-				}).Return([]*dtos.HouseReservationsDTO{}, nil, nil)
+				}).Return([]*dtos.HouseReservationsDTO{}, nil)
 				m.On("DeleteHousePhotoByHouseID", 1).Return(nil)
 				m.On("DeleteHouseByID", 1).Return(&models.House{}, nil)
 			},

@@ -72,7 +72,7 @@ func (_m *ReservationRepository) GetHouseReservationsByHostID(hostID int, queryP
 }
 
 // GetHouseReservationsByHouseID provides a mock function with given fields: houseID, queryParams
-func (_m *ReservationRepository) GetHouseReservationsByHouseID(houseID int, queryParams map[string]interface{}) ([]*dtos.HouseReservationsDTO, *helpers.Pagination, error) {
+func (_m *ReservationRepository) GetHouseReservationsByHouseID(houseID int, queryParams map[string]interface{}) ([]*dtos.HouseReservationsDTO, error) {
 	ret := _m.Called(houseID, queryParams)
 
 	var r0 []*dtos.HouseReservationsDTO
@@ -84,23 +84,14 @@ func (_m *ReservationRepository) GetHouseReservationsByHouseID(houseID int, quer
 		}
 	}
 
-	var r1 *helpers.Pagination
-	if rf, ok := ret.Get(1).(func(int, map[string]interface{}) *helpers.Pagination); ok {
+	var r1 error
+	if rf, ok := ret.Get(1).(func(int, map[string]interface{}) error); ok {
 		r1 = rf(houseID, queryParams)
 	} else {
-		if ret.Get(1) != nil {
-			r1 = ret.Get(1).(*helpers.Pagination)
-		}
+		r1 = ret.Error(1)
 	}
 
-	var r2 error
-	if rf, ok := ret.Get(2).(func(int, map[string]interface{}) error); ok {
-		r2 = rf(houseID, queryParams)
-	} else {
-		r2 = ret.Error(2)
-	}
-
-	return r0, r1, r2
+	return r0, r1
 }
 
 // GetHouseReservationsByID provides a mock function with given fields: reservationID

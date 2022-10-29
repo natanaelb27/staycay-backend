@@ -16,7 +16,7 @@ type ReservationService interface {
 	AddReservation(userID int, request *dtos.AddReservationRequestDTO) (*models.Reservation, error)
 	GetHouseReservationsByUser(userID int, queryParams map[string]interface{}) ([]*dtos.HouseReservationsDTO, *helpers.Pagination, error)
 	GetHouseReservationsByHost(hostID int, queryParams map[string]interface{}) ([]*dtos.HouseReservationsDTO, *helpers.Pagination, error)
-	GetHouseReservationsByHouse(houseID int, queryParams map[string]interface{}) ([]*dtos.HouseReservationsDTO, *helpers.Pagination, error)
+	GetHouseReservationsByHouse(houseID int, queryParams map[string]interface{}) ([]*dtos.HouseReservationsDTO, error)
 	GetHouseReservationsByID(reservationID int, userID int) (*dtos.HouseReservationsDTO, error)
 }
 
@@ -148,14 +148,14 @@ func (s *reservationService) GetHouseReservationsByHost(hostID int, queryParams 
 	return houseReservations, pagination, nil
 }
 
-func (s *reservationService) GetHouseReservationsByHouse(houseID int, queryParams map[string]interface{}) ([]*dtos.HouseReservationsDTO, *helpers.Pagination, error) {
-	houseReservations, pagination, err := s.reservationRepository.GetHouseReservationsByHouseID(houseID, queryParams)
+func (s *reservationService) GetHouseReservationsByHouse(houseID int, queryParams map[string]interface{}) ([]*dtos.HouseReservationsDTO, error) {
+	houseReservations, err := s.reservationRepository.GetHouseReservationsByHouseID(houseID, queryParams)
 
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
-	return houseReservations, pagination, nil
+	return houseReservations, nil
 }
 
 func (s *reservationService) GetHouseReservationsByID(reservationID int, userID int) (*dtos.HouseReservationsDTO, error) {

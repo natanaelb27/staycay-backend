@@ -430,7 +430,7 @@ func TestHandler_GetHouseReservationsByHouseHandler(t *testing.T) {
 				endPoint: "/house/reservation",
 			},
 			mock: func(m *mocks.ReservationService) {
-				m.On("GetHouseReservationsByHouse", MockParamsHouseID, MockQueryParams).Return(nil, nil, errors.New("unknown error"))
+				m.On("GetHouseReservationsByHouse", MockParamsHouseID, MockQueryParams).Return(nil, errors.New("unknown error"))
 			},
 			wants: http.StatusInternalServerError,
 		},
@@ -442,7 +442,7 @@ func TestHandler_GetHouseReservationsByHouseHandler(t *testing.T) {
 				endPoint: "/house/reservation",
 			},
 			mock: func(m *mocks.ReservationService) {
-				m.On("GetHouseReservationsByHouse", MockParamsHouseID, MockQueryParams).Return([]*dtos.HouseReservationsDTO{}, &helpers.Pagination{}, nil)
+				m.On("GetHouseReservationsByHouse", MockParamsHouseID, MockQueryParams).Return([]*dtos.HouseReservationsDTO{}, nil)
 			},
 			wants: http.StatusOK,
 		},

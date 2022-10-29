@@ -45,7 +45,6 @@ type GetHouseReservationsByHostResponseDTO struct {
 }
 
 type GetHouseReservationsByHouseResponseDTO struct {
-	Pagination  *helpers.Pagination     `json:"pagination"`
 	Reservation []*HouseReservationsDTO `json:"reservation"`
 }
 

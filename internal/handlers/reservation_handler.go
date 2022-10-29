@@ -143,7 +143,7 @@ func (h *Handler) GetHouseReservationsByHouseHandler(c *gin.Context) {
 		queryParams[key] = values[0]
 	}
 
-	data, pagination, err := h.reservationService.GetHouseReservationsByHouse(houseID, queryParams)
+	data, err := h.reservationService.GetHouseReservationsByHouse(houseID, queryParams)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, helpers.BuildErrorResponse(http.StatusInternalServerError, err.Error()))
@@ -151,7 +151,6 @@ func (h *Handler) GetHouseReservationsByHouseHandler(c *gin.Context) {
 	}
 
 	response = &dtos.GetHouseReservationsByHouseResponseDTO{
-		Pagination:  pagination,
 		Reservation: data,
 	}
 

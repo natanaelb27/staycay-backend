@@ -15,7 +15,7 @@ type ReservationRepository interface {
 	// GetHouseReservationsByUserID(userID int, filterBy string) ([]*dtos.HouseReservationsDTO, error)
 	GetHouseReservationsByUserID(userID int, queryParams map[string]interface{}) ([]*dtos.HouseReservationsDTO, *helpers.Pagination, error)
 	GetHouseReservationsByHostID(hostID int, queryParams map[string]interface{}) ([]*dtos.HouseReservationsDTO, *helpers.Pagination, error)
-	GetHouseReservationsByHouseID(houseID int, queryParams map[string]interface{}) ([]*dtos.HouseReservationsDTO, *helpers.Pagination, error)
+	GetHouseReservationsByHouseID(houseID int, queryParams map[string]interface{}) ([]*dtos.HouseReservationsDTO, error)
 	GetHouseReservationsByID(reservationID int) (*dtos.HouseReservationsDTO, error)
 	ValidateReservation(request *dtos.AddReservationRequestDTO) error
 	GetLastReservationID() (int, error)
@@ -109,7 +109,8 @@ func (r *reservationRepository) GetHouseReservationsByHostID(hostID int, queryPa
 		(CASE WHEN NOW()::timestamp::date = reservations.check_in_date::timestamp::date THEN 'today'
 		WHEN NOW()::timestamp::date BETWEEN reservations.check_in_date::timestamp::date AND reservations.check_out_date::timestamp::date THEN 'ongoing'
 		WHEN reservations.check_in_date::timestamp::date > NOW() THEN 'upcoming'
-		WHEN reservations.check_out_date::timestamp::date < NOW() THEN 'completed' END) AS reservation_status`).
+	result.Scopes(helpers.Paginate(&pagination, result)).Find(&houseReservation)
+	WHEN reservations.check_out_date::timestamp::date < NOW() THEN 'completed' END) AS reservation_status`).
 		Joins("JOIN houses ON reservations.house_id = houses.id").
 		Where("houses.user_id = ?", hostID)
 
@@ -208,7 +209,7 @@ func (r *reservationRepository) GetHouseReservationsByHostID(hostID int, queryPa
 // 	return houseReservation, nil
 // }
 
-func (r *reservationRepository) GetHouseReservationsByHouseID(houseID int, queryParams map[string]interface{}) ([]*dtos.HouseReservationsDTO, *helpers.Pagination, error) {
+func (r *reservationRepository) GetHouseReservationsByHouseID(houseID int, queryParams map[string]interface{}) ([]*dtos.HouseReservationsDTO, error) {
 	var houseReservation []*dtos.HouseReservationsDTO
 
 	filterBy := fmt.Sprintf("%v", queryParams["filterBy"])
@@ -242,23 +243,6 @@ func (r *reservationRepository) GetHouseReservationsByHouseID(houseID int, query
 		result = result.Order("reservations.check_in_date desc")
 	}
 
-	limit := 0
-	if queryParams["limit"] != nil {
-		limit, _ = strconv.Atoi(queryParams["limit"].(string))
-	}
-
-	page := 0
-	if queryParams["page"] != nil {
-		page, _ = strconv.Atoi(queryParams["page"].(string))
-	}
-
-	pagination := helpers.Pagination{
-		Limit: limit,
-		Page:  page,
-	}
-
-	result.Scopes(helpers.Paginate(&pagination, result)).Find(&houseReservation)
-
 	result.Find(&houseReservation)
 
 	// if filterBy == "today" {
@@ -280,10 +264,10 @@ func (r *reservationRepository) GetHouseReservationsByHouseID(houseID int, query
 	// result.Find(&houseReservation)
 
 	if result.Error != nil {
-		return nil, nil, result.Error
+		return nil, result.Error
 	}
 
-	return houseReservation, &pagination, nil
+	return houseReservation, nil
 }
 
 func (r *reservationRepository) GetHouseReservationsByID(reservationID int) (*dtos.HouseReservationsDTO, error) {

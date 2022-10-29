@@ -13,6 +13,8 @@ func main() {
 
 	db.Connect()
 
+	r.Static("/docs", "swaggerui")
+
 	// r.Use(cors.New(cors.Config{
 	// 	AllowOrigins:     []string{"*"},
 	// 	AllowMethods:     []string{"POST", "PATCH", "GET", "DELETE", "PUT", "OPTIONS"},

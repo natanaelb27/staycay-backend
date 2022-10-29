@@ -343,7 +343,7 @@ func (s *houseService) DeleteHouse(houseID int, userID int) (*models.House, erro
 	queryParams := make(map[string]interface{})
 	queryParams["filterBy"] = "upcoming"
 
-	upcomingHouseReservation, _, err := s.reservationRepository.GetHouseReservationsByHouseID(houseID, queryParams)
+	upcomingHouseReservation, err := s.reservationRepository.GetHouseReservationsByHouseID(houseID, queryParams)
 
 	if err != nil {
 		return nil, err
