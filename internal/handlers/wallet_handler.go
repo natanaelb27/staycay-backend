@@ -19,6 +19,7 @@ func (h *Handler) TopUpWalletHandler(c *gin.Context) {
 
 	if err != nil {
 		c.JSON(http.StatusBadRequest, helpers.BuildErrorResponse(http.StatusBadRequest, err.Error()))
+		return
 	}
 
 	data, err := h.walletService.TopUpWallet(userContext.UserID, request.Amount)
