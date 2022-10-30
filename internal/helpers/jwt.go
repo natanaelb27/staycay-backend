@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v4"
-	"github.com/joho/godotenv"
 )
 
 type JwtHelper interface {
@@ -29,7 +28,7 @@ type IdTokenClaims struct {
 }
 
 func (h *jwtHelper) GenerateJwtToken(data interface{}) (*string, error) {
-	godotenv.Load(".env")
+	// godotenv.Load(".env")
 	idExp, _ := strconv.ParseInt(os.Getenv("EXPIRED_TIME"), 10, 64)
 	unixTime := time.Now().Unix()
 	tokenExp := unixTime + idExp
