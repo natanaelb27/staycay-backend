@@ -152,7 +152,7 @@ paths:
       tags:
         - user
       summary: Update user role to host
-      description: ''
+      description: 'Update current logged in user role to host'
       operationId: updateRole
       responses:
         '200':
@@ -188,7 +188,7 @@ paths:
             example: 10
         - name: page
           in: query
-          description: View which page (default view last page)
+          description: View which page 
           required: false
           schema:
             type: integer
@@ -220,7 +220,7 @@ paths:
             example: 10
         - name: page
           in: query
-          description: View which page (default view last page)
+          description: View which page 
           required: false
           schema:
             type: integer
@@ -408,7 +408,7 @@ paths:
             example: 10
         - name: page
           in: query
-          description: View which page (default view last page)
+          description: View which page 
           required: false
           schema:
             type: integer
@@ -470,14 +470,14 @@ paths:
             example: "2022-11-12"
         - name: sortBy
           in: query
-          description: Sort houses by several options
+          description: Sort houses by several options (default is house name)
           required: false
           schema:
             type: string
             enum: ["name", "city_name", "price"]
         - name: sort
           in: query
-          description: Sort by ascending or descending
+          description: Sort by ascending or descending (default is ascending)
           required: false
           schema:
             type: string
@@ -491,7 +491,7 @@ paths:
             example: 10
         - name: page
           in: query
-          description: View which page (default view last page)
+          description: View which page 
           required: false
           schema:
             type: integer
@@ -743,7 +743,7 @@ paths:
             example: 10
         - name: page
           in: query
-          description: View which page (default view last page)
+          description: View which page 
           required: false
           schema:
             type: integer
@@ -1989,8 +1989,8 @@ components:
       required: true
         
     PlayGameRequest:
-      description: play game
-      content:
+      description: play game (available choices are 'heads' or 'tails')
+      content:  
         application/json:
           schema:
             $ref: '#/components/schemas/PlayGameRequest'
