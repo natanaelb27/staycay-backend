@@ -5,7 +5,6 @@ import (
 	"os"
 
 	"git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend/internal/models"
-	"github.com/joho/godotenv"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -13,9 +12,9 @@ import (
 var db *gorm.DB
 
 func Connect() (err error) {
-	godotenv.Load(".env")
+	// godotenv.Load(".env")
 	dsn := fmt.Sprintf(
-		"host=%v port=%v user=%v password=%v dbname=%v sslmode=disable",
+		"host=%v port=%v user=%v password=%v dbname=%v sslmode=require",
 		os.Getenv("HOST"),
 		os.Getenv("PORT"),
 		os.Getenv("DB_USER"),
