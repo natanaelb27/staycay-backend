@@ -17,9 +17,9 @@ func main() {
 
 	r.Static("/docs", "swaggerui")
 
-	r.Use(middlewares.CORSMiddleware())
-
 	r.NoRoute(middlewares.NotFoundHandler)
+
+	r.Use(middlewares.CORSMiddleware())
 
 	h := handlers.InitAllHandlers()
 
@@ -36,5 +36,4 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-
 }

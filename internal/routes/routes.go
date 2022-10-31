@@ -14,61 +14,58 @@ func InitAllRoutes(r *gin.Engine, h *handlers.Handler) {
 		c.JSON(http.StatusOK, helpers.BuildSuccessResponse(http.StatusOK, "House Rental StayCay App", nil))
 	})
 
-	// Auth
 	r.POST("/register", h.RegisterHandler)
 	r.POST("/login", h.LoginHandler)
 
-	// City
-	r.GET("/city", h.GetAllCitiesHandler)
+	city := r.Group("/city")
+	city.GET("", h.GetAllCitiesHandler)
 
-	// House
-	r.GET("/house", h.GetAllHousesHandler)
-	r.GET("/house/:houseId", h.GetHouseByIDHandler)
-	// r.GET("/house/unscoped/:houseId", h.GetUnscopedHouseByIDHandler)
-	r.GET("/house/status", h.GetAllHouseStatusesHandler)
-	r.GET("/house/reservation/:houseId", h.GetHouseReservationsByHouseHandler)
+	house := r.Group("/house")
+	house.GET("", h.GetAllHousesHandler)
+	house.GET("/:houseId", h.GetHouseByIDHandler)
+	house.GET("/status", h.GetAllHouseStatusesHandler)
+	house.GET("/reservation/:houseId", h.GetHouseReservationsByHouseHandler)
 
-	// User
-	r.GET("/user/:userId", h.GetUserProfileByUserIDHandler)
+	user := r.Group("/user")
+	user.GET("/:userId", h.GetUserProfileByUserIDHandler)
+	user.Use(middlewares.AuthorizeJWT)
+	user.GET("", h.GetUserProfileHandler)
+	user.PATCH("", h.UpdateUserProfileHandler)
+	user.PATCH("/role", h.UpdateUserRoleHandler)
+	user.GET("/reservation", h.GetHouseReservationsByUserHandler)
 
-	// Pickup
-	r.GET("/pickup/status", h.GetAllPickupStatusesHandler)
-	r.GET("/pickup", h.GetAllPickupDetailsHandler)
+	pickup := r.Group("/pickup")
+	pickup.GET("/status", h.GetAllPickupStatusesHandler)
+	pickup.GET("", h.GetAllPickupDetailsHandler)
+	pickup.Use(middlewares.AuthorizeJWT)
+	pickup.GET("/reservation/:reservationId", h.GetPickupDetailsByReservationHandler)
+	pickup.POST("/reservation/:reservationId", h.RequestPickupHandler)
 
-	// Need Authorizations
-	r.Use(middlewares.AuthorizeJWT)
+	topup := r.Group("/topup")
+	topup.Use(middlewares.AuthorizeJWT)
+	topup.POST("", h.TopUpWalletHandler)
 
-	// User
-	r.GET("/user", h.GetUserProfileHandler)
-	r.PATCH("/user", h.UpdateUserProfileHandler)
-	r.PATCH("/user/role", h.UpdateUserRoleHandler)
-	r.GET("/user/reservation", h.GetHouseReservationsByUserHandler)
+	host := r.Group("/host")
+	host.Use(middlewares.AuthorizeJWT)
+	host.GET("house", h.GetHostHousesHandler)
+	host.GET("/reservation", h.GetHouseReservationsByHostHandler)
+	host.POST("/house", h.AddNewHouseHandler)
+	host.PATCH("/house/:houseId", h.UpdateHouseHandler)
+	host.DELETE("/house/:houseId", h.DeleteHouseHandler)
+	host.POST("/house/photo/:houseId", h.AddHousePhotoHandler)
+	host.DELETE("/house/photo/:housePhotoId", h.DeleteHousePhotoHandler)
 
-	// Topup
-	r.POST("/topup", h.TopUpWalletHandler)
+	reservation := r.Group("/reservation")
+	reservation.Use(middlewares.AuthorizeJWT)
+	reservation.GET("/:reservationId", h.GetHouseReservationsByIDHandler)
+	reservation.POST("", h.AddReservationHandler)
 
-	// Host
-	r.GET("/host/house", h.GetHostHousesHandler)
-	r.GET("/host/reservation", h.GetHouseReservationsByHostHandler)
-	r.POST("/host/house", h.AddNewHouseHandler)
-	r.PATCH("/host/house/:houseId", h.UpdateHouseHandler)
-	r.DELETE("/host/house/:houseId", h.DeleteHouseHandler)
-	r.POST("/host/house/photo/:houseId", h.AddHousePhotoHandler)
-	r.DELETE("/host/house/photo/:housePhotoId", h.DeleteHousePhotoHandler)
+	game := r.Group("/game")
+	game.Use(middlewares.AuthorizeJWT)
+	game.GET("", h.GetGameHandler)
+	game.POST("", h.PlayGameHandler)
 
-	// Reservation
-	r.GET("/reservation/:reservationId", h.GetHouseReservationsByIDHandler)
-	r.POST("/reservation", h.AddReservationHandler)
-
-	// Pickup
-	r.GET("/pickup/reservation/:reservationId", h.GetPickupDetailsByReservationHandler)
-	r.POST("/pickup/reservation/:reservationId", h.RequestPickupHandler)
-
-	// Game
-	r.GET("/game", h.GetGameHandler)
-	r.POST("/game", h.PlayGameHandler)
-
-	// Admin
-	r.PATCH("admin/pickup/:pickupId", h.AdminUpdatePickupStatusHandler)
-
+	admin := r.Group("/admin")
+	admin.Use(middlewares.AuthorizeJWT)
+	admin.PATCH("/pickup/:pickupId", h.AdminUpdatePickupStatusHandler)
 }
