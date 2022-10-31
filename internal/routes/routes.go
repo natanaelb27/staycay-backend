@@ -1,12 +1,19 @@
 package routes
 
 import (
+	"net/http"
+
 	"git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend/internal/handlers"
+	"git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend/internal/helpers"
 	"git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend/internal/middlewares"
 	"github.com/gin-gonic/gin"
 )
 
 func InitAllRoutes(r *gin.Engine, h *handlers.Handler) {
+	r.GET("", func(c *gin.Context) {
+		c.JSON(http.StatusOK, helpers.BuildSuccessResponse(http.StatusOK, "House Rental StayCay App", nil))
+	})
+
 	// Auth
 	r.POST("/register", h.RegisterHandler)
 	r.POST("/login", h.LoginHandler)

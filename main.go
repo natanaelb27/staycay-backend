@@ -18,11 +18,13 @@ func main() {
 	r.Use(middlewares.CORSMiddleware())
 
 	r.NoRoute(middlewares.NotFoundHandler)
+
 	h := handlers.InitAllHandlers()
 
 	routes.InitAllRoutes(r, h)
 
 	err := r.Run(":8080")
+
 	if err != nil {
 		panic(err)
 	}
