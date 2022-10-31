@@ -1,1 +1,1 @@
-web: final-project-backend
+web: bin/final-project-backend

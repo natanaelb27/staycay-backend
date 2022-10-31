@@ -11,10 +11,14 @@ import (
 	"git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend/internal/helpers"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v4"
+	"github.com/joho/godotenv"
 )
 
 func validateToken(encodedToken string) (*jwt.Token, error) {
-	// godotenv.Load(".env")
+	if os.Getenv("ENV") == "development" {
+		godotenv.Load(".env")
+	}
+
 	return jwt.Parse(encodedToken, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
