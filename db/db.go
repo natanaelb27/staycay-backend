@@ -13,8 +13,6 @@ import (
 var db *gorm.DB
 
 func Connect() (err error) {
-	godotenv.Load(".env")
-
 	// dsn := fmt.Sprintf(
 	// 	"host=%v port=%v user=%v password=%v dbname=%v sslmode=require",
 	// 	os.Getenv("HOST"),
@@ -27,6 +25,7 @@ func Connect() (err error) {
 	if os.Getenv("ENV") == "deployment" {
 		dsn = os.Getenv("DATABASE_URL")
 	} else {
+		godotenv.Load(".env")
 		dsn = fmt.Sprintf(
 			"host=%v port=%v user=%v password=%v dbname=%v sslmode=disable",
 			os.Getenv("HOST"),
