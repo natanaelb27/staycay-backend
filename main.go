@@ -28,7 +28,7 @@ func main() {
 	var err error
 
 	if os.Getenv("ENV") == "deployment" {
-		err = r.Run(os.Getenv("PORT"))
+		err = r.Run(":" + os.Getenv("PORT"))
 	} else {
 		err = r.Run(":8080")
 	}
