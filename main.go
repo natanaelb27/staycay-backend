@@ -1,6 +1,8 @@
 package main
 
 import (
+	"os"
+
 	"git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend/db"
 	"git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend/internal/handlers"
 	"git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend/internal/middlewares"
@@ -23,9 +25,16 @@ func main() {
 
 	routes.InitAllRoutes(r, h)
 
-	err := r.Run(":8080")
+	var err error
+
+	if os.Getenv("ENV") == "deployment" {
+		err = r.Run(os.Getenv("PORT"))
+	} else {
+		err = r.Run(":8080")
+	}
 
 	if err != nil {
 		panic(err)
 	}
+
 }
