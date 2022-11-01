@@ -41,3 +41,7 @@ Features below require authorization where user must login first:
 
 ## Test coverage screenshots
 <img src="./assets/Test Coverage.png" alt="test-coverage-overall" width="1000"/>
+
+## API URL
+https://staycay-backend.herokuapp.com/
+
