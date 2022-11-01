@@ -12,6 +12,7 @@ info:
   version: 0.0.1
 servers:
   - url: http://localhost:8080
+  - url: https://staycay-backend.herokuapp.com/
 security:
   - bearerAuth: []
 tags:
