@@ -3,9 +3,9 @@ package handlers
 import (
 	"net/http"
 
-	"git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend/internal/dtos"
-	"git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend/internal/helpers"
 	"github.com/gin-gonic/gin"
+	"github.com/natanaelb27/staycay-backend/internal/dtos"
+	"github.com/natanaelb27/staycay-backend/internal/helpers"
 )
 
 func (h *Handler) GetAllCitiesHandler(c *gin.Context) {

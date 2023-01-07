@@ -5,8 +5,8 @@ import (
 	"reflect"
 	"testing"
 
-	"git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend/internal/dtos"
-	"git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend/internal/mocks"
+	"github.com/natanaelb27/staycay-backend/internal/dtos"
+	"github.com/natanaelb27/staycay-backend/internal/mocks"
 	"github.com/stretchr/testify/assert"
 )
 

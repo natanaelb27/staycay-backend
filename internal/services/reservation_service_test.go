@@ -8,10 +8,10 @@ import (
 	"testing"
 	"time"
 
-	"git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend/internal/dtos"
-	"git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend/internal/helpers"
-	"git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend/internal/mocks"
-	"git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend/internal/models"
+	"github.com/natanaelb27/staycay-backend/internal/dtos"
+	"github.com/natanaelb27/staycay-backend/internal/helpers"
+	"github.com/natanaelb27/staycay-backend/internal/mocks"
+	"github.com/natanaelb27/staycay-backend/internal/models"
 	"github.com/stretchr/testify/assert"
 )
 

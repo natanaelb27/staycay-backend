@@ -5,11 +5,11 @@ import (
 	"strings"
 	"time"
 
-	"git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend/internal/dtos"
-	e "git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend/internal/errors"
-	"git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend/internal/helpers"
-	"git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend/internal/models"
-	r "git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend/internal/repositories"
+	"github.com/natanaelb27/staycay-backend/internal/dtos"
+	e "github.com/natanaelb27/staycay-backend/internal/errors"
+	"github.com/natanaelb27/staycay-backend/internal/helpers"
+	"github.com/natanaelb27/staycay-backend/internal/models"
+	r "github.com/natanaelb27/staycay-backend/internal/repositories"
 )
 
 type ReservationService interface {

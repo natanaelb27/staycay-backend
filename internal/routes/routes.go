@@ -3,10 +3,10 @@ package routes
 import (
 	"net/http"
 
-	"git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend/internal/handlers"
-	"git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend/internal/helpers"
-	"git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend/internal/middlewares"
 	"github.com/gin-gonic/gin"
+	"github.com/natanaelb27/staycay-backend/internal/handlers"
+	"github.com/natanaelb27/staycay-backend/internal/helpers"
+	"github.com/natanaelb27/staycay-backend/internal/middlewares"
 )
 
 func InitAllRoutes(r *gin.Engine, h *handlers.Handler) {

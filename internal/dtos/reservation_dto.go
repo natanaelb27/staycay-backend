@@ -3,7 +3,7 @@ package dtos
 import (
 	"time"
 
-	"git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend/internal/helpers"
+	"github.com/natanaelb27/staycay-backend/internal/helpers"
 )
 
 type HouseReservationsDTO struct {

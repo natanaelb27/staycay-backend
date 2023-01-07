@@ -8,11 +8,11 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend/internal/dtos"
-	e "git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend/internal/errors"
-	"git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend/internal/mocks"
-	"git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend/internal/models"
 	"github.com/gin-gonic/gin"
+	"github.com/natanaelb27/staycay-backend/internal/dtos"
+	e "github.com/natanaelb27/staycay-backend/internal/errors"
+	"github.com/natanaelb27/staycay-backend/internal/mocks"
+	"github.com/natanaelb27/staycay-backend/internal/models"
 	"github.com/stretchr/testify/assert"
 )
 

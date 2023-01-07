@@ -4,12 +4,12 @@ import (
 	"net/url"
 	"strconv"
 
-	"git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend/db"
-	"git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend/internal/dtos"
-	"git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend/internal/helpers"
-	r "git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend/internal/repositories"
-	s "git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend/internal/services"
 	"github.com/gin-gonic/gin"
+	"github.com/natanaelb27/staycay-backend/db"
+	"github.com/natanaelb27/staycay-backend/internal/dtos"
+	"github.com/natanaelb27/staycay-backend/internal/helpers"
+	r "github.com/natanaelb27/staycay-backend/internal/repositories"
+	s "github.com/natanaelb27/staycay-backend/internal/services"
 )
 
 type Handler struct {

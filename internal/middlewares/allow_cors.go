@@ -3,8 +3,8 @@ package middlewares
 import (
 	"net/http"
 
-	"git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend/internal/helpers"
 	"github.com/gin-gonic/gin"
+	"github.com/natanaelb27/staycay-backend/internal/helpers"
 )
 
 func CORSMiddleware() gin.HandlerFunc {

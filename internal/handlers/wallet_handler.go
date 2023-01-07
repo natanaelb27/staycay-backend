@@ -4,10 +4,10 @@ import (
 	"errors"
 	"net/http"
 
-	"git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend/internal/dtos"
-	e "git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend/internal/errors"
-	"git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend/internal/helpers"
 	"github.com/gin-gonic/gin"
+	"github.com/natanaelb27/staycay-backend/internal/dtos"
+	e "github.com/natanaelb27/staycay-backend/internal/errors"
+	"github.com/natanaelb27/staycay-backend/internal/helpers"
 )
 
 func (h *Handler) TopUpWalletHandler(c *gin.Context) {

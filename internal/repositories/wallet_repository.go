@@ -1,7 +1,7 @@
 package repositories
 
 import (
-	"git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend/internal/models"
+	"github.com/natanaelb27/staycay-backend/internal/models"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 )

@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"os"
 
-	"git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend/internal/models"
 	"github.com/joho/godotenv"
+	"github.com/natanaelb27/staycay-backend/internal/models"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )

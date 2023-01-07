@@ -7,11 +7,11 @@ import (
 	"os"
 	"strings"
 
-	"git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend/internal/dtos"
-	"git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend/internal/helpers"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/joho/godotenv"
+	"github.com/natanaelb27/staycay-backend/internal/dtos"
+	"github.com/natanaelb27/staycay-backend/internal/helpers"
 )
 
 func validateToken(encodedToken string) (*jwt.Token, error) {

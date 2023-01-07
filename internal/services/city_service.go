@@ -1,8 +1,8 @@
 package services
 
 import (
-	"git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend/internal/dtos"
-	r "git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend/internal/repositories"
+	"github.com/natanaelb27/staycay-backend/internal/dtos"
+	r "github.com/natanaelb27/staycay-backend/internal/repositories"
 )
 
 type CityService interface {

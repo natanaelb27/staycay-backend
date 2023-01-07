@@ -1,6 +1,6 @@
 package dtos
 
-import "git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend/internal/helpers"
+import "github.com/natanaelb27/staycay-backend/internal/helpers"
 
 // type HouseDetailsDTO struct {
 // 	HouseID          int            `json:"house_id"`

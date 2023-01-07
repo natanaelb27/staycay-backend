@@ -3,11 +3,11 @@ package main
 import (
 	"os"
 
-	"git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend/db"
-	"git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend/internal/handlers"
-	"git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend/internal/middlewares"
-	"git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend/internal/routes"
 	"github.com/gin-gonic/gin"
+	"github.com/natanaelb27/staycay-backend/db"
+	"github.com/natanaelb27/staycay-backend/internal/handlers"
+	"github.com/natanaelb27/staycay-backend/internal/middlewares"
+	"github.com/natanaelb27/staycay-backend/internal/routes"
 )
 
 func main() {

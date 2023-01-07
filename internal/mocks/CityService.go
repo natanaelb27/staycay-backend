@@ -3,7 +3,7 @@
 package mocks
 
 import (
-	dtos "git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend/internal/dtos"
+	dtos "github.com/natanaelb27/staycay-backend/internal/dtos"
 	mock "github.com/stretchr/testify/mock"
 )
 

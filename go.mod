@@ -1,4 +1,4 @@
-module git.garena.com/sea-labs-id/batch-02/natanael-benediktus/final-project-backend
+module github.com/natanaelb27/staycay-backend
 
 // +heroku goVersion go1.18
 go 1.18
